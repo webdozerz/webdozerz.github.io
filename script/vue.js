@@ -20,3 +20,5 @@ var app4 = new Vue({
     ]
   }
 })
+app4.todos.push({ text: 'Profit' })
+
