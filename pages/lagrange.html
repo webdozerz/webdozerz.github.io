@@ -26,80 +26,80 @@
              <p class="card-text">
              <code class="prettyprint">
 #include "stdafx.h" <br />
-#include < cmath >  <br />
-#include < iostream > ; <br />
+#include <cmath>  <br />
+#include <iostream>; <br />
 using namespace std; <br />
 const int n = 10; <br />
+<br />
+double lagranz(double X[n], double Y[n], double t); <br />
+double pirson(double X[n], double Y[n]); <br />
 
-double lagranz(double X[n], double Y[n], double t);
-double pirson(double X[n], double Y[n]);
-
-int main() {
-  double X[n] = {
-    2.0,
-    2.2,
-    2.4,
-    2.6,
-    2.8,
-    3.0,
-    3.2,
-    3.4,
-    3.6,
-    3.8
-  };
-  double Y[n] = {
-    0.9093,
-    0.8085,
-    0.6755,
-    0.5155,
-    0.3350,
-    0.1411,
-    -0.0584,
-    -0.2555,
-    -0.4425,
-    -0.6119
-  };
-  double E;
-  cout << "Zadaite x" << " " << endl;
-  cin >> E;
-  cout << "Ln(3)=" << lagranz(X, Y, E) << " " << endl;
-  cout << "Pirson=" << pirson(X, Y) << " " << endl;
-  system("pause");
-  return 0;
-}
-
-double lagranz(double X[n], double Y[n], double t) {
-  double sum, prod;
-  sum = 0;
-  for (int j = 0; j < n; j++) {
-    prod = 1;
-    for (int i = 0; i < n; i++) {
-      if (i != j) {
-        prod = prod * (t - X[i]) / (X[j] - X[i]);
-      }
-    }
-    sum = sum + Y[j] * prod;
-  }
-  return sum;
-}
-
-double pirson(double X[n], double Y[n]) {
-  double sredX, sredY, dispX, dispY, rXY, covXY;
-  for (int j = 0; j < n; j++) {
-    rXY = 0;
-    for (int i = 0; i < n; i++) {
-      if (i != j) {
-        sredX = X[i] / n;
-        sredY = Y[i] / n;
-        dispX = pow(X[i] - X[j], 2);
-        dispY = pow(Y[i] - Y[j], 2);
-        covXY = (X[i] - X[j]) * (Y[i] - Y[j]);
-      }
-    }
-    rXY = covXY / sqrt(dispX * dispY);
-  }
-  return rXY;
-}
+int main() { <br />
+  double X[n] = { <br />
+    2.0, <br />
+    2.2, <br />
+    2.4, <br />
+    2.6, <br />
+    2.8, <br />
+    3.0, <br />
+    3.2, <br />
+    3.4, <br />
+    3.6, <br />
+    3.8 <br />
+  }; <br />
+  double Y[n] = { <br />
+    0.9093, <br />
+    0.8085, <br />
+    0.6755, <br />
+    0.5155, <br />
+    0.3350, <br />
+    0.1411, <br />
+    -0.0584, <br />
+    -0.2555, <br />
+    -0.4425, <br />
+    -0.6119 <br />
+  }; <br />
+  double E; <br />
+  cout << "Zadaite x" << " " << endl; <br />
+  cin >> E; <br />
+  cout << "Ln(3)=" << lagranz(X, Y, E) << " " << endl; <br />
+  cout << "Pirson=" << pirson(X, Y) << " " << endl; <br />
+  system("pause"); <br />
+  return 0; <br />
+} <br />
+<br />
+double lagranz(double X[n], double Y[n], double t) { <br />
+  double sum, prod; <br />
+  sum = 0; <br />
+  for (int j = 0; j < n; j++) { <br />
+    prod = 1; <br />
+    for (int i = 0; i < n; i++) { <br />
+      if (i != j) { <br />
+        prod = prod * (t - X[i]) / (X[j] - X[i]); <br />
+      } <br />
+    } <br />
+    sum = sum + Y[j] * prod; <br />
+  }  <br />
+  return sum; <br />
+} <br />
+<br /> 
+double pirson(double X[n], double Y[n]) { <br />
+  double sredX, sredY, dispX, dispY, rXY, covXY; <br />
+  for (int j = 0; j < n; j++) { <br />
+    rXY = 0; <br />
+    for (int i = 0; i < n; i++) { <br />
+      if (i != j) { <br />
+        sredX = X[i] / n; <br />
+        sredY = Y[i] / n; <br />
+        dispX = pow(X[i] - X[j], 2); <br />
+        dispY = pow(Y[i] - Y[j], 2); <br />
+        covXY = (X[i] - X[j]) * (Y[i] - Y[j]); <br />
+      } <br />
+    } <br />
+    rXY = covXY / sqrt(dispX * dispY); <br />
+  } <br />
+  return rXY; <br />
+} <br />
              </code>
              </p>
              </div>
