@@ -28,6 +28,19 @@
   <ul>
 <li><code>SELECT</code> * <code>FROM</code> имя_таблицы;</li>
 </ul>
+  <h3><strong>DISTINCT:</strong> отфильтровывает повторяющиеся значения и возвращает строки определенного столбца</h3>
+  <ul>
+<li><code>SELECT DISTINCT </code>имя_столбца;</li>
+</ul>
+  <h3><strong>WHERE:</strong> используется для фильтрации записей / строк</h3>
+  <ul>
+<li><code>SELECT</code> столбец1, столбец2 <code>FROM</code> имя_таблицы <code>WHERE</code> условие;</li>
+<li><code>SELECT</code> * <code>FROM</code>  имя_таблицы <code>WHERE</code> условие1 <code>AND</code> условие2;</li>
+<li><code>SELECT</code> * <code>FROM</code> имя_таблицы <code>WHERE</code> условие1 <code>OR</code> условие2;</li>
+<li><code>SELECT</code> * <code>FROM</code> имя_таблицы <code>WHERE NOT</code> условие;</li>
+<li><code>SELECT</code> * <code>FROM</code> имя_таблицы <code>WHERE</code> условие1 <code>AND</code> (условие2 <code>OR</code> условие3);</li>
+<li><code>SELECT</code> * <code>FROM</code> имя_таблицы <code>WHERE EXISTS</code> (<code>SELECT</code> имя_столбца <code>FROM</code> имя_таблицы <code>WHERE</code> условие);</li>
+</ul>
  </div> 
 <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">tabs2</div> 
 <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">tabs3</div> 
@@ -37,7 +50,6 @@
 </div>
 </div>
     <!-- Optional JavaScript -->
-     <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
