@@ -46,6 +46,43 @@
 <li><code>SELECT</code> * <code>FROM</code> имя_таблицы <code>WHERE</code> условие1 <code>AND</code> (условие2 <code>OR</code> условие3);</li>
 <li><code>SELECT</code> * <code>FROM</code> имя_таблицы <code>WHERE EXISTS</code> (<code>SELECT</code> имя_столбца <code>FROM</code> имя_таблицы <code>WHERE</code> условие);</li>
 </ul>
+  <h3><strong>ORDER BY:</strong> используется для сортировки набора результатов в порядке возрастания или убывания</h3>
+  <ul>
+<li><code>SELECT</code> * <code>FROM</code> имя_таблицы <code>ORDER BY</code> столбец;</li>
+<li><code>SELECT</code> * <code>FROM</code> имя_таблицы <code>ORDER BY</code> столбец <code>DESC</code>;</li>
+<li><code>SELECT</code> * <code>FROM</code> имя_таблицы <code>ORDER BY</code> столбец1 <code>ASC</code>, столбец2 <code>DESC</code>;</li>
+</ul>
+   <h3><strong>SELECT TOP:</strong> используется для указания количества записей, возвращаемых из верхней части таблицы</h3>
+  <ul>
+<li><code>SELECT TOP</code> number имена_столбцов <code>FROM</code> имя_таблицы <code>WHERE</code> условие;</li>
+<li><code>SELECT TOP</code> percent имена_столбцов <code>FROM</code> имя_таблицы <code>WHERE</code> условие;</li>
+<li>Не все системы баз данных поддерживают <code>SELECT TOP</code>. Эквивалентом MySQL является <code>LIMIT</code></li>
+<li><code>SELECT</code> имена_столбцов <code>FROM</code> имя_таблицы <code>LIMIT</code> смещение, кол-во;</li>
+</ul>
+  <h3><strong>LIKE:</strong> оператор, используемый в предложении WHERE для поиска определенного шаблона в столбце</h3>
+ <ul>
+<li>% (Знак процента) является символом подстановки, который представляет ноль, один или несколько символов</li>
+<li>_ (подчеркивание) - это символ подстановки, который представляет один символ</li>
+<li><code>SELECT</code> имена_столбцов <code>FROM</code> имя_таблицы <code>WHERE</code> имя_столбца <code>LIKE</code> шаблон;</li>
+<li><code>LIKE</code> ‘a%’ (Найти любые значения, начинающиеся с «а»)</li>
+<li><code>LIKE</code> ‘%a’ (найти любые значения, которые заканчиваются на «а»)</li>
+<li><code>LIKE</code> ‘%or%’ (найти любые значения, которые имеют «or» в любой позиции)</li>
+<li><code>LIKE</code> ‘_r%’ (найти любые значения, которые имеют «r» во второй позиции)</li>
+<li><code>LIKE</code> ‘a_%_%’ (найти любые значения, которые начинаются с «а» и имеют длину не менее 3 символов)</li>
+<li><code>LIKE</code> ‘[a-c]%’ (найти любые значения, начинающиеся с «a», «b» или «c»)</li>
+</ul>
+   <h3><strong>IN:</strong> оператор, который позволяет указать несколько значений в предложении WHERE</h3>
+  <ul>
+<li>По сути, оператор IN является сокращением для нескольких условий OR</li>
+<li><code>SELECT</code> имена_столбцов <code>FROM</code> имя_таблицы <code>WHERE</code> имя_столбца <code>IN</code> (значение1, значение2, …);</li>
+<li><code>SELECT</code> имена_столбцов <code>FROM</code> имя_таблицы <code>WHERE</code> имя_столбца <code>IN</code> (<code>SELECT STATEMENT</code>);</li>
+</ul>
+   <h3><strong>BETWEEN:</strong> оператор выбирающий значения в заданном диапазоне включительно</h3>
+  <ul>
+<li><code>SELECT</code> имена_столбцов <code>FROM</code> имя_таблицы <code>WHERE</code> имя_столбца <code>BETWEEN</code> значение1 <code>AND</code> значение2;</li>
+<li><code>SELECT</code> * <code>FROM</code> Продукты <code>WHERE</code> (имя_столбца1 <code>BETWEEN</code> значение1 <code>AND</code> значение2) <code>AND NOT</code> имя_столбца2 <code>IN</code> (значение3, значение4);</li>
+<li><code>SELECT</code> * <code>FROM</code> Продукты <code>WHERE</code> имя_столбца <code>BETWEEN</code> #01/07/1999# AND #03/12/1999#;</li>
+</ul>
  </div> 
 <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">tabs2</div> 
 <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">tabs3</div> 
