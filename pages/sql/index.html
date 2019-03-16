@@ -83,6 +83,60 @@
 <li><code>SELECT</code> * <code>FROM</code> Продукты <code>WHERE</code> (имя_столбца1 <code>BETWEEN</code> значение1 <code>AND</code> значение2) <code>AND NOT</code> имя_столбца2 <code>IN</code> (значение3, значение4);</li>
 <li><code>SELECT</code> * <code>FROM</code> Продукты <code>WHERE</code> имя_столбца <code>BETWEEN</code> #01/07/1999# AND #03/12/1999#;</li>
 </ul>
+<h3><strong>NULL:</strong> значения в поле без значения</h3>
+  <ul>
+<li><code>SELECT</code> * <code>FROM</code> имя_таблицы <code>WHERE</code> имя_столбца <code>IS NULL</code>;</li>
+<li><code>SELECT</code> * <code>FROM</code> имя_таблицы <code>WHERE</code> имя_столбца <code>IS NOT NULL</code>;</li>
+</ul>
+ <h3><strong>AS:</strong> псевдонимы, которые используются для назначения временного имени таблице или столбцу</h3>
+  <ul>
+<li><code>SELECT</code> имя_столбца <code>AS</code> имя_псевдонима <code>FROM</code> имя_таблицы;</li>
+<li><code>SELECT</code> имя_столбца <code>FROM</code> имя_таблицы <code>AS</code> имя_псевдонима;</li>
+<li><code>SELECT</code> имя_столбца <code>AS</code> имя_псевдонима1, имя_столбца2 <code>AS</code> имя_псевдонима2;</li>
+<li><code>SELECT</code> имя_столбца1, имя_столбца2 + ‘, ‘ + имя_столбца3 <code>AS</code> имя_псевдонима;</li>
+</ul>
+<h3><strong>UNION:</strong> используется для объединения результирующего набора из двух или более операторов SELECT</h3>
+  <ul>
+<li>Каждый оператор SELECT в UNION должен иметь одинаковое количество столбцов</li>
+<li>Столбцы должны иметь одинаковые типы данных</li>
+<li>Столбцы в каждом операторе SELECT также должны быть в том же порядке</li>
+<li><code>SELECT</code> имена_столбцов <code>FROM</code> таблица1 <code>UNION SELECT</code> имя_столбца <code>FROM</code> таблица2;</li>
+<li><code>UNION</code> оператор выбирает только отдельные значения, <code>UNION ALL</code> позволит дубликаты</li>
+</ul>
+<h3><strong>INTERSECT:</strong> оператор, который используется для возврата записей, которые имеют два общих оператора SELECT</h3>
+  <ul>
+<li>Обычно используется так же, как и UNION</li>
+<li><code>SELECT</code> имена_столбцов <code>FROM</code> таблица1 <code>INTERSECT SELECT</code> имя_столбца <code>FROM</code> таблица2;</li>
+</ul>
+<h3><strong>EXCEPT:</strong> используется для возврата всех записей в первом операторе SELECT, которые не найдены во втором операторе SELECT</h3>
+  <ul>
+<li>Обычно используется так же, как и UNION</li>
+<li><code>SELECT</code> имена_столбцов <code>FROM</code> таблица1 <code>EXCEPT SELECT</code> имя_столбца <code>FROM</code> таблица2;</li>
+</ul>
+<h3><strong>ANY|ALL:</strong> оператор, используемый для проверки условий подзапроса, используемых в предложениях WHERE или HAVING</h3>
+  <ul>
+<li>Оператор <code>ANY</code> возвращает true, если какие-либо значения подзапроса удовлетворяют условию</li>
+<li>Оператор <code>ALL</code> возвращает true, если все значения подзапроса удовлетворяют условию</li>
+<li><code>SELECT</code> имена_столбцов <code>FROM</code> таблица1 <code>WHERE</code> имя_столбца оператор (<code>ANY</code>|<code>ALL</code>) (<code>SELECT</code> имя_столбца <code>FROM</code> имя_таблицы <code>WHERE</code> условие);</li>
+</ul>
+<h3><strong>GROUP BY:</strong> оператор, оператор, часто используемый с агрегатными функциями (COUNT, MAX, MIN, SUM, AVG) для группировки результирующего набора по одному или нескольким столбцам</h3>
+  <ul>
+<li><code>SELECT</code> имя_столбца1, COUNT(имя_столбца2) <code>FROM</code> имя_таблицы <code>WHERE</code> условие <code>GROUP BY</code> имя_столбца1 <code>ORDER BY</code> COUNT(имя_столбца2) DESC;</li>
+</ul>
+<h3><strong>HAVING:</strong> это предложение было добавлено в SQL, поскольку ключевое слово WHERE нельзя использовать с агрегатными функциями</h3>
+  <ul>
+<li><code>SELECT</code> <code>COUNT</code>(имя_столбца1), имя_столбца2 <code>FROM</code> таблица <code>GROUP BY</code> имя_столбца2 <code>HAVING</code> <code>COUNT(</code>имя_столбца1<code>)</code> &gt; 5;</li>
+</ul>
+<h3><strong>WITH:</strong> часто используется для извлечения иерархических данных или повторного использования временного набора результатов в запросе несколько раз. Также называется «общим выражением таблицы» (овт)</h3>
+  <ul>
+<li><code>WITH RECURSIVE</code> овт <code>AS</code> (<br>
+&nbsp;&nbsp;<code>SELECT</code> о0.* <code>FROM</code> категории <code>AS</code> о0 <code>WHERE</code> id = 1 <code># Отправная точка</code><br>
+&nbsp;&nbsp;<code>UNION ALL</code><br>
+&nbsp;&nbsp;<code>SELECT</code> c1.* <code>FROM</code> категории <code>AS</code> о1 <code>JOIN</code> овт <code>ON</code> о1.идентификатор_категории_id = овт.id<br>
+)<br>
+<code>SELECT</code> *<br>
+<code>FROM</code> овт</li>
+</ul>
  </div> 
 <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">tabs2</div> 
 <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">tabs3</div> 
