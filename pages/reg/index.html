@@ -44,8 +44,12 @@
     <script type="text/javascript">
       var iX = $("#iX").val();
       var iY = $("#iY").val();
-      var tX = $("#pastXi").text(iX);
-      var tY = $("#pastYi").text(iY);
+      if ($("#find").click) {
+        var tX = $("#pastXi").text(iX);
+        var tY = $("#pastYi").text(iY);
+      }
+
+
       $('input').on('input', function () {
         console.log($(this).val());
       });
