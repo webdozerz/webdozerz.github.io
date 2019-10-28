@@ -40,8 +40,9 @@
     <script type="text/javascript">
       var iX = $("#iX").val();
       var iY = $("#iY").val();
-      console.log(iX);
-      console.log(iY);
+      $('input').on('input', function () {
+        console.log($(this).val());
+      });
     </script>
   </body>
 </html>
