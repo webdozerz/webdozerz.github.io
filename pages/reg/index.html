@@ -15,44 +15,209 @@
     <div class="container">
       <div class="row">
         <div class="col-12 col-sm-12 col-md-12 col-xl-12 col-lg-12">
-           <h6>Сервис позволяет найти с помощью метода наименьших квадратов уравнение линейной регрессии, коэффициенты и индексы корреляции и детерминации. Показываются диаграмма рассеяние и график уравнения регрессии. Также калькулятор делает оценку значимости параметров уравнения регрессии с помощью F-критерия Фишера, t-критерия Стьюдента и критерия Дарбина-Уотсона.</h6>
-           <div class="input-group input-group-sm mb-3">
-              <div class="input-group-prepend">
-                <span class="input-group-text" id="inputGroup-sizing-sm">X</span>
-              </div>
-              <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm" id="iX" placeholder="Введите значения независимой переменной (через пробел или запятую)">
-            </div>
-            <div class="input-group input-group-sm mb-3">
-              <div class="input-group-prepend">
-                <span class="input-group-text" id="inputGroup-sizing-sm">Y</span>
-              </div>
-              <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm" id="iY" placeholder="Введите значения зависимой переменной (через пробел или запятую)">
-            </div>
-            <button id="find">Найти</button>
-            <p> Нахождение и анализ уравнения линейной регрессии \(\hat y = ax+b \) для данных: </p>
-            <p>\(x_i\) <div id="pastXi"></div></p>
-            <p>\(y_i\) <div id="pastYi"></div></p>
+          <h6>Сервис позволяет найти с помощью метода наименьших квадратов уравнение линейной регрессии, коэффициенты и индексы корреляции и детерминации. Показываются диаграмма рассеяние и график уравнения регрессии. Также калькулятор делает оценку значимости параметров уравнения регрессии с помощью F-критерия Фишера, t-критерия Стьюдента и критерия Дарбина-Уотсона.</h6>
+          <p>Количество исходных данных:</p>
+          <p><input type="text" name="" id="countTD"></p>
+          <p><button id="next">Далее</button></p>
+      <div class="row" id="tableInput" style="display: none;">
+        <div class="col-6">
+          <div id="outputTable1"></div>
+        </div>
+        <div class="col-6">
+          <div id="outputTable2"></div>
+        </div>
+        <div><button id="find" style="margin: 15px;">Найти</button></div>
+      </div>
+      <p></p>
+            <div id="result" style="display: none;">
+              <p> Нахождение и анализ уравнения линейной регрессии \(\hat y = ax+b \) для данных: </p>
+              \(x_i = \) <div id="pastXi" style="display: inline;"></div> <br>
+              \(y_i = \) <div id="pastYi" style="display: inline;"></div> <br>
+              <p>Составим таблицу вспомогательных величин:</p>
+               \(\sum x_i = \)  <div id="sumXi" style="display: inline;"></div> <br>
+               \(\sum y_i = \)  <div id="sumYi" style="display: inline;"></div> <br>
+               \(\sum x_i y_i = \)  <div id="prodXY" style="display: inline;"></div><br>
+               \(\sum x_i^2 = \)  <div id="powX" style="display: inline;"></div><br>
+               \(\sum y_i^2 = \)  <div id="powY" style="display: inline;"></div><br>
+               <p>Вычислим коэффициенты \(a\) и \(b\) уравнения линейной регрессии \(\hat y = ax+b \) по известным формулам:</p>
+               \[a = {\frac{\sum x_i \sum y_i-n \sum x_i y_i} {\left(\sum x_i\right)^2 - n \sum x_i^2 }}\]
+               \[b = {\frac{\sum x_i \sum x_i y_i - \sum x_i^2 \sum y_i} {\left(\sum x_i\right)^2 - n \sum x_i^2 }}\]
+               <p>Отсюда:</p>
+               \(a = \) <div id="koefA" style="display: inline;">
+                
+         <div style="border-bottom: 1px solid black; width: 300px; display: inline;"><span class="resSumXA"></span> \(\cdot \) <span id="resSumYA"></span> \(- \) <span class="countN1A"></span> \(\cdot \) <span id="resProdXYA"></span></div><div style="display: inline; margin-left: 15px;"> \(\approx \) <span class="resKoefA"></span></div>
+         <br>
+         <div style="margin-left: 30px;"><span class="resSumXA"></span>\(^2 \) \(- \) <span class="countN1A"></span> \(\cdot \) <span id="resPowXA"></span></div>
+
+               </div><br>
+               \(b = \) <div id="koefB" style="display: inline;">
+                
+        <div style="border-bottom: 1px solid black; width: 300px; display: inline;"><span class="resSumXB"></span> \(\cdot \) <span id="resProdXYB"></span> \(- \) <span class="resPowXB"></span> \(\cdot \) <span id="resSumYB"></span></div> <div style="display: inline; margin-left: 15px;"> \(\approx \) <span class="resKoefB"></span></div>
+         <br>
+         <div style="margin-left: 30px;"><span class="resSumXB"></span>\(^2 \) \(- \) <span class="countN1B"></span> \(\cdot \) <span class="resPowXB"></span></div>  
+
+               </div><br>
+
+               <p>В итоге получим искомое уравнение линейной регрессии:</p>
+
+               \(\hat y = \) <span class="resKoefA"></span> \(x + \) <span class="resKoefB"></span>
+
+          </div>
         </div>
       </div>
       
     </div>
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script type="text/javascript">
-      var iX = $("#iX").val();
-      var iY = $("#iY").val();
-      if ($("#find").click) {
-        var tX = $("#pastXi").text(iX);
-        var tY = $("#pastYi").text(iY);
-      }
+  //Создание таблицы
+  $("#next").click(function () {
+     var countTd = parseInt($("#countTD").val());
+     $('#outputTable1').html("<h5>X</h5><table id='t1' ></table>");      
+        for (var i = 1; i <= countTd; i++){
+                  $('#outputTable1 #t1').append("<tr></tr>");
+                  for (var n = 1; n <= 1; n++){
+                      $('#outputTable1 #t1 tr:last').append("<input type='text' class='arrX'>");
+                  }
+                }
+      $('#outputTable2').html("<h5>Y</h5><table id='t2' ></table>");      
+        for (var i = 1; i <= countTd; i++){
+                  $('#outputTable2 #t2').append("<tr></tr>");
+                  for (var n = 1; n <= 1; n++){
+                      $('#outputTable2 #t2 tr:last').append("<input type='text' class='arrY'>");
+                  }
+                }                     
+  }) ;
+
+  //Далее
+  $('#next').click(function(){
+    $("#tableInput").show();
+
+  }); 
+
+  var arrayX = [];
+  var arrayY = [];
 
 
-      $('input').on('input', function () {
-        console.log($(this).val());
-      });
+
+  //Найти
+  $('#find').click(function(){
+    $("#result").show();
+
+    //Формируем массив X
+    $('.arrX').each(function(i, input) {
+        arrayX.push($(input).val());
+      
+    });
+    //Переводим X из string в float
+    var arrayXFloat = arrayX.map(function (x) { 
+      return parseFloat(x, 10); 
+    });
+
+    //Выводим X
+    console.log(arrayXFloat);
+    $("#pastXi").append(arrayXFloat.join(';'));
+
+    //Формируем массив Y
+    $('.arrY').each(function(i, input) {
+        arrayY.push($(input).val());
+    });
+
+    //Переводим Y из string в float
+    var arrayYFloat = arrayY.map(function (x) { 
+      return parseFloat(x, 10); 
+    });
+
+    //Выводим Y
+    console.log(arrayYFloat);
+    $("#pastYi").append(arrayYFloat.join(';'));
+
+    //Выводим сумму X
+    var sumX = arraySum(arrayX);
+    $("#sumXi").html(sumX);
+
+    //Выводим сумму X
+    var sumY = arraySum(arrayY);
+    $("#sumYi").html(sumY);
+
+
+    //Произведение
+    var prodXY = arrayX.map(function(value, index){ return value * arrayY[index] });
+    //Сумма произведений
+    var prodXYSum = prodXY.reduce(function(sum, current) {
+      return sum + current;
+    }, 0);
+    var prodXSumPow = Math.pow(sumX,2);
+    console.log(prodXY);
+    console.log(prodXYSum);
+    console.log(prodXSumPow);
+    $("#prodXY").html(prodXYSum);
+
+    //Возведение X в квадрат 
+    var powX = arrayX.map(function(value){ return Math.pow(value, 2)});
+    console.log(powX);
+    //Сумма квадратов X
+    var powXsum = powX.reduce(function(sum, current) {
+      return sum + current;
+    }, 0);
+    console.log(powXsum);
+    $("#powX").html(powXsum);
+
+    //Возведение Y в квадрат 
+    var powY = arrayY.map(function(value){ return Math.pow(value, 2)});
+    console.log(powX);
+    //Сумма квадратов Y
+    var powYsum = powY.reduce(function(sum, current) {
+      return sum + current;
+    }, 0);
+    console.log(powYsum);
+    $("#powY").html(powYsum);
+
+    var n1 = arrayXFloat.length;
+    var n2 = arrayYFloat.length;
+
+    //Для коэффициента a
+    $(".resSumXA").html(sumX);
+    $("#resSumYA").html(sumY);
+    $(".countN1A").html(n1);
+    $("#resProdXYA").html(prodXYSum);
+    $("#resPowXA").html(powXsum);
+
+    //Для коэффициента b
+    $(".resSumXB").html(sumX);
+    $("#resSumYB").html(sumY);
+    $(".countN1B").html(n2);
+    $("#resProdXYB").html(prodXYSum);
+    $(".resPowXB").html(powXsum);
+
+    //Считаем и округляем коэффициент а
+    var a = 0;
+    a = (sumX * sumY - n1 * prodXYSum) / (prodXSumPow - n1 * powXsum);
+    var roundedA = parseFloat(a.toFixed(4));
+    $(".resKoefA").html(roundedA);
+    console.log(roundedA);
+
+    //Считаем и округляем коэффициент b
+    var b = 0;
+    b = (sumX * prodXYSum - powXsum * sumY) / (prodXSumPow - n1 * powXsum);
+    var roundedB = parseFloat(b.toFixed(4));
+    $(".resKoefB").html(roundedB);
+    console.log(roundedB);
+
+
+  }); 
+
+  //Суммирование элементов  
+  function arraySum(arr) {
+    var sum = 0.0;
+    for(var i=0;i<arr.length;i++){
+        sum += parseFloat(arr[i]);
+    }
+    return sum;
+  }
+
+
     </script>
   </body>
 </html>
