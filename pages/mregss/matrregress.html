@@ -150,7 +150,7 @@
             <div class="alert alert-primary" role="alert">Найдем множественный коэффициент корреляции по формуле:
             </div>
 
-            \begin{aligned}R = \sqrt{ 1 - \frac{S_{e}^2}{\left(\sum y_i^2 - \left(\bar y_i\right)^2\right)} } \end{aligned}
+            \begin{aligned}R = \sqrt{ 1 - \frac{S_{e}^2}{\left(\sum y_i^2 - \bar y_i{^2}\right)} } \end{aligned}
             <div class="alert alert-warning" role="alert">Отсюда:
                 <strong> 
                             \(R =  \) <div id="r" style="display: inline;"></div>
@@ -737,7 +737,7 @@
                     }
                     var yn = arrY2DF.length;
                     var znam = (yn * powYsum) - (prodYSumPow);
-                    var r = Math.sqrt(1 - (chisl)/(znam));
+                    var r = Math.sqrt(r2);
                     r = parseFloat(r).toFixed(4);
                     var r2 = 1 - (yn * chisl) / (znam);
                     r2 = parseFloat(r2).toFixed(4);
