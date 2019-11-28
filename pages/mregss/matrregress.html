@@ -80,6 +80,9 @@
         </div>
         <br/>
         <div id="result" style="display: none;">
+            <div class="alert alert-success" role="alert">
+                Для оценки параметров уравнения множественной регрессии применяют МНК. Определим вектор оценок коэффициентов регрессии. Согласно методу наименьших квадратов, вектор B получается из выражения: \(B = (X^{T}X)^{-1}X^TY \))
+            </div>
             <div class="alert alert-primary" role="alert">Введенные данные</div>
             <div class="row">
                 <div class="col-6">
@@ -89,7 +92,7 @@
                     <div id="tableX"></div>
                 </div>
             </div>
-            <div class="alert alert-primary" role="alert">К исходной матрице X добавим единичный столбец, получив новую матрицу X</div>
+            <div class="alert alert-primary" role="alert">К исходной матрице X добавим единичный столбец</div>
             <div class="row">
                 <div class="col-12">
                     <div id="newMatrX"></div>
