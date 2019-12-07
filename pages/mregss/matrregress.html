@@ -7,60 +7,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <style type="text/css">
-        input[type="text"]::-webkit-input-placeholder {
-            color: gray;
-            font-size: 14px;
-        }
-        
-        input[type="text"]:-ms-input-placeholder {
-            color: gray;
-            font-size: 14px;
-        }
-        
-        input[type="text"]::-ms-input-placeholder {
-            color: gray;
-            font-size: 14px;
-        }
-        
-        input[type="text"]::placeholder {
-            color: gray;
-            font-size: 14px;
-        }
-        .trX{
-        	margin-top: 35px;
-  		    margin-left: -25px;
-  		    margin-right: 25px;
-  		    width: 200px;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="../style.css">
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <title>Множественный регрессионный анализ</title>
 </head>
-
 <body>
     <div class="container">
         <div class="row">
             <br/>
             <div class="alert alert-primary" role="alert">
-                Уравнение множественной регрессии Основная цель множественной регрессии – построить модель с большим числом факторов, определив при этом влияние каждого из них в отдельности, а также совокупное их воздействие на моделируемый показатель.
+                Основная цель множественной регрессии – построить модель с большим числом факторов, определив при этом влияние каждого из них в отдельности, а также совокупное их воздействие на моделируемый показатель.
             </div>
         </div>
         <div class="row">
             <div class="col">
                 <div class="input-group input-group-sm mb-3">
                     <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-sizing-sm">Количество данных</span>
+                        <span class="input-group-text">Введите объём выборки</span>
                     </div>
-                    <input type="text" id="rowsData" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+                    <input type="text" id="rowsData" class="form-control" aria-label="Sizing example input" placeholder="6">
                 </div>
 
                 <div class="input-group input-group-sm mb-3">
                     <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-sizing-sm">Количество факторов (X)</span>
+                        <span class="input-group-text">Введите количество определяющих факторов (X)</span>
                     </div>
-                    <input type="text" id="colsData" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+                    <input type="text" id="colsData" class="form-control" aria-label="Sizing example input" placeholder="2">
                 </div>
                 <button type="button" class="btn btn-outline-primary" id="next">Далее</button>
             </div>
@@ -75,7 +48,7 @@
             </div>
             <div class="w-100"></div>
             <div>
-                <button id="find" style="margin: 15px;" type="submit" class="btn btn-outline-primary">Найти</button>
+                <button id="find" style="margin: 15px;" type="submit" class="btn btn-outline-primary">Решить</button>
             </div>
         </div>
         <br/>
@@ -128,22 +101,24 @@
                     <div id="koef"></div>
                 </div>
             </div>
-            <div class="alert alert-warning" role="alert">Уравнение регрессии: <strong>Y = <div id="resK" style="display: inline;"></div></strong></div>
+            <div class="alert alert-warning" role="alert">Уравнение регрессии: Y = <div id="resK" style="display: inline;"></div></div>
 
-			<div class="alert alert-success" role="alert">Дисперсия – норма, отражающая, с точки зрения теории, ожидаемое отклонение случайной величины от ее математического ожидания. Пользуясь этим определением, можно попытаться найти оценку для дисперсии (обозначим ее как \(S_{e}^2\)), используя среднее арифметическое в качестве оценки такого математического ожидания. 
+            <div class="alert alert-success" role="alert">Остаточная дисперсия - это общая сумма квадратов отклонений расчетных значений от фактических (объем остаточной вариации) , разделенная на число наблюдений.
             </div>
 
-            <div class="alert alert-primary" role="alert">Сделаем оценку дисперсии по формуле:
+            <div class="alert alert-primary" role="alert">Найдем остаточную дисперсию по формуле:
             </div>
 
             \begin{aligned}S_{e}^2 = (Y - XB)^T (Y-XB) \end{aligned}
 
             <div class="alert alert-warning" role="alert">Отсюда:
-                <strong>
-					\(S_{e}^2 =  \)  <div id="resDisp" style="display: inline;"></div>
-				</strong>
+                
+                    \(S_{e}^2 =  \)  <div id="resDisp" style="display: inline;"></div>
+                
             </div>
-            <div class="alert alert-success" role="alert"><strong>Множественный коэффициент корреляции (Индекс множественной корреляции).</strong> Тесноту совместного влияния факторов на результат оценивает индекс множественной корреляции.
+            <div class="alert alert-success" role="alert">Множественный коэффициент корреляции (Индекс множественной корреляции). 
+            <br>
+            Тесноту совместного влияния факторов на результат оценивает индекс множественной корреляции.
             В отличии от парного коэффициента корреляции, который может принимать отрицательные значения, он принимает значения от 0 до 1.
             Поэтому R не может быть использован для интерпретации направления связи. Чем плотнее фактические значения yi располагаются относительно линии регрессии, тем меньше остаточная дисперсия и, следовательно, больше величина \( R_y(x_1,...,x_m) \).
             Таким образом, при значении R близком к 1, уравнение регрессии лучше описывает фактические данные и факторы сильнее влияют на результат. При значении R близком к 0 уравнение регрессии плохо описывает фактические данные и факторы оказывают слабое воздействие на результат. </div>  
@@ -152,11 +127,11 @@
 
            \begin{aligned}R = \sqrt { 1 - \frac{\sum S_{e}^2}{ \sum \left( y_i - \bar y_i \right)^2} }\end{aligned}
             <div class="alert alert-warning" role="alert">Отсюда:
-                <strong> 
+                 
                             \(R =  \) <div id="r" style="display: inline;"></div>
-                </strong>
+                
             </div>
-			<div class="alert alert-success" role="alert">Суммарной мерой общего качества уравнения регрессии (соответствия уравнения регрессии статистическим данным) является коэффициент детерминации \(R^{2}\). Чем теснее линейная связь между \(Y\) и \(X_i\) , тем ближе коэффициент детерминации \(R^{2}\) к единице. Чем слабее такая связь, тем \(R^{2}\) ближе к нулю.
+            <div class="alert alert-success" role="alert">Суммарной мерой общего качества уравнения регрессии (соответствия уравнения регрессии статистическим данным) является коэффициент детерминации \(R^{2}\). Чем теснее линейная связь между \(Y\) и \(X_i\) , тем ближе коэффициент детерминации \(R^{2}\) к единице. Чем слабее такая связь, тем \(R^{2}\) ближе к нулю.
             </div>
 
             <div class="alert alert-primary" role="alert">Найдем коэффициент детерминации по формуле:
@@ -165,58 +140,55 @@
             \begin{aligned}R^{2}=1 - \frac{n\sum S_{e}^2}{\left(n\sum y_i^2-\left(\sum \bar y_i\right)^2\right)}\end{aligned}
 
             <div class="alert alert-warning" role="alert">Отсюда:
-                <strong> 
-							\(R^{2} =  \) <div id="r2" style="display: inline;"></div>
-					</strong>
+                 
+                            \(R^{2} =  \) <div id="r2" style="display: inline;"></div>
+                    
             </div>
-			
-			<div class="alert alert-success" role="alert">Сделаем проверку общего качества уравнения множественной регрессии. Проверим гипотезу об общей значимости - гипотезу об одновременном равенстве нулю всех коэффициентов регрессии при объясняющих переменных: \(H_{0}: R^2 = 0 \), \(H_{1}: R^2 \neq 0 \). Проверка этой гипотезы осуществляется с помощью F-статистики распределения Фишера.
-				Если \(F < F_{кр}\), то нет оснований для отклонения гипотезы \(H_{0}\).
+            
+            <div class="alert alert-success" role="alert">Сделаем проверку общего качества уравнения множественной регрессии. Проверим гипотезу об общей значимости - гипотезу об одновременном равенстве нулю всех коэффициентов регрессии при объясняющих переменных: \(H_{0}: R^2 = 0 \), \(H_{1}: R^2 \neq 0 \). Проверка этой гипотезы осуществляется с помощью F-статистики распределения Фишера.
+                Если \(F &lt; F_{кр}\), то нет оснований для отклонения гипотезы \(H_{0}\).
             </div>
-			<div class="alert alert-warning" role="alert">В данном случае:
-                <strong> 
-							\(F =  \) <div id="ffact" style="display: inline;"></div>
-							\(F_{кр} =  \) <div id="ftabll" style="display: inline;"></div>
-				</strong>
+            <div class="alert alert-warning" role="alert">В данном случае:
+                 
+                            \(F =  \) <div id="ffact" style="display: inline;"></div>
+                            \(F_{кр} =  \) <div id="ftabll" style="display: inline;"></div>
+                
             </div>
             <div class="alert alert-warning" role="alert">Поскольку F <span id="znak"></span> Fkp, то коэффициент детерминации статистически <span id="znach"></span> и уравнение регрессии статистически <span id="nadejn"></span>.</div>
 
         </div>
+    </div>
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-
-        <script type="text/javascript">
-            //Создание таблицы
+        <script>
+        //multi.regress.analysis v.0.10
+        //
+            //Генерация таблиц
             $("#next").click(function() {
 
-                var value = $.trim($("#rowsData").val());
-                var val2 = $.trim($("#colsData").val());
+                var valRows = $.trim($("#rowsData").val());
+                var valCols = $.trim($("#colsData").val());
 
-                if (value.length > 0 && val2.length > 0) {
+                if (valRows.length > 0 && valCols.length > 0) {
 
                     var countTd = parseInt($("#rowsData").val());
                     var countTr = parseInt($("#colsData").val());
-
                     $('#outputTable1').html("<table id='t1' style='display: inline-flex;'></table>");
-                   
+               
                     for (var i = 0; i <= countTr - 1; i++) {
-                        $('#outputTable1 #t1').append("<div style='font-size:24px;'>X</div>", i);
-                        $('#outputTable1 #t1').append("<tr class='trX'></tr>");
-                        $('#outputTable1 #t1').append("<br/>");
-
-
-                        for (var n = 1; n <= countTd; n++) {
+                            $('#outputTable1 #t1').append("<div style='font-size:24px;'>X</div>", "<span class='numberi'>"+i+"</span>");
+                            $('#outputTable1 #t1').append("<tr class='trX'></tr>");
+                            $('#outputTable1 #t1').append("<br/>");
+                    for (var n = 1; n <= countTd; n++) {
                             $('#outputTable1 #t1 tr:last').append("<input type='text' class='arrX form-control' placeholder='Независимая переменная'>");
-                        }
-                        
+                        } 
                     }
-
 
                     $('#outputTable2').html("<span style='font-size:24px;'>Y</span><table id='t2'></table>");
 
                     for (var i = 1; i <= countTd; i++) {
-                        $('#outputTable2 #t2').append("<tr></tr>");
+                            $('#outputTable2 #t2').append("<tr></tr>");
                         for (var n = 1; n <= 1; n++) {
                             $('#outputTable2 #t2 tr:last').append("<input type='text' class='arrY form-control'  placeholder='Зависимая переменная'>");
                         }
@@ -224,15 +196,14 @@
 
                     $("#tableInput").show();
 
-                } else {
-
+                } 
+                else {
                     alert("Заполните все поля");
-
                 }
             });
 
-            var arrY2D = new Array();
-            var arrX2D = new Array();
+            var arrY2D = [];
+            var arrX2D = [];
 
             $('#find').click(function() {
 
@@ -266,8 +237,7 @@
                     var arrY2DF = arrY2D.map(function(x) {
                         return parseFloat(x, 10);
                     });
-                    console.log("Массив Y (одномерный): " + arrY2DF);
-
+                    
                     //Формируем одномерный массив из X
                     $('.arrX').each(function(i, input) {
                         arrX2D.push($(input).val());
@@ -277,9 +247,8 @@
                     var arrX2DF = arrX2D.map(function(x) {
                         return parseFloat(x, 10);
                     });
-                    console.log("Массив X (одномерный): " + arrX2DF);
-
-                    //Переводим из одномерного в двумерный
+                    
+                    //Переводим из одномерного в двумерный (function)
                     var matrixify = (arr, size) =>
                         Array.from({
                                 length: Math.ceil(arr.length / size)
@@ -290,31 +259,26 @@
                     var colX = parseInt($("#rowsData").val());
                     var matrX = matrixify(arrX2DF, colX);
                     var matrX2 = matrixify(arrX2DF, colX);
-                    console.log("Матрица Y");
-                    console.log(matrY);
-                    console.log("Матрица X");
-                    console.log(matrX);
 
                     //Транспонируем X 
-                    function TransX(A) //На входе двумерный массив
+                    function TransX(A)
                     {
                         var m = A.length,
                             n = A[0].length,
                             AT = [];
                         for (var i = 0; i < n; i++) {
                             AT[i] = [];
-                            for (var j = 0; j < m; j++) AT[i][j] = A[j][i];
+                            for (var j = 0; j < m; j++) {
+                                AT[i][j] = A[j][i];
+                            }
                         }
                         return AT;
                     }
 
                     var tranzX = TransX(matrX2);
                     var tranzXME = TransX(matrX2); //Без единичного
-                    console.log("Транспонированная матрица X");
-                    console.log(tranzX);
-                    console.log("Транспонированная матрица X без единичного столбца");
-                    console.log(tranzXME);
-
+                    
+                   
                     //Выводим Y в таблицу
                     var divY = $("#tableY");
                     var tableY = $("<table class='table table-bordered'></table>");
@@ -352,23 +316,20 @@
                         }
                     }
 
-                    var matrED = new Array();
+                    //Расчет вектора коээфициентов уравнения
+                    //Формирование единичной матрицы-столбца по длине массива X
+                    var matrED = [];
                     for (var i = 0; i < tranzX.length; i++) {
                         matrED[i] = 1;
                     }
 
-                    console.log("Единичный столбец");
-                    console.log(matrED);
-
-                    var matrEDaddX = new Array();
+                    //Добавляем единичную матрицу-столбец к массиву X
+                    var matrEDaddX = [];
                     for (var i = 0; i < tranzX.length; i++) {
                         matrEDaddX[i] = tranzX[i].unshift(matrED[i]);
                     }
 
-                    console.log("Матрица X с единичным столбцом");
-                    console.log(tranzX);
-
-                    //Добавим единичный столбец к матрице X
+                    //Вывод матрицы X с единичным столбцом в таблицу
                     var divXED = $("#newMatrX");
                     var theadXED = $("<thead><tr><th scope='col'>X</th></tr></thead>");
                     var tableXED = $("<table class='table table-bordered'></table>");
@@ -398,12 +359,10 @@
                         }
                         return AT;
                     }
-
                     var transpose = TransMatrix(tranzX);
-                    console.log("Транспонированная матрица X");
-                    console.log(transpose);
+                    
 
-                    //Выведем транспонированную матрицу X
+                    //Выведем транспонированную матрицу X в таблицу
                     var divXT = $("#transposeX");
                     var theadXT = $("<thead><tr><th scope='col'>X<sup>T</sup></th></tr></thead>");
                     var tableXT = $("<table class='table table-bordered'></table>");
@@ -421,6 +380,7 @@
                         }
                     }
 
+                    //Функция умножения матриц
                     function MultiplyMatrix(A, B) {
                         var rowsA = A.length,
                             colsA = A[0].length,
@@ -440,10 +400,9 @@
                     }
 
                     var prodXT = MultiplyMatrix(transpose, tranzX);
-                    console.log("Результат умножения Xt*X");
-                    console.log(prodXT);
+                    
 
-                    //Выведем результат умножения
+                    //Выведем результат умножения Xt на X в таблицу
                     var divXTprod = $("#xTprodX");
                     var theadXTprod = $("<thead><tr><th scope='col'>X<sup>T</sup>X</th></tr></thead>");
                     var tableXTprod = $("<table class='table table-bordered'></table>");
@@ -462,10 +421,9 @@
                     }
 
                     var prodXY = MultiplyMatrix(transpose, matrY);
-                    console.log("Результат умножения Xt*Y");
-                    console.log(prodXY);
+                    
 
-                    //Выведем результат умножения
+                    //Выведем результат умножения Xt на Y в таблицу
                     var divXYprod = $("#xTprodY");
                     var theadXYprod = $("<thead><tr><th scope='col'>X<sup>T</sup>Y</th></tr></thead>");
                     var tableXYprod = $("<table class='table table-bordered'></table>");
@@ -483,11 +441,10 @@
                         }
                     }
 
-                    //xTprodXobr
-                    //Находим обратную матрицу. Для этого необходимо найти обределитель матрицы и союзную матрицу
-
-                    //Определитель
-                    function Determinant(A) // Используется алгоритм Барейса, сложность O(n^3)
+                    //Находим обратную матрицу. Для этого необходимо найти обределитель матрицы и союзную матрицу, составленную из алгебраических дополнений
+                    //Функция нахождения определителя матрицы
+                    // Используется алгоритм Барейса, сложность O(n^3)
+                    function Determinant(A) 
                     {
                         var N = A.length,
                             B = [],
@@ -527,8 +484,8 @@
                         else return B[N - 1][N - 1];
                     }
 
-                    //Союзная матрица
-                    function AdjugateMatrix(A) // A - двумерный квадратный массив
+                    //Функция нахождения союзной матрицы
+                    function AdjugateMatrix(A)
                     {
                         var N = A.length,
                             adjA = [];
@@ -547,18 +504,19 @@
                                     for (var n = 0; n < i; n++) B[m - 1][n] = A[m][n];
                                     for (var n = i + 1; n < N; n++) B[m - 1][n - 1] = A[m][n];
                                 }
-                                adjA[i][j] = sign * Determinant(B); // Функцию Determinant см. выше
+                                adjA[i][j] = sign * Determinant(B);
                             }
                         }
                         return adjA;
                     }
 
-                    function InverseMatrix(A) // A - двумерный квадратный массив
+                    //Функция нахождения обратной матрицы
+                    function InverseMatrix(A)
                     {
-                        var det = Determinant(A); // Функцию Determinant см. выше
+                        var det = Determinant(A); // Функция Determinant
                         if (det == 0) return false;
                         var N = A.length,
-                            A = AdjugateMatrix(A); // Функцию AdjugateMatrix см. выше
+                            A = AdjugateMatrix(A); // Функция AdjugateMatrix
                         for (var i = 0; i < N; i++) {
                             for (var j = 0; j < N; j++) A[i][j] /= det;
                         }
@@ -566,10 +524,8 @@
                     }
 
                     var inverseXtX = InverseMatrix(prodXT);
-                    console.log("Результат обратной матрицы");
-                    console.log(inverseXtX);
-
-                    //Выведем обратную матрицу 
+                    
+                    //Выведем обратную матрицу в таблицу
                     var divXOBR = $("#xTprodXobr");
                     var theadXOBR = $("<thead><tr><th scope='col'>X<sup>T</sup>X<sup>-1</sup></th></tr></thead>");
                     var tableXOBR = $("<table class='table table-bordered'></table>");
@@ -588,25 +544,18 @@
                     }
 
                     var proObrXtY = MultiplyMatrix(inverseXtX, prodXY);
-                    console.log("Коэффициенты");
-                    console.log(proObrXtY);
-
-                    //Из двумерного в одномерный
+                   
+                    //Переводим из двумерного массива в одномерный
                     var flattened = [];
                     flattened = [].concat(...proObrXtY);
-
                     var arrayKFL = flattened.map(function(x) {
                         return parseFloat(x, 10);
                     });
-
                     arrayKFL = arrayKFL.map(a => a.toFixed(4));
-
                     arrayKFL = arrayKFL.map(a => parseFloat(a, 10));
 
-                    console.log("Коэффициенты (одномерный массив)");
-                    console.log(arrayKFL);
-
-                    //Выведем коэффициенты уравнения
+                    
+                    //Выведем коэффициенты уравнения в таблицу
                     var divKoef = $("#koef");
                     var theadKoef = $("<thead><tr><th scope='col'>Вектор коэффициентов</th></tr></thead>");
                     var tableKoef = $("<table class='table table-bordered'></table>");
@@ -622,13 +571,12 @@
                         }
                     }
 
+                    //Составление уравнения регрессиии
                     var arrXi = [];
                     var xs = "x";
                     for (var k = 0; k < arrayKFL.length - 1; k++) {
                         arrXi[k] = xs + k;
                     }
-                    console.log("Массив из Xi");
-                    console.log(arrXi);
 
                     var s = Math.max(arrayKFL.length, arrXi.length) * 2;
                     var d = [arrayKFL, arrXi];
@@ -640,18 +588,15 @@
                             r.push(v);
                         }
                     }
-
                     $("#resK").html(r);
-                    console.log("Уравнение");
-                    console.log(r);
+                   
 
-                    //Знаки
+                    //Меняем знаки +- на -
                     function highlight(word) {
                         var element = $('#resK');
                         var rgxp = new RegExp(word, 'g');
                         var repl = word + '+';
                         element.html(element.html().replace(word, repl));
-
                     }
 
                     highlight('x0');
@@ -664,19 +609,15 @@
                     var dU = [];
                     dU = $('#resK').text();
                     dU.toString();
-                    console.log(dU);
-
                     var newchar = '-'
                     dU = dU.split('+-').join(newchar);
                     $("#resK").html(dU);
-                    console.log(dU);
+    
 
-                    //Оценка дисперсии (Y - XB)T (Y-XB)
+                    //Нахождение остаточной дисперсии по формуле (Y - XB)T*(Y-XB)
                     var XB = MultiplyMatrix(tranzX, proObrXtY);
-                    console.log("Результат X*B");
-                    console.log(XB);
-
-                    function DevMatrix(A, B) //На входе двумерные массивы одинаковой размерности
+                    //Функция разности матриц
+                    function DevMatrix(A, B)
                     {
                         var m = A.length,
                             n = A[0].length,
@@ -687,27 +628,17 @@
                         }
                         return C;
                     }
-                    var YXB = DevMatrix(matrY, XB);
-                    console.log("Результат Y-XB");
-                    console.log(YXB);
-
+                    var YXB = DevMatrix(matrY, XB);               
                     var YXBT = TransMatrix(YXB);
-                    console.log("Результат (Y-XB)T");
-                    console.log(YXB);
-
                     var yXBTprodTXB = MultiplyMatrix(YXBT, YXB);
                     yXBTprodTXB = parseFloat(yXBTprodTXB).toFixed(4);
                     var chisl = yXBTprodTXB;
-                    console.log("Оценка дисперсии");
-                    console.log(yXBTprodTXB);
-
+                  
                     $("#resDisp").html(yXBTprodTXB);
 
-                    //Коэффициент детерминации + корреляции
+                    //Расчет коэффициента детерминации + корреляции
                     // n * sum(Yi^2) - sum(Yi)^2
                     var arrayYD = arrY2DF;
-
-                    //sum(Yi^2)
 
                     //Возведение Y в квадрат
                     var powY = arrY2DF.map(function(value) {
@@ -717,15 +648,9 @@
                         return sum + current;
                     }, 0);
 
-                    console.log("sum(Yi^2)");
-                    console.log(powYsum);
-
                     //sum(Yi)^2
                     var sumY = arraySum(arrY2DF);
                     var prodYSumPow = Math.pow(sumY, 2);
-
-                    console.log("sum(Yi)^2");
-                    console.log(prodYSumPow);
 
                     //Суммирование элементов
                     function arraySum(arr) {
@@ -739,77 +664,117 @@
                     var znam = (yn * powYsum) - (prodYSumPow);
                     var r2 = 1 - (yn * chisl) / (znam);
                     r2 = parseFloat(r2).toFixed(4);
-                    var r = Math.sqrt(r2);
-                    r = parseFloat(r).toFixed(4);
-                    console.log("Числитель");
-                    console.log(chisl);
-                    console.log("Знаменатель");
-                    console.log(znam);
-                    console.log("R");
-                    console.log(r);
-                    console.log("R2");
-                    console.log(r2);
+                    var mr = Math.sqrt(r2);
+                    mr = parseFloat(mr).toFixed(4);
 
-                    $("#r").html(r);
+                    $("#r").html(mr);
                     $("#r2").html(r2);
 
-                    //F - критерий
-
+                    //F - тест
+                    //nF, mF - степени свободы для F фактического
                     var nF = arrY2DF.length;
                     var cX = parseInt($("#colsData").val());
                     var mF = cX;
                     var F = (r2 / (1-r2)) * ((nF - mF - 1) / mF);
                     F = parseFloat(F).toFixed(4);
-                    console.log("F набл.");
-                    console.log(F);
+                    
                     $("#ffact").html(F);
 
+                    //Массив значений F табл. при уровне значимости = 0.05 (по-умолчанию)
                     var arrF =[
-					[161,200,216,225,230,234,237,239,241,242,244],
-					[18.51,19,19.16,19.25,19.30,19.33,19.36,19.38,19.39,19.41],
-					[10.31,9.55,9.28,9.12,9.01,8.94,8.88,8.84,8.81,8.78,8.74],
-					[7.71,6.94,6.59,6.39,6.26,6.16,6.09,6.04,6,5.96,5,90],
-					[6.61,5.79,5.41,5.19,5.05,4.95,4.88,4.82,4.78,4.74,4.68],
-					[5.99,5.14,4.76,4.53,4.39,4.28,4.21,4.15,4.10,4.06,4],
-					[5.59,4.74,4.35,4.12,3.97,3.87,3.79,3.73,3.68,3.63,3.57],
-					[5.32,4.46,4.07,3.84,3.69,3.58,3.5,3.44,3.39,3.34,3.28],
-					[5.12,4.26,3.86,3.63,3.48,3.37,3.29,3.23,3.18,3.13,3.07],
-					[4.96,4.10,3.71,3.48,3.37,3.29,3.23,3.18,3.13,3.07],
-					[4.84,3.98,3.59,3.36,3.20,3.09,3.01,2.95,2.90,2.86,2.79],
-					[4.75,3.88,3.49,3.26,3.11,3,2.92,2.85,2.8,2.76,2.69],
-					[4.67,3.8,3.41,3.18,3.02,2.92,2.84,2.77,2.72,2.67,2.6],
-					[4.60,3.74,3.34,3.11,2.96,2.85,2.77,2.7,2.65,2.6,2.53],
-					[4.54,3.68,3.29,3.06,2.90,2.79,2.7,2.64,2.59,2.55,2.48],
-					[4.49,3.63,3.24,3.01,2.85,2.74,2.66,2.59,2.54,2.49,2.42],
-					[4.45,3.59,3.20,2.96,2.81,2.7,2.62,2.55,2.50,2.50,2.38]
-					];
+                    [161,200,216,225,230,234,237,239,241,242,244],
+                    [18.51,19,19.16,19.25,19.30,19.33,19.36,19.38,19.39,19.41],
+                    [10.31,9.55,9.28,9.12,9.01,8.94,8.88,8.84,8.81,8.78,8.74],
+                    [7.71,6.94,6.59,6.39,6.26,6.16,6.09,6.04,6,5.96,5,90],
+                    [6.61,5.79,5.41,5.19,5.05,4.95,4.88,4.82,4.78,4.74,4.68],
+                    [5.99,5.14,4.76,4.53,4.39,4.28,4.21,4.15,4.10,4.06,4],
+                    [5.59,4.74,4.35,4.12,3.97,3.87,3.79,3.73,3.68,3.63,3.57],
+                    [5.32,4.46,4.07,3.84,3.69,3.58,3.5,3.44,3.39,3.34,3.28],
+                    [5.12,4.26,3.86,3.63,3.48,3.37,3.29,3.23,3.18,3.13,3.07],
+                    [4.96,4.10,3.71,3.48,3.37,3.29,3.23,3.18,3.13,3.07],
+                    [4.84,3.98,3.59,3.36,3.20,3.09,3.01,2.95,2.90,2.86,2.79],
+                    [4.75,3.88,3.49,3.26,3.11,3,2.92,2.85,2.8,2.76,2.69],
+                    [4.67,3.8,3.41,3.18,3.02,2.92,2.84,2.77,2.72,2.67,2.6],
+                    [4.60,3.74,3.34,3.11,2.96,2.85,2.77,2.7,2.65,2.6,2.53],
+                    [4.54,3.68,3.29,3.06,2.90,2.79,2.7,2.64,2.59,2.55,2.48],
+                    [4.49,3.63,3.24,3.01,2.85,2.74,2.66,2.59,2.54,2.49,2.42],
+                    [4.45,3.59,3.20,2.96,2.81,2.7,2.62,2.55,2.50,2.50,2.38]
+                    ];
 
-					var k1 = cX - 1;
-					var k2 = nF - cX - 2;
-					var fTabl = arrF[k1][k2];
-
-					console.log("F табл.");
-                    console.log(fTabl);
+                    //Степени свободы для F табличного (критического)
+                    var k1 = cX - 1;
+                    var k2 = nF - cX - 2;
+                    var fTabl = arrF[k1][k2];
 
                     $("#ftabll").html(fTabl);
 
+                    //Заключение о значимости
                     if(F > fTabl){
-                    	$("#znak").html(">");
-                    	$("#znach").html("значим");
-                    	$("#nadejn").html("надежно");
+                        $("#znak").html(">");
+                        $("#znach").html("значим");
+                        $("#nadejn").html("надежно");
                     }
                     else{
-                    	$("#znak").html("<");
-                    	$("#znach").html("незначим");
-                    	$("#nadejn").html("ненадежно");
+                        $("#znak").html("<");
+                        $("#znach").html("незначим");
+                        $("#nadejn").html("ненадежно");
                     }
 
-
+                    //Console.log's (dev)
+                    console.log("Массив Y (одномерный): " + arrY2DF);
+                    console.log("Массив X (одномерный): " + arrX2DF);
+                    console.log("Матрица Y");
+                    console.log(matrY);
+                    console.log("Матрица X");
+                    console.log(matrX);
+                    console.log("Транспонированная матрица X");
+                    console.log(tranzX);
+                    console.log("Транспонированная матрица X без единичного столбца");
+                    console.log(tranzXME);
+                    console.log("Единичный столбец");
+                    console.log(matrED);
+                    console.log("Матрица X с единичным столбцом");
+                    console.log(tranzX);
+                    console.log("Транспонированная матрица X");
+                    console.log(transpose);
+                    console.log("Результат умножения Xt*X");
+                    console.log(prodXT);
+                    console.log("Результат умножения Xt*Y");
+                    console.log(prodXY);
+                    console.log("Результат обратной матрицы");
+                    console.log(inverseXtX);
+                    console.log("Коэффициенты");
+                    console.log(proObrXtY);
+                    console.log("Коэффициенты (одномерный массив)");
+                    console.log(arrayKFL);
+                    console.log("Массив из Xi");
+                    console.log(arrXi);
+                    console.log("Уравнение");
+                    console.log(r);
+                    console.log("Результат X*B");
+                    console.log(XB);
+                    console.log("Результат Y-XB");
+                    console.log(YXB);
+                    console.log("Результат (Y-XB)T");
+                    console.log(YXB);
+                    console.log("Уравнение после смены знаков");
+                    console.log(dU);
+                    console.log("Остаточная дисперсия");
+                    console.log(yXBTprodTXB);
+                    console.log("sum(Yi^2)");
+                    console.log(powYsum);
+                    console.log("sum(Yi)^2");
+                    console.log(prodYSumPow);
+                    console.log("R");
+                    console.log(mr);
+                    console.log("R2");
+                    console.log(r2);
+                    console.log("F фактический");
+                    console.log(F);
+                    console.log("F табличный");
+                    console.log(fTabl);
                 }
-
             });
         </script>
-
 </body>
-
 </html>
