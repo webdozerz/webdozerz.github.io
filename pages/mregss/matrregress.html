@@ -119,10 +119,10 @@
                  $('#next').attr("disabled","disabled");
                 if (countX.length > 0) {
 
-                    $('#outputTable').html("<div class='input-group mb-3'><div class='input-group-prepend'><span class='input-group-text'>Y</span></div><input type='text' class='yValue form-control' aria-label='Sizing example input' aria-describedby='yValue' placeholder="Вставьте значения зависимой переменной из Excel"></div>");
+                    $('#outputTable').html("<div class='input-group mb-3'><div class='input-group-prepend'><span class='input-group-text'>Y</span></div><input type='text' class='yValue form-control' aria-label='Sizing example input' aria-describedby='yValue' placeholder='Вставьте значения зависимой переменной из Excel'></div>");
 
                     for(var i = 0; i <= countX-1; i++){
-                        $('#xT').append("<div class='input-group mb-3'><div class='input-group-prepend'><span class='input-group-text'>X"+i+"</span></div><input type='text' class='xValue form-control' aria-label='Sizing example input' aria-describedby='xValue' placeholder="Вставьте значения независимой переменной из Excel"></div>");
+                        $('#xT').append("<div class='input-group mb-3'><div class='input-group-prepend'><span class='input-group-text'>X"+i+"</span></div><input type='text' class='xValue form-control' aria-label='Sizing example input' aria-describedby='xValue' placeholder='Вставьте значения независимой переменной из Excel'></div>");
                     }
 
                     $("#tableInput").show();
