@@ -4,8 +4,11 @@ import eslintPlugin from 'vite-plugin-eslint'
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
   target: 'static',
-  meta: {
-    title: 'WWWEBDOZERZ'
+  head: {
+    title: 'WWWEBDOZERZ',
+    link: [
+      { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Source%20Code%20Pro:100,300,400,500,600,700,900&display=swap' }
+    ]
   },
   css: [
     // styles

@@ -10,7 +10,10 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+useMeta({
+  title: 'WWWEBDOZERZ'
+})
 </script>
 
 <style lang="scss" scoped>
