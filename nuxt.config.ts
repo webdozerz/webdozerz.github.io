@@ -12,7 +12,9 @@ export default defineNuxtConfig({
   },
   css: [
     // styles
-    '@/assets/css/main.scss'
+    '@/assets/css/main.scss',
+    '@/assets/css/normalize.scss',
+    '@/assets/css/mixins.scss'
   ],
   vite: {
     plugins: [
