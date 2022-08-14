@@ -8,7 +8,7 @@
         I make stuff for the Web
       </p>
       <p>
-        Right now, you can find me working mostly with Vue.js, Nuxt.js, and everything else related to JavaScript, HTML, and CSS.
+        Right now, you can find me working mostly with Vue.js, Nuxt.js, and everything else related to JavaScript, HTML, and CSS. I also use web3.js for blockchain development.
       </p>
     </div>
   </div>

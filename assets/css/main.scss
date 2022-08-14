@@ -11,3 +11,19 @@ body {
   background-color: #f1e7d0;
   color: #433422;
 }
+
+.ul {
+  display: flex;
+  flex-direction: column;
+  & li {
+    padding: 4px 0;
+  }
+}
+
+.link {
+  color: rgb(255, 255, 255);
+  transition: color 0.2s ease-in-out;
+  &:hover {
+    color: rgba(255, 0, 0, .9);
+  }
+}
