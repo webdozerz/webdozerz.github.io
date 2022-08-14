@@ -21,6 +21,9 @@ useMeta({
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  @media (max-width: 680px) {
+    margin: 0 16px;
+  }
   &__content {
     display: grid;
     max-width: 680px;

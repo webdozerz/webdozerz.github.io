@@ -32,7 +32,7 @@ $indicator-color: #e82d00;
 
 $transition-speed: 1.3s;
 
-$width: (100/$menu-items) * 1%;
+$width: calc((100/$menu-items)) * 1%;
 $menu-items-loop-offset: $menu-items - 1;
 
 .PrimaryNav {
@@ -97,7 +97,7 @@ $menu-items-loop-offset: $menu-items - 1;
         width: 0;
         height: 0;
         top: 0;
-        left: ($width/2);
+        left: calc($width/2);
         margin-left: -3px;
       }
       &:after {
@@ -115,21 +115,21 @@ $menu-items-loop-offset: $menu-items - 1;
 
   @for $i from 1 through $menu-items-loop-offset {
     .Nav-item:nth-child(#{$i}).is-active ~ .Nav-item:last-child:after {
-      left:($width*$i)-$width;
+      left: calc(($width*$i) - $width);
     }
     .Nav-item:nth-child(#{$i}).is-active ~ .Nav-item:last-child:before
     {
-      left:($width*$i)+($width/2)-$width;
+      left: calc(($width*$i) + ($width/2) - $width);
     }
   }
 
   @for $i from 1 through $menu-items-loop-offset {
     .Nav-item:nth-child(#{$i}):hover ~ .Nav-item:last-child:after {
-      left:($width*$i)-$width !important;
+      left: calc(($width*$i) - $width) !important;
     }
 
     .Nav-item:nth-child(#{$i}):hover ~ .Nav-item:last-child:before{
-      left:($width*$i)+($width/2)-$width !important;
+      left: calc(($width*$i) + ($width/2) - $width) !important;
     }
 
   }
@@ -138,7 +138,7 @@ $menu-items-loop-offset: $menu-items - 1;
     &:last-child {
       &:hover, &.is-active {
         &:before {
-          left: (100%-$width)+($width/2) !important;
+          left: calc((100% - $width) + ($width/2)) !important;
         }
         &:after{
           left: 100%-$width !important;
