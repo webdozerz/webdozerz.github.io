@@ -60,7 +60,7 @@ export default {
   }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .container {
   display: grid;
   margin-top: 24px;

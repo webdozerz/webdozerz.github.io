@@ -17,5 +17,19 @@ useMeta({
 </script>
 
 <style lang="scss" scoped>
-.container {}
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  &__content {
+    display: grid;
+    max-width: 680px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+main {
+  margin-top: 60px;
+}
 </style>
