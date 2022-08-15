@@ -31,6 +31,45 @@
         <a href="https://iterm2.com/" target="_blank" class="link">iTerm2</a> Terminal + <a class="link" target="_blank" href="https://ohmyz.sh/">Oh My Zsh</a>
       </li>
     </ul>
+    <h2>
+      Design
+    </h2>
+    <ul class="ul">
+      <li>
+        <a href="https://www.figma.com/" target="_blank" class="link">Figma</a>
+      </li>
+      <li>
+        <a href="https://zeplin.io/" target="_blank" class="link">Zeplin</a>
+      </li>
+    </ul>
+    <h2>
+      Software
+    </h2>
+    <ul class="ul">
+      <li>
+        Browsers: <a href="https://www.google.com/chrome/" target="_blank" class="link">Google Chrome</a>, <a href="https://www.mozilla.org/en-US/firefox/developer/" target="_blank" class="link">Firefox Developer Edition</a>
+      </li>
+      <li>
+        Extensions: <a href="https://github.com/vuejs/devtools" target="_blank" class="link">Vue Devtools</a>, <a href="https://www.wappalyzer.com/" target="_blank" class="link">Wappalyzer</a>
+      </li>
+    </ul>
+    <h2>
+      Other Stuff
+    </h2>
+    <ul class="ul">
+      <li>
+        <a href="https://github.com/" target="_blank" class="link">Github</a>
+      </li>
+      <li>
+        <a href="https://bitbucket.org/" target="_blank" class="link">Bitbucket</a>
+      </li>
+      <li>
+        <a href="https://gitlab.com/" target="_blank" class="link">Gitlab</a>
+      </li>
+      <li>
+        <a href="https://www.redmine.org/" target="_blank" class="link">Redmine</a>
+      </li>
+    </ul>
   </div>
 </template>
 
