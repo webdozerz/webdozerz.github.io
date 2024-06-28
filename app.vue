@@ -1,3 +1,9 @@
+<script lang="ts" setup>
+useSeoMeta({
+  title: 'WebDozerz'
+})
+</script>
+
 <template>
   <div>Test APP</div>
 </template>
