@@ -2,19 +2,28 @@
 export default defineNuxtConfig({
   devtools: { enabled: false },
   app: {
-    baseURL: process.env.NODE_ENV === 'production' ? '/webdozerz.github.io/' : '/',
+    baseURL:
+      process.env.NODE_ENV === "production" ? "/webdozerz.github.io/" : "/",
   },
   modules: [
     "@nuxt/eslint",
-    ["@nuxtjs/google-fonts", { display: "swap", families: {Inter: [400, 700]} }],
+    [
+      "@nuxtjs/google-fonts",
+      { display: "swap", families: { Inter: [400, 700] } },
+    ],
   ],
+  css: ["@/assets/scss/index.scss"],
+
   vite: {
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: '@import "@/assets/scss/index.scss";'
-        }
-      }
-    }
-  }
+          additionalData: '@import "@/assets/scss/additionalData/index.scss";',
+        },
+      },
+    },
+    build: {
+      sourcemap: false,
+    },
+  },
 });

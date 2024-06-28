@@ -1,0 +1,49 @@
+body,
+html {
+  height: 100%;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+
+  background: var(--black-1000);
+
+  color: var(--white-1000);
+
+  @include scroll;
+}
+
+.nuxt-icon {
+  font-size: 20px;
+  display: flex;
+
+  svg {
+    margin-bottom: 0 !important;
+  }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.2s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-rotate {
+  animation: spin 2s infinite;
+}
