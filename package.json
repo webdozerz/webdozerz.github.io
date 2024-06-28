@@ -9,7 +9,7 @@
     "deploy": "./deploy.sh",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "lint": "pnpm lint:eslint && pnpm lint:prettier",
+    "lint": "npm lint:eslint && npm lint:prettier",
     "lint:eslint": "eslint .",
     "lint:prettier": "prettier . --check",
     "lintfix": "eslint . --fix && prettier --write --list-different ."

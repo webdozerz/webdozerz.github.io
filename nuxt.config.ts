@@ -8,12 +8,11 @@ export default defineNuxtConfig({
     "@nuxt/eslint",
     ["@nuxtjs/google-fonts", { display: "swap", families: {Inter: [400, 700]} }],
   ],
-  css: ['~/assets/scss/main.scss', '~/assets/scss/_reset.css'],
   vite: {
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: '@use "~/assets/scss/_colors.scss" as *;'
+          additionalData: '@import "@/assets/scss/index.scss";'
         }
       }
     }
