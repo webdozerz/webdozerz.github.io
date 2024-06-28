@@ -1,11 +1,10 @@
-body,
-html {
+body, html {
   height: 100%;
   width: 100%;
   min-height: 100vh;
   overflow: hidden;
 
-  font-family: "Inter", sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-style: normal;
   font-weight: 400;
 
@@ -16,6 +15,7 @@ html {
   @include scroll;
 }
 
+
 .nuxt-icon {
   font-size: 20px;
   display: flex;
@@ -25,13 +25,11 @@ html {
   }
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.2s;
+.fade-enter-active, .fade-leave-active {
+  transition: all .2s;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.fade-enter-from, .fade-leave-to {
   opacity: 0;
 }
 
@@ -47,3 +45,4 @@ html {
 .loading-rotate {
   animation: spin 2s infinite;
 }
+

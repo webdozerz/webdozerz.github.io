@@ -11,19 +11,5 @@ export default defineNuxtConfig({
       "@nuxtjs/google-fonts",
       { display: "swap", families: { Inter: [400, 700] } },
     ],
-  ],
-  css: ["@/assets/scss/index.scss"],
-
-  vite: {
-    css: {
-      preprocessorOptions: {
-        scss: {
-          additionalData: '@import "@/assets/scss/additionalData/index.scss";',
-        },
-      },
-    },
-    build: {
-      sourcemap: false,
-    },
-  },
+  ]
 });
