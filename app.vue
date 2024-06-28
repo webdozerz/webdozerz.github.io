@@ -5,7 +5,9 @@ useSeoMeta({
 </script>
 
 <template>
-  <div>Test APP</div>
+  <div class="app">
+    <NuxtPage />
+  </div>
 </template>
 
 <style lang="scss">
