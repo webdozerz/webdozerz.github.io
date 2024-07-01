@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 useSeoMeta({
-  title: 'IlDev | Frontend Developer Portfolio'
+  title: 'IlDev | Портфолио frontend разработчика',
 })
 </script>
 
