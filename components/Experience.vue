@@ -152,8 +152,11 @@ li {
     gap: 12px;
 
     @media (max-width: 767px) {
-      grid-template-columns: 1fr;
-      grid-gap: 16px;
+      flex-direction: column;
+      align-items: flex-start;
+      .divider {
+        display: none;
+      }
     }
   }
   &__col {
