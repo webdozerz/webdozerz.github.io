@@ -27,7 +27,7 @@ li {
   flex-direction: column;
   gap: 12px;
   &__title {
-    color: var(--orange);
+    color: var(--white-1000);
   }
   &__list {
     margin-top: 8px;

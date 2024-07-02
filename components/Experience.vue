@@ -144,7 +144,7 @@ li {
   flex-direction: column;
   gap: 12px;
   &__title {
-    color: var(--orange);
+    color: var(--white-1000);
   }
   &__row  {
     display: flex;
@@ -160,7 +160,7 @@ li {
     }
   }
   &__col {
-    color: var(--red);
+    color: var(--white-1000);
     text-align: left;
   }
   &__link {
