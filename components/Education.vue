@@ -29,32 +29,8 @@ li {
   &__title {
     color: var(--orange);
   }
-  &__row  {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    align-items: center;
-    grid-gap: 42px;
-    max-width: 1024px;
-
-    @media (max-width: 767px) {
-      grid-template-columns: 1fr;
-      grid-gap: 16px;
-    }
-  }
-  &__col {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  &__link {
-    color: var(--green);
-    text-decoration: none;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
   &__list {
-    margin-top: 24px;
+    margin-top: 8px;
   }
 }
 </style>
