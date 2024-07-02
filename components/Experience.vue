@@ -8,11 +8,13 @@
             Frontend-разработчик
           </b>
         </div>
+        <div class="divider">|</div>
         <div class="experience__col">
           <b>
             Crypton Studio
           </b>
         </div>
+        <div class="divider">|</div>
         <div class="experience__col">
           <b>
             01.2022 - Настоящее время
@@ -52,11 +54,13 @@
             Frontend-разработчик
           </b>
         </div>
+        <div class="divider">|</div>
         <div class="experience__col">
           <b>
             Astana Prom Design
           </b>
         </div>
+        <div class="divider">|</div>
         <div class="experience__col">
           <b>
             2020 - 2022
@@ -84,11 +88,13 @@
             Frontend-разработчик
           </b>
         </div>
+        <div class="divider">|</div>
         <div class="experience__col">
           <b>
             Фриланс
           </b>
         </div>
+        <div class="divider">|</div>
         <div class="experience__col">
           <b>
             2017 - 2020
@@ -141,11 +147,9 @@ li {
     color: var(--orange);
   }
   &__row  {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
     align-items: center;
-    grid-gap: 42px;
-    max-width: 1024px;
+    gap: 12px;
 
     @media (max-width: 767px) {
       grid-template-columns: 1fr;
@@ -153,9 +157,8 @@ li {
     }
   }
   &__col {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    color: var(--red);
+    text-align: left;
   }
   &__link {
     color: var(--green);
