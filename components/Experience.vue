@@ -5,7 +5,7 @@
       <div class="experience__row">
         <div class="experience__col">
           <b>
-            Frontend-разработчик
+            Frontend-разработчик (Middle +)
           </b>
         </div>
         <div class="divider">|</div>
@@ -51,7 +51,7 @@
       <div class="experience__row">
         <div class="experience__col">
           <b>
-            Frontend-разработчик
+            Frontend-разработчик (Junior)
           </b>
         </div>
         <div class="divider">|</div>
