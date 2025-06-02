@@ -124,7 +124,9 @@
         </section>
 
         <!-- Сброс -->
-        <div class="flex justify-end">
+        <div class="flex justify-end gap-3">
+          <button class="btn btn-primary" @click="exportToCsv">Экспорт в CSV</button>
+          <button class="btn btn-accent" @click="exportToJson">Экспорт в JSON</button>
           <button class="btn btn-secondary" @click="reset">Сбросить</button>
         </div>
       </div>
@@ -406,6 +408,232 @@ function reset() {
   
   state.devLevel = "middle"
 }
+
+// Добавляем функцию экспорта в CSV
+function exportToCsv() {
+  // Получаем текущую дату для названия файла
+  const now = new Date()
+  const dateStr = now.toLocaleDateString('ru-RU').replace(/\./g, '-')
+  const timeStr = now.toLocaleTimeString('ru-RU', { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  }).replace(':', '-')
+  
+  // Формируем данные для экспорта
+  const csvData = [
+    ['Параметр', 'Значение'],
+    ['Дата расчета', `${dateStr} ${timeStr}`],
+    [''],
+    
+    // Количество компонентов
+    ['=== КОЛИЧЕСТВО КОМПОНЕНТОВ ===', ''],
+    ...componentTypes.map(type => [
+      `${labels[type]}`, 
+      state.counts[type] || 0
+    ]),
+    [''],
+    
+    // Компоненты с готовой базой
+    ['=== КОМПОНЕНТЫ С ГОТОВОЙ БАЗОЙ ===', ''],
+    ...componentTypes.map(type => [
+      `${labels[type]} с базой`, 
+      state.countsWithBase[type] || 0
+    ]),
+    [''],
+    
+    // Новые props на компонент
+    ['=== НОВЫЕ PROPS НА КОМПОНЕНТ ===', ''],
+    ...componentTypes.map(type => [
+      `${labels[type]} - новые props`, 
+      state.countsNewProps[type] || 0
+    ]),
+    [''],
+    
+    // Основные параметры
+    ['=== ОСНОВНЫЕ ПАРАМЕТРЫ ===', ''],
+    ['Сложность UI', state.uiComplex === 'static' ? 'Статическая' : 'Интерактивная'],
+    ['Слой состояния', state.stateLayer === 'local' ? 'Локальный' : 'Глобальный'],
+    ['Тип API', 
+      state.apiType === 'none' ? 'Нет' : 
+      state.apiType === 'simple' ? 'Простой GET' : 'Полный CRUD'
+    ],
+    ['Интернационализация', 
+      state.i18n === 'none' ? 'Нет' : 
+      state.i18n === 'simple' ? 'Строки' : 'Склонения / RTL'
+    ],
+    ['Грейд разработчика', 
+      state.devLevel === 'junior' ? 'Junior' : 
+      state.devLevel === 'middle' ? 'Middle' : 'Senior'
+    ],
+    [''],
+    
+    // Дополнительные опции
+    ['=== ДОПОЛНИТЕЛЬНЫЕ ОПЦИИ ===', ''],
+    ['SSR (Async Data, Изоморфный код)', state.ssr ? 'Да' : 'Нет'],
+    ['Расширенный SEO', state.seoAdvanced ? 'Да' : 'Нет'],
+    ['Unit-тесты', state.testsUnit ? 'Да' : 'Нет'],
+    ['E2E-тесты', state.testsE2E ? 'Да' : 'Нет'],
+    ['Адаптивный дизайн', state.responsive ? 'Да' : 'Нет'],
+    ['Доступность (a11y)', state.accessibility ? 'Да' : 'Нет'],
+    ['Код-ревью и рефакторинг', state.codeReview ? 'Да' : 'Нет'],
+    ['Документация', state.documentation ? 'Да' : 'Нет'],
+    ['Настройка деплоя и CI/CD', state.deployment ? 'Да' : 'Нет'],
+    [''],
+    
+    // Результаты
+    ['=== РЕЗУЛЬТАТЫ (ЧАСЫ) ===', ''],
+    ['Оптимистичная оценка', hours.value.optimistic],
+    ['Реалистичная оценка', hours.value.realistic],
+    ['Пессимистичная оценка', hours.value.pessimistic],
+  ]
+  
+  // Преобразуем в CSV формат
+  const csvContent = csvData
+    .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .join('\n')
+  
+  // Добавляем BOM для корректного отображения русских символов в Excel
+  const bom = '\uFEFF'
+  const csvWithBom = bom + csvContent
+  
+  // Создаем blob и ссылку для скачивания
+  const blob = new Blob([csvWithBom], { type: 'text/csv;charset=utf-8' })
+  const url = window.URL.createObjectURL(blob)
+  
+  // Создаем временную ссылку и кликаем по ней
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `trudozatraty-${dateStr}-${timeStr}.csv`
+  document.body.appendChild(link)
+  link.click()
+  
+  // Очищаем ресурсы
+  document.body.removeChild(link)
+  window.URL.revokeObjectURL(url)
+}
+
+// Добавляем функцию экспорта в JSON
+function exportToJson() {
+  // Получаем текущую дату для названия файла
+  const now = new Date()
+  const dateStr = now.toLocaleDateString('ru-RU').replace(/\./g, '-')
+  const timeStr = now.toLocaleTimeString('ru-RU', { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  }).replace(':', '-')
+  
+  // Формируем структурированные данные для экспорта
+  const jsonData = {
+    meta: {
+      exportDate: now.toISOString(),
+      exportDateFormatted: `${dateStr} ${timeStr}`,
+      version: '1.0',
+      description: 'Экспорт данных калькулятора трудозатрат'
+    },
+    
+    // Исходные данные формы (для возможного импорта)
+    rawData: {
+      counts: { ...state.counts },
+      countsWithBase: { ...state.countsWithBase },
+      countsNewProps: { ...state.countsNewProps },
+      uiComplex: state.uiComplex,
+      stateLayer: state.stateLayer,
+      apiType: state.apiType,
+      ssr: state.ssr,
+      seoAdvanced: state.seoAdvanced,
+      i18n: state.i18n,
+      testsUnit: state.testsUnit,
+      testsE2E: state.testsE2E,
+      responsive: state.responsive,
+      accessibility: state.accessibility,
+      codeReview: state.codeReview,
+      documentation: state.documentation,
+      deployment: state.deployment,
+      devLevel: state.devLevel
+    },
+    
+    // Человекочитаемые данные
+    formattedData: {
+      components: {
+        counts: componentTypes.reduce((acc, type) => {
+          acc[labels[type]] = state.counts[type] || 0
+          return acc
+        }, {} as Record<string, number>),
+        
+        withBase: componentTypes.reduce((acc, type) => {
+          acc[labels[type]] = state.countsWithBase[type] || 0
+          return acc
+        }, {} as Record<string, number>),
+        
+        newProps: componentTypes.reduce((acc, type) => {
+          acc[labels[type]] = state.countsNewProps[type] || 0
+          return acc
+        }, {} as Record<string, number>)
+      },
+      
+      settings: {
+        uiComplexity: state.uiComplex === 'static' ? 'Статическая' : 'Интерактивная',
+        stateManagement: state.stateLayer === 'local' ? 'Локальный' : 'Глобальный',
+        apiIntegration: state.apiType === 'none' ? 'Нет' : 
+                       state.apiType === 'simple' ? 'Простой GET' : 'Полный CRUD',
+        internationalization: state.i18n === 'none' ? 'Нет' : 
+                              state.i18n === 'simple' ? 'Строки' : 'Склонения / RTL',
+        developerLevel: state.devLevel === 'junior' ? 'Junior' : 
+                       state.devLevel === 'middle' ? 'Middle' : 'Senior'
+      },
+      
+      features: {
+        ssr: state.ssr,
+        advancedSeo: state.seoAdvanced,
+        unitTests: state.testsUnit,
+        e2eTests: state.testsE2E,
+        responsiveDesign: state.responsive,
+        accessibility: state.accessibility,
+        codeReview: state.codeReview,
+        documentation: state.documentation,
+        deployment: state.deployment
+      }
+    },
+    
+    // Результаты расчетов
+    results: {
+      hours: {
+        optimistic: hours.value.optimistic,
+        realistic: hours.value.realistic,
+        pessimistic: hours.value.pessimistic
+      },
+      
+      // Дополнительная аналитика
+      analysis: {
+        totalComponents: componentTypes.reduce((sum, t) => sum + (state.counts[t] || 0), 0),
+        componentsWithBase: componentTypes.reduce((sum, t) => sum + (state.countsWithBase[t] || 0), 0),
+        estimateRange: {
+          min: hours.value.optimistic,
+          max: hours.value.pessimistic,
+          spread: Math.round((hours.value.pessimistic - hours.value.optimistic) * 10) / 10
+        }
+      }
+    }
+  }
+  
+  // Преобразуем в JSON с красивым форматированием
+  const jsonContent = JSON.stringify(jsonData, null, 2)
+  
+  // Создаем blob и ссылку для скачивания
+  const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8' })
+  const url = window.URL.createObjectURL(blob)
+  
+  // Создаем временную ссылку и кликаем по ней
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `trudozatraty-${dateStr}-${timeStr}.json`
+  document.body.appendChild(link)
+  link.click()
+  
+  // Очищаем ресурсы
+  document.body.removeChild(link)
+  window.URL.revokeObjectURL(url)
+}
 </script>
 
 <style scoped>
@@ -550,6 +778,24 @@ function reset() {
   transition: all 0.2s;
 }
 
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.btn-accent {
+  background-color: #8b5cf6;
+  color: white;
+}
+
+.btn-accent:hover {
+  background-color: #7c3aed;
+}
+
 .btn-secondary {
   background-color: #e5e7eb;
   color: #111827;
@@ -566,6 +812,10 @@ function reset() {
 
 .justify-end {
   justify-content: flex-end;
+}
+
+.gap-3 {
+  gap: 0.75rem;
 }
 
 /* === БАЗОВЫЕ КОМПОНЕНТЫ === */
