@@ -543,4 +543,218 @@ function reset() {
 .justify-end {
   justify-content: flex-end;
 }
+
+/* === БАЗОВЫЕ КОМПОНЕНТЫ === */
+
+/* Form Group Styles */
+:deep(.form-group) {
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.form-group.full-width) {
+  grid-column: 1 / -1;
+}
+
+/* Label Styles */
+:deep(.label) {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: #111827;
+}
+
+/* Component type group labels */
+.component-type-group :deep(.form-group:first-child .label) {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #111827;
+}
+
+.component-type-group :deep(.form-group:not(:first-child) .label) {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+/* Input and Select Styles */
+:deep(.input),
+:deep(.select) {
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  height: 2.25rem;
+  padding: 0 0.5rem;
+  font-size: 0.875rem;
+  background: white;
+  color: #111827;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.component-type-group :deep(.form-group:not(:first-child) .input) {
+  height: 2rem;
+  font-size: 0.8125rem;
+}
+
+:deep(.input:focus),
+:deep(.select:focus) {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Number Input Wrapper */
+:deep(.number-input-wrapper) {
+  position: relative;
+  display: flex;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+:deep(.number-input-wrapper:focus-within) {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+:deep(.number-input-wrapper .input) {
+  flex: 1;
+  padding: 0 0.5rem 0 0.5rem;
+  padding-right: 2.5rem;
+  text-align: center;
+  font-weight: 500;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  height: 2.25rem;
+}
+
+:deep(.number-controls) {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #d1d5db;
+  width: 2rem;
+}
+
+:deep(.number-btn) {
+  flex: 1;
+  width: 100%;
+  background: #f9fafb;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.75rem;
+  color: #6b7280;
+  transition: all 0.2s;
+  line-height: 1;
+  font-family: monospace;
+}
+
+:deep(.number-btn:hover) {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+:deep(.number-btn.increment) {
+  border-bottom: 1px solid #d1d5db;
+}
+
+:deep(.number-btn.increment::before) {
+  content: '+';
+}
+
+:deep(.number-btn.decrement::before) {
+  content: '−';
+}
+
+/* Checkbox/Toggle Styles */
+:deep(.checkbox-wrapper) {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+  color: #111827;
+  font-weight: 500;
+}
+
+:deep(.checkbox) {
+  position: relative;
+  width: 3rem;
+  height: 1.5rem;
+  background-color: #d1d5db;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border: none;
+  appearance: none;
+  outline: none;
+}
+
+:deep(.checkbox::before) {
+  content: '';
+  position: absolute;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+:deep(.checkbox:checked) {
+  background-color: #3b82f6;
+}
+
+:deep(.checkbox:checked::before) {
+  transform: translateX(1.5rem);
+}
+
+:deep(.checkbox:hover) {
+  background-color: #9ca3af;
+}
+
+:deep(.checkbox:checked:hover) {
+  background-color: #2563eb;
+}
+
+/* Result Card Styles */
+:deep(.result-card) {
+  padding: 1rem;
+  border-radius: 0.75rem;
+}
+
+:deep(.result-card.green) {
+  background-color: #dcfce7;
+}
+
+:deep(.result-card.blue) {
+  background-color: #eff6ff;
+}
+
+:deep(.result-card.red) {
+  background-color: #fef2f2;
+}
+
+:deep(.result-card .title) {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #111827;
+}
+
+:deep(.result-card .value) {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #111827;
+}
 </style>
