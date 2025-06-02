@@ -124,36 +124,42 @@
         </section>
 
         <!-- Сброс -->
-        <div class="flex justify-end gap-3">
-          <button 
-            class="btn btn-info" 
-            :disabled="!hasComponents"
-            @click="showCalculationDetails = true"
-          >
-            Детали расчета
-          </button>
-          <button 
-            class="btn btn-success" 
-            :disabled="!hasComponents"
-            @click="showJiraIntegration = true"
-          >
-            Экспорт в Jira
-          </button>
-          <button 
-            class="btn btn-primary" 
-            :disabled="!hasComponents"
-            @click="exportToCsv"
-          >
-            Экспорт в CSV
-          </button>
-          <button 
-            class="btn btn-accent" 
-            :disabled="!hasComponents"
-            @click="exportToJson"
-          >
-            Экспорт в JSON
-          </button>
-          <button class="btn btn-secondary" @click="reset">Сбросить</button>
+        <div class="buttons-container">
+          <div class="buttons-group">
+            <button 
+              class="btn btn-info" 
+              :disabled="!hasComponents"
+              @click="showCalculationDetails = true"
+            >
+              Детали расчета
+            </button>
+            <button 
+              class="btn btn-success" 
+              :disabled="!hasComponents"
+              @click="showJiraIntegration = true"
+            >
+              Экспорт в Jira
+            </button>
+          </div>
+          <div class="buttons-group">
+            <button 
+              class="btn btn-primary" 
+              :disabled="!hasComponents"
+              @click="exportToCsv"
+            >
+              Экспорт в CSV
+            </button>
+            <button 
+              class="btn btn-accent" 
+              :disabled="!hasComponents"
+              @click="exportToJson"
+            >
+              Экспорт в JSON
+            </button>
+          </div>
+          <div class="buttons-group">
+            <button class="btn btn-secondary" @click="reset">Сбросить</button>
+          </div>
         </div>
       </div>
     </div>
@@ -2029,5 +2035,75 @@ async function exportToJira() {
 .estimate-item span:last-child {
   font-weight: 600;
   color: #111827;
+}
+
+.buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (min-width: 640px) {
+  .buttons-container {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .buttons-container {
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+}
+
+.buttons-group {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .buttons-group {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+  }
+}
+
+@media (max-width: 639px) {
+  .btn {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.8125rem;
+    padding: 0.625rem 0.75rem;
+    text-align: center;
+  }
+  
+  .buttons-group {
+    width: 100%;
+  }
+  
+  /* На мобильных первые две группы показываем по 2 кнопки в ряд */
+  .buttons-group:nth-child(1),
+  .buttons-group:nth-child(2) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  
+  /* Кнопка сброса на всю ширину */
+  .buttons-group:nth-child(3) {
+    display: flex;
+    margin-top: 0.5rem;
+  }
+  
+  .buttons-group:nth-child(3) .btn {
+    width: 100%;
+  }
 }
 </style>
