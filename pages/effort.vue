@@ -165,320 +165,31 @@
     </div>
 
     <!-- Модальное окно с деталями расчета -->
-    <div v-if="showCalculationDetails" class="modal-overlay" @click="showCalculationDetails = false">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h2>Детали расчета трудозатрат</h2>
-          <button class="modal-close" @click="showCalculationDetails = false">&times;</button>
-        </div>
-        
-        <div class="modal-body">
-          <!-- Общая информация -->
-          <div class="detail-section">
-            <h3>Общая информация</h3>
-            <div class="detail-grid">
-              <div class="detail-item">
-                <span class="detail-label">Всего компонентов:</span>
-                <span class="detail-value">{{ calculationDetails.totalComponents }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">С готовой базой:</span>
-                <span class="detail-value">{{ calculationDetails.totalWithBase }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Грейд разработчика:</span>
-                <span class="detail-value">{{ 
-                  state.devLevel === 'junior' ? 'Junior' : 
-                  state.devLevel === 'middle' ? 'Middle' : 'Senior' 
-                }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Множитель грейда:</span>
-                <span class="detail-value">{{ LEVEL_FACTOR[state.devLevel] }}x</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Базовые коэффициенты -->
-          <div class="detail-section">
-            <h3>Базовые коэффициенты (часы на компонент)</h3>
-            <div class="detail-grid">
-              <div class="detail-item">
-                <span class="detail-label">Сложность UI:</span>
-                <span class="detail-value">{{ BASE_COEFFS.uiComplex[state.uiComplex] }}ч</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Управление состоянием:</span>
-                <span class="detail-value">{{ BASE_COEFFS.stateLayer[state.stateLayer] }}ч</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">API интеграция:</span>
-                <span class="detail-value">{{ BASE_COEFFS.apiType[state.apiType] }}ч</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Интернационализация:</span>
-                <span class="detail-value">{{ BASE_COEFFS.i18n[state.i18n] }}ч</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Дополнительные факторы -->
-          <div class="detail-section">
-            <h3>Дополнительные факторы</h3>
-            <div class="detail-grid">
-              <div v-if="state.ssr" class="detail-item">
-                <span class="detail-label">SSR:</span>
-                <span class="detail-value">+{{ BASE_COEFFS.ssr }}ч</span>
-              </div>
-              <div v-if="state.seoAdvanced" class="detail-item">
-                <span class="detail-label">Расширенный SEO:</span>
-                <span class="detail-value">+{{ BASE_COEFFS.seoAdvanced }}ч</span>
-              </div>
-              <div v-if="state.testsUnit" class="detail-item">
-                <span class="detail-label">Unit-тесты:</span>
-                <span class="detail-value">+{{ BASE_COEFFS.tests.unit }}ч</span>
-              </div>
-              <div v-if="state.testsE2E" class="detail-item">
-                <span class="detail-label">E2E-тесты:</span>
-                <span class="detail-value">+{{ BASE_COEFFS.tests.e2e }}ч</span>
-              </div>
-              <div v-if="state.responsive" class="detail-item">
-                <span class="detail-label">Адаптивный дизайн:</span>
-                <span class="detail-value">+{{ BASE_COEFFS.responsive }}ч</span>
-              </div>
-              <div v-if="state.accessibility" class="detail-item">
-                <span class="detail-label">Доступность (a11y):</span>
-                <span class="detail-value">+{{ BASE_COEFFS.accessibility }}ч</span>
-              </div>
-              <div v-if="state.codeReview" class="detail-item">
-                <span class="detail-label">Код-ревью:</span>
-                <span class="detail-value">+{{ BASE_COEFFS.codeReview }}ч</span>
-              </div>
-              <div v-if="state.documentation" class="detail-item">
-                <span class="detail-label">Документация:</span>
-                <span class="detail-value">+{{ BASE_COEFFS.documentation }}ч</span>
-              </div>
-              <div v-if="state.deployment" class="detail-item">
-                <span class="detail-label">Настройка деплоя:</span>
-                <span class="detail-value">+{{ BASE_COEFFS.deployment }}ч</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Разбивка по типам компонентов -->
-          <div v-if="calculationDetails.componentBreakdown.length > 0" class="detail-section">
-            <h3>Разбивка по типам компонентов</h3>
-            <div class="component-breakdown">
-              <div v-for="item in calculationDetails.componentBreakdown" :key="item.type" class="breakdown-item">
-                <div class="breakdown-header">
-                  <span class="breakdown-type">{{ item.label }}</span>
-                  <span class="breakdown-count">{{ item.count }} шт.</span>
-                </div>
-                <div class="breakdown-details">
-                  <div class="breakdown-line">
-                    <span>Базовое время на компонент:</span>
-                    <span>{{ item.baseTimePerComponent.toFixed(2) }}ч</span>
-                  </div>
-                  <div class="breakdown-line">
-                    <span>Коэффициент типа:</span>
-                    <span>{{ item.typeCoeff }}x</span>
-                  </div>
-                  <div class="breakdown-line">
-                    <span>Время на тип компонента:</span>
-                    <span>{{ item.typeTime.toFixed(2) }}ч</span>
-                  </div>
-                  <div v-if="item.withBase > 0" class="breakdown-line">
-                    <span>С готовой базой ({{ item.withBase }} шт.):</span>
-                    <span>-{{ item.baseSavings.toFixed(2) }}ч</span>
-                  </div>
-                  <div v-if="item.propsTime > 0" class="breakdown-line">
-                    <span>Новые props ({{ item.newProps }} на компонент):</span>
-                    <span>+{{ item.propsTime.toFixed(2) }}ч</span>
-                  </div>
-                  <div class="breakdown-line total">
-                    <span>Итого для этого типа:</span>
-                    <span>{{ item.totalTime.toFixed(2) }}ч</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Итоговые расчеты -->
-          <div class="detail-section">
-            <h3>Итоговые расчеты</h3>
-            <div class="calculation-summary">
-              <div class="calc-line">
-                <span>Базовое время:</span>
-                <span>{{ calculationDetails.baseTime.toFixed(2) }}ч</span>
-              </div>
-              <div class="calc-line">
-                <span>С учетом грейда ({{ LEVEL_FACTOR[state.devLevel] }}x):</span>
-                <span>{{ calculationDetails.withLevelFactor.toFixed(2) }}ч</span>
-              </div>
-              <div class="calc-line separator">
-                <span>Оптимистичная (-20%):</span>
-                <span>{{ hours.optimistic }}ч</span>
-              </div>
-              <div class="calc-line">
-                <span>Реалистичная (базовая):</span>
-                <span>{{ hours.realistic }}ч</span>
-              </div>
-              <div class="calc-line">
-                <span>Пессимистичная (+30%):</span>
-                <span>{{ hours.pessimistic }}ч</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button class="btn btn-secondary" @click="showCalculationDetails = false">Закрыть</button>
-        </div>
-      </div>
-    </div>
+    <CalculationDetailsModal
+      :is-visible="showCalculationDetails"
+      :calculation-details="calculationDetails"
+      :hours="hours"
+      :form-state="state"
+      :base-coeffs="BASE_COEFFS"
+      :level-factor="LEVEL_FACTOR"
+      @close="showCalculationDetails = false"
+    />
 
     <!-- Модальное окно интеграции с Jira -->
-    <div v-if="showJiraIntegration" class="modal-overlay" @click="showJiraIntegration = false">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h2>Интеграция с Jira</h2>
-          <button class="modal-close" @click="showJiraIntegration = false">&times;</button>
-        </div>
-        
-        <div class="modal-body">
-          <form class="jira-form" @submit.prevent="exportToJira">
-            <!-- Настройки подключения -->
-            <div class="detail-section">
-              <h3>Настройки подключения</h3>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label class="label">URL Jira (например: https://company.atlassian.net)</label>
-                  <input
-                    v-model="jiraSettings.url"
-                    class="input"
-                    placeholder="https://company.atlassian.net"
-                    required
-                  >
-                </div>
-                <div class="form-group">
-                  <label class="label">Email пользователя</label>
-                  <input
-                    v-model="jiraSettings.email"
-                    class="input"
-                    type="email"
-                    placeholder="user@company.com"
-                    required
-                  >
-                </div>
-                <div class="form-group">
-                  <label class="label">API Token</label>
-                  <input
-                    v-model="jiraSettings.apiToken"
-                    class="input"
-                    type="password"
-                    placeholder="Ваш API токен из Jira"
-                    required
-                  >
-                </div>
-                <div class="form-group">
-                  <label class="label">Ключ проекта</label>
-                  <input
-                    v-model="jiraSettings.projectKey"
-                    class="input"
-                    placeholder="PROJ"
-                    required
-                  >
-                </div>
-              </div>
-            </div>
-
-            <!-- Настройки задачи -->
-            <div class="detail-section">
-              <h3>Настройки задачи</h3>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label class="label">Название задачи</label>
-                  <input
-                    v-model="jiraTask.summary"
-                    class="input"
-                    placeholder="Разработка компонентов"
-                    required
-                  >
-                </div>
-                <div class="form-group">
-                  <label class="label">Тип задачи</label>
-                  <select v-model="jiraTask.issueType" class="select">
-                    <option value="Task">Task</option>
-                    <option value="Story">Story</option>
-                    <option value="Epic">Epic</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="label">Исполнитель (email)</label>
-                  <input
-                    v-model="jiraTask.assignee"
-                    class="input"
-                    type="email"
-                    placeholder="developer@company.com"
-                  >
-                </div>
-              </div>
-              
-              <div class="form-group full-width">
-                <label class="label">Описание задачи</label>
-                <textarea 
-                  v-model="jiraTask.description"
-                  class="textarea"
-                  rows="4"
-                  placeholder="Описание задачи с деталями расчета"
-                />
-              </div>
-            </div>
-
-            <!-- Предпросмотр -->
-            <div class="detail-section">
-              <h3>Предпросмотр оценок</h3>
-              <div class="jira-preview">
-                <div class="estimate-item">
-                  <span>Оптимистичная оценка:</span>
-                  <span>{{ hours.optimistic }}ч ({{ Math.round(hours.optimistic / 8 * 10) / 10 }} дней)</span>
-                </div>
-                <div class="estimate-item">
-                  <span>Реалистичная оценка:</span>
-                  <span>{{ hours.realistic }}ч ({{ Math.round(hours.realistic / 8 * 10) / 10 }} дней)</span>
-                </div>
-                <div class="estimate-item">
-                  <span>Пессимистичная оценка:</span>
-                  <span>{{ hours.pessimistic }}ч ({{ Math.round(hours.pessimistic / 8 * 10) / 10 }} дней)</span>
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <div class="modal-footer">
-          <div class="flex gap-3">
-            <button type="button" class="btn btn-secondary" @click="showJiraIntegration = false">
-              Отмена
-            </button>
-            <button 
-              type="button" 
-              class="btn btn-success" 
-              :disabled="!canExportToJira"
-              @click="exportToJira"
-            >
-              {{ jiraExporting ? 'Создаем задачу...' : 'Создать задачу' }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <JiraIntegrationModal
+      :is-visible="showJiraIntegration"
+      :hours="hours"
+      :form-state="state"
+      :component-types="componentTypes"
+      :labels="labels"
+      @close="showJiraIntegration = false"
+      @success="handleJiraSuccess"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, computed, onMounted, ref } from 'vue'
+import { reactive, computed, ref } from 'vue'
 
 /**
  * БАЗОВЫЕ КОЭФФИЦИЕНТЫ для расчета трудозатрат
@@ -630,42 +341,6 @@ const state = reactive<FormState>({ ...initial })
 // Состояние модального окна
 const showCalculationDetails = ref(false)
 const showJiraIntegration = ref(false)
-const jiraExporting = ref(false)
-
-// Настройки Jira
-const jiraSettings = reactive({
-  url: '',
-  email: '',
-  apiToken: '',
-  projectKey: ''
-})
-
-// Данные задачи Jira
-const jiraTask = reactive({
-  summary: 'Разработка компонентов',
-  description: '',
-  issueType: 'Task',
-  assignee: ''
-})
-
-// Принудительно устанавливаем дефолтные значения при монтировании
-onMounted(() => {
-  // Убеждаемся что devLevel установлен правильно
-  if (!state.devLevel || !['junior', 'middle', 'senior'].includes(state.devLevel)) {
-    state.devLevel = 'middle'
-  }
-  
-  // Загружаем сохраненные настройки Jira из localStorage
-  const savedJiraSettings = localStorage.getItem('jiraSettings')
-  if (savedJiraSettings) {
-    try {
-      const parsed = JSON.parse(savedJiraSettings)
-      Object.assign(jiraSettings, parsed)
-    } catch (e) {
-      console.warn('Не удалось загрузить настройки Jira:', e)
-    }
-  }
-})
 
 /**
  * РАСЧЕТ БАЗОВОГО ВРЕМЕНИ НА ОДИН КОМПОНЕНТ
@@ -1171,144 +846,17 @@ const hasComponents = computed(() => {
   return Object.values(state.counts).some(count => count > 0)
 })
 
-// Проверка возможности экспорта в Jira
-const canExportToJira = computed(() => {
-  return jiraSettings.url && 
-         jiraSettings.email && 
-         jiraSettings.apiToken && 
-         jiraSettings.projectKey && 
-         jiraTask.summary && 
-         !jiraExporting.value
-})
-
-// Функция создания описания задачи
-function generateJiraDescription() {
-  const components = componentTypes
-    .filter(type => (state.counts[type] || 0) > 0)
-    .map(type => `• ${labels[type]}: ${state.counts[type]} шт.`)
-    .join('\n')
+// Добавляем функцию обработки успешного экспорта в Jira
+function handleJiraSuccess(result: { key: string; url: string }) {
+  // Закрываем модальное окно интеграции с Jira
+  showJiraIntegration.value = false
   
-  const settings = []
-  if (state.uiComplex !== 'static') settings.push(`• UI: Интерактивная`)
-  if (state.stateLayer !== 'local') settings.push(`• Состояние: Глобальное`)
-  if (state.apiType !== 'none') settings.push(`• API: ${state.apiType === 'simple' ? 'Простой GET' : 'Полный CRUD'}`)
-  if (state.i18n !== 'none') settings.push(`• i18n: ${state.i18n === 'simple' ? 'Строки' : 'Склонения / RTL'}`)
-  if (state.devLevel !== 'middle') settings.push(`• Грейд: ${state.devLevel === 'junior' ? 'Junior' : 'Senior'}`)
+  // Показываем уведомление об успешном создании задачи
+  alert(`Задача успешно создана в Jira!\nКлюч: ${result.key}\nСсылка: ${result.url}`)
   
-  const features = []
-  if (state.ssr) features.push('• SSR')
-  if (state.seoAdvanced) features.push('• Расширенный SEO')
-  if (state.testsUnit) features.push('• Unit-тесты')
-  if (state.testsE2E) features.push('• E2E-тесты')
-  if (state.responsive) features.push('• Адаптивный дизайн')
-  if (state.accessibility) features.push('• Доступность (a11y)')
-  if (state.codeReview) features.push('• Код-ревью')
-  if (state.documentation) features.push('• Документация')
-  if (state.deployment) features.push('• Настройка деплоя')
-  
-  let description = jiraTask.description || 'Разработка компонентов с расчетом трудозатрат'
-  description += '\n\n*Компоненты:*\n' + components
-  
-  if (settings.length > 0) {
-    description += '\n\n*Настройки проекта:*\n' + settings.join('\n')
-  }
-  
-  if (features.length > 0) {
-    description += '\n\n*Дополнительные требования:*\n' + features.join('\n')
-  }
-  
-  description += `\n\n*Оценки времени:*
-• Оптимистичная: ${hours.value.optimistic}ч (${Math.round(hours.value.optimistic / 8 * 10) / 10} дней)
-• Реалистичная: ${hours.value.realistic}ч (${Math.round(hours.value.realistic / 8 * 10) / 10} дней)
-• Пессимистичная: ${hours.value.pessimistic}ч (${Math.round(hours.value.pessimistic / 8 * 10) / 10} дней)
-
-_Расчет выполнен калькулятором трудозатрат_`
-  
-  return description
-}
-
-// Добавляем функцию экспорта в Jira
-async function exportToJira() {
-  if (!canExportToJira.value) return
-  
-  jiraExporting.value = true
-  
-  try {
-    // Сохраняем настройки в localStorage (без API токена)
-    const settingsToSave = {
-      url: jiraSettings.url,
-      email: jiraSettings.email,
-      projectKey: jiraSettings.projectKey
-    }
-    localStorage.setItem('jiraSettings', JSON.stringify(settingsToSave))
-    
-    // Подготавливаем данные для API
-    const auth = btoa(`${jiraSettings.email}:${jiraSettings.apiToken}`)
-    const apiUrl = `${jiraSettings.url.replace(/\/$/, '')}/rest/api/3/issue`
-    
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const issueData: any = {
-      fields: {
-        project: { key: jiraSettings.projectKey },
-        summary: jiraTask.summary,
-        description: {
-          type: 'doc',
-          version: 1,
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: generateJiraDescription()
-                }
-              ]
-            }
-          ]
-        },
-        issuetype: { name: jiraTask.issueType },
-        // Добавляем оценку времени (в секундах)
-        timetracking: {
-          originalEstimate: `${hours.value.realistic}h`
-        }
-      }
-    }
-    
-    // Добавляем исполнителя если указан
-    if (jiraTask.assignee) {
-      issueData.fields.assignee = { emailAddress: jiraTask.assignee }
-    }
-    
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${auth}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(issueData)
-    })
-    
-    if (!response.ok) {
-      const errorData = await response.text()
-      throw new Error(`Ошибка создания задачи: ${response.status} ${response.statusText}\n${errorData}`)
-    }
-    
-    const result = await response.json()
-    const issueUrl = `${jiraSettings.url}/browse/${result.key}`
-    
-    // Показываем успешное сообщение
-    alert(`Задача успешно создана!\nКлюч: ${result.key}\nURL: ${issueUrl}`)
-    
-    // Закрываем модальное окно
-    showJiraIntegration.value = false
-    
-  } catch (error) {
-    console.error('Ошибка при создании задачи в Jira:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
-    alert(`Ошибка при создании задачи в Jira:\n${errorMessage}`)
-  } finally {
-    jiraExporting.value = false
+  // Опционально: открываем задачу в новой вкладке
+  if (confirm('Открыть созданную задачу в Jira?')) {
+    window.open(result.url, '_blank')
   }
 }
 </script>
