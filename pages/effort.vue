@@ -125,9 +125,202 @@
 
         <!-- Сброс -->
         <div class="flex justify-end gap-3">
-          <button class="btn btn-primary" @click="exportToCsv">Экспорт в CSV</button>
-          <button class="btn btn-accent" @click="exportToJson">Экспорт в JSON</button>
+          <button 
+            class="btn btn-info" 
+            :disabled="!hasComponents"
+            @click="showCalculationDetails = true"
+          >
+            Детали расчета
+          </button>
+          <button 
+            class="btn btn-primary" 
+            :disabled="!hasComponents"
+            @click="exportToCsv"
+          >
+            Экспорт в CSV
+          </button>
+          <button 
+            class="btn btn-accent" 
+            :disabled="!hasComponents"
+            @click="exportToJson"
+          >
+            Экспорт в JSON
+          </button>
           <button class="btn btn-secondary" @click="reset">Сбросить</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно с деталями расчета -->
+    <div v-if="showCalculationDetails" class="modal-overlay" @click="showCalculationDetails = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h2>Детали расчета трудозатрат</h2>
+          <button class="modal-close" @click="showCalculationDetails = false">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <!-- Общая информация -->
+          <div class="detail-section">
+            <h3>Общая информация</h3>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span class="detail-label">Всего компонентов:</span>
+                <span class="detail-value">{{ calculationDetails.totalComponents }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">С готовой базой:</span>
+                <span class="detail-value">{{ calculationDetails.totalWithBase }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Грейд разработчика:</span>
+                <span class="detail-value">{{ 
+                  state.devLevel === 'junior' ? 'Junior' : 
+                  state.devLevel === 'middle' ? 'Middle' : 'Senior' 
+                }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Множитель грейда:</span>
+                <span class="detail-value">{{ LEVEL_FACTOR[state.devLevel] }}x</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Базовые коэффициенты -->
+          <div class="detail-section">
+            <h3>Базовые коэффициенты (часы на компонент)</h3>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span class="detail-label">Сложность UI:</span>
+                <span class="detail-value">{{ BASE_COEFFS.uiComplex[state.uiComplex] }}ч</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Управление состоянием:</span>
+                <span class="detail-value">{{ BASE_COEFFS.stateLayer[state.stateLayer] }}ч</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">API интеграция:</span>
+                <span class="detail-value">{{ BASE_COEFFS.apiType[state.apiType] }}ч</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Интернационализация:</span>
+                <span class="detail-value">{{ BASE_COEFFS.i18n[state.i18n] }}ч</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Дополнительные факторы -->
+          <div class="detail-section">
+            <h3>Дополнительные факторы</h3>
+            <div class="detail-grid">
+              <div v-if="state.ssr" class="detail-item">
+                <span class="detail-label">SSR:</span>
+                <span class="detail-value">+{{ BASE_COEFFS.ssr }}ч</span>
+              </div>
+              <div v-if="state.seoAdvanced" class="detail-item">
+                <span class="detail-label">Расширенный SEO:</span>
+                <span class="detail-value">+{{ BASE_COEFFS.seoAdvanced }}ч</span>
+              </div>
+              <div v-if="state.testsUnit" class="detail-item">
+                <span class="detail-label">Unit-тесты:</span>
+                <span class="detail-value">+{{ BASE_COEFFS.tests.unit }}ч</span>
+              </div>
+              <div v-if="state.testsE2E" class="detail-item">
+                <span class="detail-label">E2E-тесты:</span>
+                <span class="detail-value">+{{ BASE_COEFFS.tests.e2e }}ч</span>
+              </div>
+              <div v-if="state.responsive" class="detail-item">
+                <span class="detail-label">Адаптивный дизайн:</span>
+                <span class="detail-value">+{{ BASE_COEFFS.responsive }}ч</span>
+              </div>
+              <div v-if="state.accessibility" class="detail-item">
+                <span class="detail-label">Доступность (a11y):</span>
+                <span class="detail-value">+{{ BASE_COEFFS.accessibility }}ч</span>
+              </div>
+              <div v-if="state.codeReview" class="detail-item">
+                <span class="detail-label">Код-ревью:</span>
+                <span class="detail-value">+{{ BASE_COEFFS.codeReview }}ч</span>
+              </div>
+              <div v-if="state.documentation" class="detail-item">
+                <span class="detail-label">Документация:</span>
+                <span class="detail-value">+{{ BASE_COEFFS.documentation }}ч</span>
+              </div>
+              <div v-if="state.deployment" class="detail-item">
+                <span class="detail-label">Настройка деплоя:</span>
+                <span class="detail-value">+{{ BASE_COEFFS.deployment }}ч</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Разбивка по типам компонентов -->
+          <div v-if="calculationDetails.componentBreakdown.length > 0" class="detail-section">
+            <h3>Разбивка по типам компонентов</h3>
+            <div class="component-breakdown">
+              <div v-for="item in calculationDetails.componentBreakdown" :key="item.type" class="breakdown-item">
+                <div class="breakdown-header">
+                  <span class="breakdown-type">{{ item.label }}</span>
+                  <span class="breakdown-count">{{ item.count }} шт.</span>
+                </div>
+                <div class="breakdown-details">
+                  <div class="breakdown-line">
+                    <span>Базовое время на компонент:</span>
+                    <span>{{ item.baseTimePerComponent.toFixed(2) }}ч</span>
+                  </div>
+                  <div class="breakdown-line">
+                    <span>Коэффициент типа:</span>
+                    <span>{{ item.typeCoeff }}x</span>
+                  </div>
+                  <div class="breakdown-line">
+                    <span>Время на тип компонента:</span>
+                    <span>{{ item.typeTime.toFixed(2) }}ч</span>
+                  </div>
+                  <div v-if="item.withBase > 0" class="breakdown-line">
+                    <span>С готовой базой ({{ item.withBase }} шт.):</span>
+                    <span>-{{ item.baseSavings.toFixed(2) }}ч</span>
+                  </div>
+                  <div v-if="item.propsTime > 0" class="breakdown-line">
+                    <span>Новые props ({{ item.newProps }} на компонент):</span>
+                    <span>+{{ item.propsTime.toFixed(2) }}ч</span>
+                  </div>
+                  <div class="breakdown-line total">
+                    <span>Итого для этого типа:</span>
+                    <span>{{ item.totalTime.toFixed(2) }}ч</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Итоговые расчеты -->
+          <div class="detail-section">
+            <h3>Итоговые расчеты</h3>
+            <div class="calculation-summary">
+              <div class="calc-line">
+                <span>Базовое время:</span>
+                <span>{{ calculationDetails.baseTime.toFixed(2) }}ч</span>
+              </div>
+              <div class="calc-line">
+                <span>С учетом грейда ({{ LEVEL_FACTOR[state.devLevel] }}x):</span>
+                <span>{{ calculationDetails.withLevelFactor.toFixed(2) }}ч</span>
+              </div>
+              <div class="calc-line separator">
+                <span>Оптимистичная (-20%):</span>
+                <span>{{ hours.optimistic }}ч</span>
+              </div>
+              <div class="calc-line">
+                <span>Реалистичная (базовая):</span>
+                <span>{{ hours.realistic }}ч</span>
+              </div>
+              <div class="calc-line">
+                <span>Пессимистичная (+30%):</span>
+                <span>{{ hours.pessimistic }}ч</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="showCalculationDetails = false">Закрыть</button>
         </div>
       </div>
     </div>
@@ -135,7 +328,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, computed, onMounted } from 'vue'
+import { reactive, computed, onMounted, ref } from 'vue'
 
 /**
  * БАЗОВЫЕ КОЭФФИЦИЕНТЫ для расчета трудозатрат
@@ -284,6 +477,9 @@ const initial: FormState = {
  */
 const state = reactive<FormState>({ ...initial })
 
+// Состояние модального окна
+const showCalculationDetails = ref(false)
+
 // Принудительно устанавливаем дефолтные значения при монтировании
 onMounted(() => {
   // Убеждаемся что devLevel установлен правильно
@@ -322,6 +518,110 @@ function baselinePerComponent(s: FormState): number {
 
   return h
 }
+
+/**
+ * ДЕТАЛИЗАЦИЯ РАСЧЕТОВ
+ * Computed свойство для отображения подробной информации о расчетах
+ */
+const calculationDetails = computed(() => {
+  const per = baselinePerComponent(state)
+  
+  // Общее количество компонентов всех типов
+  const total = componentTypes.reduce((sum, t) => sum + (state.counts[t] || 0), 0)
+  const totalWithBase = componentTypes.reduce((sum, t) => sum + (state.countsWithBase[t] || 0), 0)
+  
+  // Разбивка по типам компонентов
+  const componentBreakdown = componentTypes
+    .filter(type => (state.counts[type] || 0) > 0)
+    .map(type => {
+      const count = state.counts[type] || 0
+      const withBase = Math.min(state.countsWithBase[type] || 0, count)
+      const newProps = state.countsNewProps[type] || 0
+      
+      // Базовое время на компонент
+      const baseTimePerComponent = per
+      
+      // Время с учетом типа компонента
+      const typeCoeff = COMPONENT_TYPE_COEFFS[type]
+      const typeTime = count * typeCoeff
+      
+      // Экономия от базовых компонентов
+      const withoutBase = count - withBase
+      const baseSavings = withBase * (BASE_COEFFS.baseExists.false - BASE_COEFFS.baseExists.true)
+      
+      // Время на новые props
+      let propsTime = 0
+      if (newProps > 0) {
+        const simpleProps = Math.min(newProps, 2)
+        const complexProps = Math.max(newProps - 2, 0)
+        const timePerComponent = simpleProps * 0.1 + complexProps * 0.05
+        propsTime = count * timePerComponent
+      }
+      
+      // Общее время с учетом базы и props
+      const baseTime = withBase * BASE_COEFFS.baseExists.true + withoutBase * BASE_COEFFS.baseExists.false
+      const totalTime = baseTimePerComponent * baseTime + typeTime + propsTime
+      
+      return {
+        type,
+        label: labels[type],
+        count,
+        withBase,
+        newProps,
+        baseTimePerComponent,
+        typeCoeff,
+        typeTime,
+        baseSavings,
+        propsTime,
+        totalTime
+      }
+    })
+  
+  // Дополнительное время в зависимости от типов компонентов
+  const additive = componentTypes.reduce(
+    (sum, t) => sum + (state.counts[t] || 0) * COMPONENT_TYPE_COEFFS[t],
+    0
+  )
+  
+  // Расчет экономии времени от базовых компонентов
+  const baseEconomy = componentTypes.reduce((sum, t) => {
+    const totalCount = state.counts[t] || 0
+    const withBaseCount = Math.min(state.countsWithBase[t] || 0, totalCount)
+    const withoutBaseCount = totalCount - withBaseCount
+    
+    const baseTimeImpact = withBaseCount * BASE_COEFFS.baseExists.true + withoutBaseCount * BASE_COEFFS.baseExists.false
+    return sum + baseTimeImpact
+  }, 0)
+  
+  // Расчет времени на новые props
+  const propsTime = componentTypes.reduce((sum, t) => {
+    const totalCount = state.counts[t] || 0
+    const propsPerComponent = state.countsNewProps[t] || 0
+    
+    if (totalCount > 0 && propsPerComponent > 0) {
+      const simpleProps = Math.min(propsPerComponent, 2)
+      const complexProps = Math.max(propsPerComponent - 2, 0)
+      const timePerComponent = simpleProps * 0.1 + complexProps * 0.05
+      
+      return sum + totalCount * timePerComponent
+    }
+    return sum
+  }, 0)
+  
+  // Базовое время без учета грейда
+  const baseTime = per * total + additive + baseEconomy + propsTime
+  
+  // С учетом грейда разработчика
+  const withLevelFactor = baseTime * LEVEL_FACTOR[state.devLevel]
+  
+  return {
+    totalComponents: total,
+    totalWithBase,
+    componentBreakdown,
+    baseTime,
+    withLevelFactor
+  }
+})
 
 /**
  * ОСНОВНОЙ РАСЧЕТ ТРУДОЗАТРАТ
@@ -686,6 +986,11 @@ function exportToJson() {
   document.body.removeChild(link)
   window.URL.revokeObjectURL(url)
 }
+
+// Добавляем вычисляемое свойство для проверки наличия компонентов
+const hasComponents = computed(() => {
+  return Object.values(state.counts).some(count => count > 0)
+})
 </script>
 
 <style scoped>
@@ -830,13 +1135,28 @@ function exportToJson() {
   transition: all 0.2s;
 }
 
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .btn-primary {
   background-color: #3b82f6;
   color: white;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background-color: #2563eb;
+}
+
+.btn-info {
+  background-color: #06b6d4;
+  color: white;
+}
+
+.btn-info:hover:not(:disabled) {
+  background-color: #0891b2;
 }
 
 .btn-accent {
@@ -844,7 +1164,7 @@ function exportToJson() {
   color: white;
 }
 
-.btn-accent:hover {
+.btn-accent:hover:not(:disabled) {
   background-color: #7c3aed;
 }
 
@@ -1081,6 +1401,237 @@ function exportToJson() {
 :deep(.result-card .value) {
   font-size: 1.25rem;
   font-weight: 500;
+  color: #111827;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1.5rem 0 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+}
+
+.modal-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+}
+
+.modal-close:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.modal-body {
+  padding: 0 1.5rem;
+}
+
+.modal-footer {
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Detail sections */
+.detail-section {
+  margin-bottom: 2rem;
+}
+
+.detail-section h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 1rem 0;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background-color: #f9fafb;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #374151;
+}
+
+.detail-value {
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Component breakdown */
+.component-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.breakdown-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background-color: #f9fafb;
+}
+
+.breakdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.breakdown-type {
+  font-weight: 600;
+  color: #111827;
+  font-size: 1rem;
+}
+
+.breakdown-count {
+  font-weight: 500;
+  color: #6b7280;
+  background-color: #e5e7eb;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.breakdown-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.breakdown-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.breakdown-line span:first-child {
+  color: #4b5563;
+}
+
+.breakdown-line span:last-child {
+  font-weight: 600;
+  color: #111827;
+}
+
+.breakdown-line.total {
+  border-top: 1px solid #d1d5db;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.breakdown-line.total span:first-child {
+  color: #111827;
+}
+
+/* Calculation summary */
+.calculation-summary {
+  background-color: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.calc-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e0f2fe;
+}
+
+.calc-line:last-child {
+  border-bottom: none;
+}
+
+.calc-line.separator {
+  border-top: 2px solid #0ea5e9;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  font-weight: 600;
+}
+
+.calc-line span:first-child {
+  color: #111827;
+  font-weight: 500;
+}
+
+.calc-line span:last-child {
+  font-weight: 600;
   color: #111827;
 }
 </style>
