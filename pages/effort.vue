@@ -133,6 +133,13 @@
             Детали расчета
           </button>
           <button 
+            class="btn btn-success" 
+            :disabled="!hasComponents"
+            @click="showJiraIntegration = true"
+          >
+            Экспорт в Jira
+          </button>
+          <button 
             class="btn btn-primary" 
             :disabled="!hasComponents"
             @click="exportToCsv"
@@ -324,6 +331,143 @@
         </div>
       </div>
     </div>
+
+    <!-- Модальное окно интеграции с Jira -->
+    <div v-if="showJiraIntegration" class="modal-overlay" @click="showJiraIntegration = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h2>Интеграция с Jira</h2>
+          <button class="modal-close" @click="showJiraIntegration = false">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <form class="jira-form" @submit.prevent="exportToJira">
+            <!-- Настройки подключения -->
+            <div class="detail-section">
+              <h3>Настройки подключения</h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="label">URL Jira (например: https://company.atlassian.net)</label>
+                  <input
+                    v-model="jiraSettings.url"
+                    class="input"
+                    placeholder="https://company.atlassian.net"
+                    required
+                  >
+                </div>
+                <div class="form-group">
+                  <label class="label">Email пользователя</label>
+                  <input
+                    v-model="jiraSettings.email"
+                    class="input"
+                    type="email"
+                    placeholder="user@company.com"
+                    required
+                  >
+                </div>
+                <div class="form-group">
+                  <label class="label">API Token</label>
+                  <input
+                    v-model="jiraSettings.apiToken"
+                    class="input"
+                    type="password"
+                    placeholder="Ваш API токен из Jira"
+                    required
+                  >
+                </div>
+                <div class="form-group">
+                  <label class="label">Ключ проекта</label>
+                  <input
+                    v-model="jiraSettings.projectKey"
+                    class="input"
+                    placeholder="PROJ"
+                    required
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Настройки задачи -->
+            <div class="detail-section">
+              <h3>Настройки задачи</h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="label">Название задачи</label>
+                  <input
+                    v-model="jiraTask.summary"
+                    class="input"
+                    placeholder="Разработка компонентов"
+                    required
+                  >
+                </div>
+                <div class="form-group">
+                  <label class="label">Тип задачи</label>
+                  <select v-model="jiraTask.issueType" class="select">
+                    <option value="Task">Task</option>
+                    <option value="Story">Story</option>
+                    <option value="Epic">Epic</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="label">Исполнитель (email)</label>
+                  <input
+                    v-model="jiraTask.assignee"
+                    class="input"
+                    type="email"
+                    placeholder="developer@company.com"
+                  >
+                </div>
+              </div>
+              
+              <div class="form-group full-width">
+                <label class="label">Описание задачи</label>
+                <textarea 
+                  v-model="jiraTask.description"
+                  class="textarea"
+                  rows="4"
+                  placeholder="Описание задачи с деталями расчета"
+                />
+              </div>
+            </div>
+
+            <!-- Предпросмотр -->
+            <div class="detail-section">
+              <h3>Предпросмотр оценок</h3>
+              <div class="jira-preview">
+                <div class="estimate-item">
+                  <span>Оптимистичная оценка:</span>
+                  <span>{{ hours.optimistic }}ч ({{ Math.round(hours.optimistic / 8 * 10) / 10 }} дней)</span>
+                </div>
+                <div class="estimate-item">
+                  <span>Реалистичная оценка:</span>
+                  <span>{{ hours.realistic }}ч ({{ Math.round(hours.realistic / 8 * 10) / 10 }} дней)</span>
+                </div>
+                <div class="estimate-item">
+                  <span>Пессимистичная оценка:</span>
+                  <span>{{ hours.pessimistic }}ч ({{ Math.round(hours.pessimistic / 8 * 10) / 10 }} дней)</span>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <div class="flex gap-3">
+            <button type="button" class="btn btn-secondary" @click="showJiraIntegration = false">
+              Отмена
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-success" 
+              :disabled="!canExportToJira"
+              @click="exportToJira"
+            >
+              {{ jiraExporting ? 'Создаем задачу...' : 'Создать задачу' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -479,12 +623,41 @@ const state = reactive<FormState>({ ...initial })
 
 // Состояние модального окна
 const showCalculationDetails = ref(false)
+const showJiraIntegration = ref(false)
+const jiraExporting = ref(false)
+
+// Настройки Jira
+const jiraSettings = reactive({
+  url: '',
+  email: '',
+  apiToken: '',
+  projectKey: ''
+})
+
+// Данные задачи Jira
+const jiraTask = reactive({
+  summary: 'Разработка компонентов',
+  description: '',
+  issueType: 'Task',
+  assignee: ''
+})
 
 // Принудительно устанавливаем дефолтные значения при монтировании
 onMounted(() => {
   // Убеждаемся что devLevel установлен правильно
   if (!state.devLevel || !['junior', 'middle', 'senior'].includes(state.devLevel)) {
     state.devLevel = 'middle'
+  }
+  
+  // Загружаем сохраненные настройки Jira из localStorage
+  const savedJiraSettings = localStorage.getItem('jiraSettings')
+  if (savedJiraSettings) {
+    try {
+      const parsed = JSON.parse(savedJiraSettings)
+      Object.assign(jiraSettings, parsed)
+    } catch (e) {
+      console.warn('Не удалось загрузить настройки Jira:', e)
+    }
   }
 })
 
@@ -991,6 +1164,147 @@ function exportToJson() {
 const hasComponents = computed(() => {
   return Object.values(state.counts).some(count => count > 0)
 })
+
+// Проверка возможности экспорта в Jira
+const canExportToJira = computed(() => {
+  return jiraSettings.url && 
+         jiraSettings.email && 
+         jiraSettings.apiToken && 
+         jiraSettings.projectKey && 
+         jiraTask.summary && 
+         !jiraExporting.value
+})
+
+// Функция создания описания задачи
+function generateJiraDescription() {
+  const components = componentTypes
+    .filter(type => (state.counts[type] || 0) > 0)
+    .map(type => `• ${labels[type]}: ${state.counts[type]} шт.`)
+    .join('\n')
+  
+  const settings = []
+  if (state.uiComplex !== 'static') settings.push(`• UI: Интерактивная`)
+  if (state.stateLayer !== 'local') settings.push(`• Состояние: Глобальное`)
+  if (state.apiType !== 'none') settings.push(`• API: ${state.apiType === 'simple' ? 'Простой GET' : 'Полный CRUD'}`)
+  if (state.i18n !== 'none') settings.push(`• i18n: ${state.i18n === 'simple' ? 'Строки' : 'Склонения / RTL'}`)
+  if (state.devLevel !== 'middle') settings.push(`• Грейд: ${state.devLevel === 'junior' ? 'Junior' : 'Senior'}`)
+  
+  const features = []
+  if (state.ssr) features.push('• SSR')
+  if (state.seoAdvanced) features.push('• Расширенный SEO')
+  if (state.testsUnit) features.push('• Unit-тесты')
+  if (state.testsE2E) features.push('• E2E-тесты')
+  if (state.responsive) features.push('• Адаптивный дизайн')
+  if (state.accessibility) features.push('• Доступность (a11y)')
+  if (state.codeReview) features.push('• Код-ревью')
+  if (state.documentation) features.push('• Документация')
+  if (state.deployment) features.push('• Настройка деплоя')
+  
+  let description = jiraTask.description || 'Разработка компонентов с расчетом трудозатрат'
+  description += '\n\n*Компоненты:*\n' + components
+  
+  if (settings.length > 0) {
+    description += '\n\n*Настройки проекта:*\n' + settings.join('\n')
+  }
+  
+  if (features.length > 0) {
+    description += '\n\n*Дополнительные требования:*\n' + features.join('\n')
+  }
+  
+  description += `\n\n*Оценки времени:*
+• Оптимистичная: ${hours.value.optimistic}ч (${Math.round(hours.value.optimistic / 8 * 10) / 10} дней)
+• Реалистичная: ${hours.value.realistic}ч (${Math.round(hours.value.realistic / 8 * 10) / 10} дней)
+• Пессимистичная: ${hours.value.pessimistic}ч (${Math.round(hours.value.pessimistic / 8 * 10) / 10} дней)
+
+_Расчет выполнен калькулятором трудозатрат_`
+  
+  return description
+}
+
+// Добавляем функцию экспорта в Jira
+async function exportToJira() {
+  if (!canExportToJira.value) return
+  
+  jiraExporting.value = true
+  
+  try {
+    // Сохраняем настройки в localStorage (без API токена)
+    const settingsToSave = {
+      url: jiraSettings.url,
+      email: jiraSettings.email,
+      projectKey: jiraSettings.projectKey
+    }
+    localStorage.setItem('jiraSettings', JSON.stringify(settingsToSave))
+    
+    // Подготавливаем данные для API
+    const auth = btoa(`${jiraSettings.email}:${jiraSettings.apiToken}`)
+    const apiUrl = `${jiraSettings.url.replace(/\/$/, '')}/rest/api/3/issue`
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const issueData: any = {
+      fields: {
+        project: { key: jiraSettings.projectKey },
+        summary: jiraTask.summary,
+        description: {
+          type: 'doc',
+          version: 1,
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                {
+                  type: 'text',
+                  text: generateJiraDescription()
+                }
+              ]
+            }
+          ]
+        },
+        issuetype: { name: jiraTask.issueType },
+        // Добавляем оценку времени (в секундах)
+        timetracking: {
+          originalEstimate: `${hours.value.realistic}h`
+        }
+      }
+    }
+    
+    // Добавляем исполнителя если указан
+    if (jiraTask.assignee) {
+      issueData.fields.assignee = { emailAddress: jiraTask.assignee }
+    }
+    
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${auth}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(issueData)
+    })
+    
+    if (!response.ok) {
+      const errorData = await response.text()
+      throw new Error(`Ошибка создания задачи: ${response.status} ${response.statusText}\n${errorData}`)
+    }
+    
+    const result = await response.json()
+    const issueUrl = `${jiraSettings.url}/browse/${result.key}`
+    
+    // Показываем успешное сообщение
+    alert(`Задача успешно создана!\nКлюч: ${result.key}\nURL: ${issueUrl}`)
+    
+    // Закрываем модальное окно
+    showJiraIntegration.value = false
+    
+  } catch (error) {
+    console.error('Ошибка при создании задачи в Jira:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    alert(`Ошибка при создании задачи в Jira:\n${errorMessage}`)
+  } finally {
+    jiraExporting.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -1157,6 +1471,15 @@ const hasComponents = computed(() => {
 
 .btn-info:hover:not(:disabled) {
   background-color: #0891b2;
+}
+
+.btn-success {
+  background-color: #059669;
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: #047857;
 }
 
 .btn-accent {
@@ -1631,6 +1954,79 @@ const hasComponents = computed(() => {
 }
 
 .calc-line span:last-child {
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Jira form styles */
+.jira-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  background: white;
+  color: #111827;
+  transition: border-color 0.2s;
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.jira-preview {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.estimate-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #dcfce7;
+  color: #111827;
+}
+
+.estimate-item:last-child {
+  border-bottom: none;
+}
+
+.estimate-item span:first-child {
+  font-weight: 500;
+  color: #374151;
+}
+
+.estimate-item span:last-child {
   font-weight: 600;
   color: #111827;
 }
