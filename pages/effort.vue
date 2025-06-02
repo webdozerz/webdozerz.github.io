@@ -423,69 +423,92 @@ function exportToCsv() {
   const csvData = [
     ['Параметр', 'Значение'],
     ['Дата расчета', `${dateStr} ${timeStr}`],
-    [''],
-    
-    // Количество компонентов
-    ['=== КОЛИЧЕСТВО КОМПОНЕНТОВ ===', ''],
-    ...componentTypes.map(type => [
-      `${labels[type]}`, 
-      state.counts[type] || 0
-    ]),
-    [''],
-    
-    // Компоненты с готовой базой
-    ['=== КОМПОНЕНТЫ С ГОТОВОЙ БАЗОЙ ===', ''],
-    ...componentTypes.map(type => [
-      `${labels[type]} с базой`, 
-      state.countsWithBase[type] || 0
-    ]),
-    [''],
-    
-    // Новые props на компонент
-    ['=== НОВЫЕ PROPS НА КОМПОНЕНТ ===', ''],
-    ...componentTypes.map(type => [
-      `${labels[type]} - новые props`, 
-      state.countsNewProps[type] || 0
-    ]),
-    [''],
-    
-    // Основные параметры
-    ['=== ОСНОВНЫЕ ПАРАМЕТРЫ ===', ''],
-    ['Сложность UI', state.uiComplex === 'static' ? 'Статическая' : 'Интерактивная'],
-    ['Слой состояния', state.stateLayer === 'local' ? 'Локальный' : 'Глобальный'],
-    ['Тип API', 
-      state.apiType === 'none' ? 'Нет' : 
-      state.apiType === 'simple' ? 'Простой GET' : 'Полный CRUD'
-    ],
-    ['Интернационализация', 
-      state.i18n === 'none' ? 'Нет' : 
-      state.i18n === 'simple' ? 'Строки' : 'Склонения / RTL'
-    ],
-    ['Грейд разработчика', 
-      state.devLevel === 'junior' ? 'Junior' : 
-      state.devLevel === 'middle' ? 'Middle' : 'Senior'
-    ],
-    [''],
-    
-    // Дополнительные опции
-    ['=== ДОПОЛНИТЕЛЬНЫЕ ОПЦИИ ===', ''],
-    ['SSR (Async Data, Изоморфный код)', state.ssr ? 'Да' : 'Нет'],
-    ['Расширенный SEO', state.seoAdvanced ? 'Да' : 'Нет'],
-    ['Unit-тесты', state.testsUnit ? 'Да' : 'Нет'],
-    ['E2E-тесты', state.testsE2E ? 'Да' : 'Нет'],
-    ['Адаптивный дизайн', state.responsive ? 'Да' : 'Нет'],
-    ['Доступность (a11y)', state.accessibility ? 'Да' : 'Нет'],
-    ['Код-ревью и рефакторинг', state.codeReview ? 'Да' : 'Нет'],
-    ['Документация', state.documentation ? 'Да' : 'Нет'],
-    ['Настройка деплоя и CI/CD', state.deployment ? 'Да' : 'Нет'],
-    [''],
-    
-    // Результаты
-    ['=== РЕЗУЛЬТАТЫ (ЧАСЫ) ===', ''],
-    ['Оптимистичная оценка', hours.value.optimistic],
-    ['Реалистичная оценка', hours.value.realistic],
-    ['Пессимистичная оценка', hours.value.pessimistic],
   ]
+  
+  // Количество компонентов (только с ненулевыми значениями)
+  const nonZeroCounts = componentTypes.filter(type => (state.counts[type] || 0) > 0)
+  if (nonZeroCounts.length > 0) {
+    csvData.push([''])
+    csvData.push(['=== КОЛИЧЕСТВО КОМПОНЕНТОВ ===', ''])
+    nonZeroCounts.forEach(type => {
+      csvData.push([`${labels[type]}`, String(state.counts[type] || 0)])
+    })
+  }
+  
+  // Компоненты с готовой базой (только с ненулевыми значениями)
+  const componentsWithBase = componentTypes.filter(type => (state.countsWithBase[type] || 0) > 0)
+  if (componentsWithBase.length > 0) {
+    csvData.push([''])
+    csvData.push(['=== КОМПОНЕНТЫ С ГОТОВОЙ БАЗОЙ ===', ''])
+    componentsWithBase.forEach(type => {
+      csvData.push([`${labels[type]} с базой`, String(state.countsWithBase[type] || 0)])
+    })
+  }
+  
+  // Новые props на компонент (только с ненулевыми значениями)
+  const componentsWithProps = componentTypes.filter(type => (state.countsNewProps[type] || 0) > 0)
+  if (componentsWithProps.length > 0) {
+    csvData.push([''])
+    csvData.push(['=== НОВЫЕ PROPS НА КОМПОНЕНТ ===', ''])
+    componentsWithProps.forEach(type => {
+      csvData.push([`${labels[type]} - новые props`, String(state.countsNewProps[type] || 0)])
+    })
+  }
+  
+  // Основные параметры (только если отличаются от дефолтных значений)
+  const mainParams = []
+  if (state.uiComplex !== 'static') {
+    mainParams.push(['Сложность UI', 'Интерактивная'])
+  }
+  if (state.stateLayer !== 'local') {
+    mainParams.push(['Слой состояния', 'Глобальный'])
+  }
+  if (state.apiType !== 'none') {
+    mainParams.push(['Тип API', 
+      state.apiType === 'simple' ? 'Простой GET' : 'Полный CRUD'
+    ])
+  }
+  if (state.i18n !== 'none') {
+    mainParams.push(['Интернационализация', 
+      state.i18n === 'simple' ? 'Строки' : 'Склонения / RTL'
+    ])
+  }
+  if (state.devLevel !== 'middle') {
+    mainParams.push(['Грейд разработчика', 
+      state.devLevel === 'junior' ? 'Junior' : 'Senior'
+    ])
+  }
+  
+  if (mainParams.length > 0) {
+    csvData.push([''])
+    csvData.push(['=== ОСНОВНЫЕ ПАРАМЕТРЫ ===', ''])
+    csvData.push(...mainParams)
+  }
+  
+  // Дополнительные опции (только включенные)
+  const enabledOptions = []
+  if (state.ssr) enabledOptions.push(['SSR (Async Data, Изоморфный код)', 'Да'])
+  if (state.seoAdvanced) enabledOptions.push(['Расширенный SEO', 'Да'])
+  if (state.testsUnit) enabledOptions.push(['Unit-тесты', 'Да'])
+  if (state.testsE2E) enabledOptions.push(['E2E-тесты', 'Да'])
+  if (state.responsive) enabledOptions.push(['Адаптивный дизайн', 'Да'])
+  if (state.accessibility) enabledOptions.push(['Доступность (a11y)', 'Да'])
+  if (state.codeReview) enabledOptions.push(['Код-ревью и рефакторинг', 'Да'])
+  if (state.documentation) enabledOptions.push(['Документация', 'Да'])
+  if (state.deployment) enabledOptions.push(['Настройка деплоя и CI/CD', 'Да'])
+  
+  if (enabledOptions.length > 0) {
+    csvData.push([''])
+    csvData.push(['=== ДОПОЛНИТЕЛЬНЫЕ ОПЦИИ ===', ''])
+    csvData.push(...enabledOptions)
+  }
+  
+  // Результаты (всегда показываем)
+  csvData.push([''])
+  csvData.push(['=== РЕЗУЛЬТАТЫ (ЧАСЫ) ===', ''])
+  csvData.push(['Оптимистичная оценка', String(hours.value.optimistic)])
+  csvData.push(['Реалистичная оценка', String(hours.value.realistic)])
+  csvData.push(['Пессимистичная оценка', String(hours.value.pessimistic)])
   
   // Преобразуем в CSV формат
   const csvContent = csvData
@@ -523,7 +546,8 @@ function exportToJson() {
   }).replace(':', '-')
   
   // Формируем структурированные данные для экспорта
-  const jsonData = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const jsonData: any = {
     meta: {
       exportDate: now.toISOString(),
       exportDateFormatted: `${dateStr} ${timeStr}`,
@@ -531,7 +555,7 @@ function exportToJson() {
       description: 'Экспорт данных калькулятора трудозатрат'
     },
     
-    // Исходные данные формы (для возможного импорта)
+    // Исходные данные формы (для возможного импорта - сохраняем все)
     rawData: {
       counts: { ...state.counts },
       countsWithBase: { ...state.countsWithBase },
@@ -552,66 +576,94 @@ function exportToJson() {
       devLevel: state.devLevel
     },
     
-    // Человекочитаемые данные
-    formattedData: {
-      components: {
-        counts: componentTypes.reduce((acc, type) => {
-          acc[labels[type]] = state.counts[type] || 0
-          return acc
-        }, {} as Record<string, number>),
-        
-        withBase: componentTypes.reduce((acc, type) => {
-          acc[labels[type]] = state.countsWithBase[type] || 0
-          return acc
-        }, {} as Record<string, number>),
-        
-        newProps: componentTypes.reduce((acc, type) => {
-          acc[labels[type]] = state.countsNewProps[type] || 0
-          return acc
-        }, {} as Record<string, number>)
-      },
-      
-      settings: {
-        uiComplexity: state.uiComplex === 'static' ? 'Статическая' : 'Интерактивная',
-        stateManagement: state.stateLayer === 'local' ? 'Локальный' : 'Глобальный',
-        apiIntegration: state.apiType === 'none' ? 'Нет' : 
-                       state.apiType === 'simple' ? 'Простой GET' : 'Полный CRUD',
-        internationalization: state.i18n === 'none' ? 'Нет' : 
-                              state.i18n === 'simple' ? 'Строки' : 'Склонения / RTL',
-        developerLevel: state.devLevel === 'junior' ? 'Junior' : 
-                       state.devLevel === 'middle' ? 'Middle' : 'Senior'
-      },
-      
-      features: {
-        ssr: state.ssr,
-        advancedSeo: state.seoAdvanced,
-        unitTests: state.testsUnit,
-        e2eTests: state.testsE2E,
-        responsiveDesign: state.responsive,
-        accessibility: state.accessibility,
-        codeReview: state.codeReview,
-        documentation: state.documentation,
-        deployment: state.deployment
-      }
+    // Человекочитаемые данные (только непустые)
+    formattedData: {}
+  }
+  
+  // Компоненты (только с ненулевыми значениями)
+  const nonZeroCounts = componentTypes.filter(type => (state.counts[type] || 0) > 0)
+  const componentsWithBase = componentTypes.filter(type => (state.countsWithBase[type] || 0) > 0)
+  const componentsWithProps = componentTypes.filter(type => (state.countsNewProps[type] || 0) > 0)
+  
+  if (nonZeroCounts.length > 0 || componentsWithBase.length > 0 || componentsWithProps.length > 0) {
+    jsonData.formattedData.components = {}
+    
+    if (nonZeroCounts.length > 0) {
+      jsonData.formattedData.components.counts = nonZeroCounts.reduce((acc, type) => {
+        acc[labels[type]] = state.counts[type] || 0
+        return acc
+      }, {} as Record<string, number>)
+    }
+    
+    if (componentsWithBase.length > 0) {
+      jsonData.formattedData.components.withBase = componentsWithBase.reduce((acc, type) => {
+        acc[labels[type]] = state.countsWithBase[type] || 0
+        return acc
+      }, {} as Record<string, number>)
+    }
+    
+    if (componentsWithProps.length > 0) {
+      jsonData.formattedData.components.newProps = componentsWithProps.reduce((acc, type) => {
+        acc[labels[type]] = state.countsNewProps[type] || 0
+        return acc
+      }, {} as Record<string, number>)
+    }
+  }
+  
+  // Основные параметры (только если отличаются от дефолтных)
+  const settings: Record<string, string> = {}
+  if (state.uiComplex !== 'static') {
+    settings.uiComplexity = 'Интерактивная'
+  }
+  if (state.stateLayer !== 'local') {
+    settings.stateManagement = 'Глобальный'
+  }
+  if (state.apiType !== 'none') {
+    settings.apiIntegration = state.apiType === 'simple' ? 'Простой GET' : 'Полный CRUD'
+  }
+  if (state.i18n !== 'none') {
+    settings.internationalization = state.i18n === 'simple' ? 'Строки' : 'Склонения / RTL'
+  }
+  if (state.devLevel !== 'middle') {
+    settings.developerLevel = state.devLevel === 'junior' ? 'Junior' : 'Senior'
+  }
+  
+  if (Object.keys(settings).length > 0) {
+    jsonData.formattedData.settings = settings
+  }
+  
+  // Дополнительные опции (только включенные)
+  const features: Record<string, boolean> = {}
+  if (state.ssr) features.ssr = true
+  if (state.seoAdvanced) features.advancedSeo = true
+  if (state.testsUnit) features.unitTests = true
+  if (state.testsE2E) features.e2eTests = true
+  if (state.responsive) features.responsiveDesign = true
+  if (state.accessibility) features.accessibility = true
+  if (state.codeReview) features.codeReview = true
+  if (state.documentation) features.documentation = true
+  if (state.deployment) features.deployment = true
+  
+  if (Object.keys(features).length > 0) {
+    jsonData.formattedData.features = features
+  }
+  
+  // Результаты расчетов (всегда показываем)
+  jsonData.results = {
+    hours: {
+      optimistic: hours.value.optimistic,
+      realistic: hours.value.realistic,
+      pessimistic: hours.value.pessimistic
     },
     
-    // Результаты расчетов
-    results: {
-      hours: {
-        optimistic: hours.value.optimistic,
-        realistic: hours.value.realistic,
-        pessimistic: hours.value.pessimistic
-      },
-      
-      // Дополнительная аналитика
-      analysis: {
-        totalComponents: componentTypes.reduce((sum, t) => sum + (state.counts[t] || 0), 0),
-        componentsWithBase: componentTypes.reduce((sum, t) => sum + (state.countsWithBase[t] || 0), 0),
-        estimateRange: {
-          min: hours.value.optimistic,
-          max: hours.value.pessimistic,
-          spread: Math.round((hours.value.pessimistic - hours.value.optimistic) * 10) / 10
-        }
+    // Дополнительная аналитика
+    analysis: {
+      totalComponents: componentTypes.reduce((sum, t) => sum + (state.counts[t] || 0), 0),
+      componentsWithBase: componentTypes.reduce((sum, t) => sum + (state.countsWithBase[t] || 0), 0),
+      estimateRange: {
+        min: hours.value.optimistic,
+        max: hours.value.pessimistic,
+        spread: Math.round((hours.value.pessimistic - hours.value.optimistic) * 10) / 10
       }
     }
   }
