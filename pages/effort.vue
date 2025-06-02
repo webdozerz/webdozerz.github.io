@@ -94,7 +94,7 @@
           <!-- i18n -->
           <BaseSelect
             v-model="state.i18n"
-            label="Интернационализация"
+            label="Интернационализация (i18n)"
             class="full-width"
             :options="[
               { value: 'none',     text: 'Нет' },
@@ -377,10 +377,34 @@ const hours = computed(() => {
 
 /**
  * СБРОС ФОРМЫ к начальным значениям
- * Использует JSON для глубокого копирования объекта
+ * Вручную сбрасываем каждое поле для корректной работы с реактивностью Vue
  */
 function reset() {
-  Object.assign(state, JSON.parse(JSON.stringify(initial)))
+  // Сбрасываем объекты counts
+  componentTypes.forEach(t => {
+    state.counts[t] = 0
+    state.countsWithBase[t] = 0
+    state.countsNewProps[t] = 0
+  })
+  
+  // Сбрасываем простые поля
+  state.uiComplex = "static"
+  state.stateLayer = "local"
+  state.apiType = "none"
+  state.ssr = false
+  state.seoAdvanced = false
+  state.i18n = "none"
+  state.testsUnit = false
+  state.testsE2E = false
+  
+  // Сбрасываем новые поля
+  state.responsive = false
+  state.accessibility = false
+  state.codeReview = false
+  state.documentation = false
+  state.deployment = false
+  
+  state.devLevel = "middle"
 }
 </script>
 
