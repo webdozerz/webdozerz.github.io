@@ -539,7 +539,8 @@ watch(() => props.coefficients, (newCoeffs) => {
 // Сброс к дефолтным значениям
 function resetToDefaults() {
   if (confirm('Сбросить все коэффициенты к значениям по умолчанию?')) {
-    localCoeffs.value = { ...props.defaultCoefficients }
+    // Создаем полностью новую копию дефолтных значений через JSON
+    localCoeffs.value = JSON.parse(JSON.stringify(props.defaultCoefficients))
   }
 }
 
@@ -563,6 +564,17 @@ function saveChanges() {
   justify-content: center;
   z-index: 1000;
   padding: 1rem;
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-content {
@@ -572,16 +584,30 @@ function saveChanges() {
   max-width: 1200px;
   width: 100%;
   max-height: 90vh;
-  overflow-y: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.5rem 1.5rem 0 1.5rem;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
   border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 1.5rem;
+  flex-shrink: 0;
 }
 
 .modal-header h2 {
@@ -606,6 +632,7 @@ function saveChanges() {
   align-items: center;
   justify-content: center;
   border-radius: 0.375rem;
+  transition: all 0.2s;
 }
 
 .modal-close:hover {
@@ -615,11 +642,35 @@ function saveChanges() {
 
 .modal-body {
   padding: 0 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+/* Webkit scrollbar styling */
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .modal-footer {
   padding: 1.5rem;
   border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
 }
 
 .footer-buttons {

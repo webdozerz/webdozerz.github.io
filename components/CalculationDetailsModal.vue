@@ -1,6 +1,6 @@
 <template>
-  <div v-if="isVisible" class="modal-overlay" @click="$emit('close')">
-    <div class="modal-content" @click.stop>
+  <div v-if="isVisible" class="modal-overlay" @click.self="$emit('close')">
+    <div class="modal-content">
       <div class="modal-header">
         <h2>Детали расчета трудозатрат</h2>
         <button class="modal-close" @click="$emit('close')">&times;</button>
