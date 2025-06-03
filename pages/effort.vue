@@ -127,6 +127,12 @@
         <div class="buttons-container">
           <div class="buttons-group">
             <button 
+              class="btn btn-warning btn-full-width" 
+              @click="showCoefficientEditor = true"
+            >
+              Настроить коэффициенты
+            </button>
+            <button 
               class="btn btn-info" 
               :disabled="!hasComponents"
               @click="showCalculationDetails = true"
@@ -164,14 +170,23 @@
       </div>
     </div>
 
+    <!-- Модальное окно редактирования коэффициентов -->
+    <CoefficientEditModal
+      :is-visible="showCoefficientEditor"
+      :coefficients="coefficients"
+      :default-coefficients="defaultCoefficients"
+      @close="showCoefficientEditor = false"
+      @save="updateCoefficients"
+    />
+
     <!-- Модальное окно с деталями расчета -->
     <CalculationDetailsModal
       :is-visible="showCalculationDetails"
       :calculation-details="calculationDetails"
       :hours="hours"
       :form-state="state"
-      :base-coeffs="BASE_COEFFS"
-      :level-factor="LEVEL_FACTOR"
+      :base-coeffs="coefficients"
+      :level-factor="coefficients.levelFactor"
       @close="showCalculationDetails = false"
     />
 
@@ -195,7 +210,7 @@ import { reactive, computed, ref } from 'vue'
  * БАЗОВЫЕ КОЭФФИЦИЕНТЫ для расчета трудозатрат
  * Каждый коэффициент показывает, сколько дополнительного времени добавляет фактор
  */
-const BASE_COEFFS = {
+const DEFAULT_BASE_COEFFS = {
   // Влияние наличия базового компонента на время разработки
   baseExists: { true: 0.5, false: 1.0 }, // Если есть базовый - экономим 50% времени
   
@@ -239,7 +254,7 @@ const BASE_COEFFS = {
  * ВЕСОВЫЕ КОЭФФИЦИЕНТЫ для разных типов компонентов
  * Показывают относительную сложность каждого типа компонента
  */
-const COMPONENT_TYPE_COEFFS = {
+const DEFAULT_COMPONENT_TYPE_COEFFS = {
   layout: 0.2,    // Макеты и контейнеры (header, footer, sidebar)
   ui: 0.4,        // Базовые UI элементы (кнопки, инпуты)
   form: 0.7,      // Формы с валидацией
@@ -262,7 +277,7 @@ const LABELS = {
  * МНОЖИТЕЛИ для разных уровней разработчиков
  * Junior тратит больше времени, Senior меньше
  */
-const LEVEL_FACTOR = { junior: 1.35, middle: 1.15, senior: 0.9 } as const
+const DEFAULT_LEVEL_FACTOR = { junior: 1.35, middle: 1.15, senior: 0.9 } as const
 
 /**
  * КОЭФФИЦИЕНТЫ для оптимистичной и пессимистичной оценки
@@ -271,12 +286,53 @@ const OPT = 0.8   // Оптимистичная: -20% от реалистичн�
 const PESS = 1.3  // Пессимистичная: +30% от реалистичной
 
 // Типы TypeScript для безопасности
-type ComponentType = keyof typeof COMPONENT_TYPE_COEFFS
-const componentTypes = Object.keys(COMPONENT_TYPE_COEFFS) as ComponentType[]
+type ComponentType = keyof typeof DEFAULT_COMPONENT_TYPE_COEFFS
+const componentTypes = Object.keys(DEFAULT_COMPONENT_TYPE_COEFFS) as ComponentType[]
 const labels = LABELS
 
 // Интерфейс для счетчиков компонентов
 interface Counts { [k: string]: number }
+
+// Интерфейс для всех коэффициентов
+interface AllCoefficients {
+  baseExists: { true: number; false: number }
+  uiComplex: { static: number; interactive: number }
+  stateLayer: { local: number; global: number }
+  apiType: { none: number; simple: number; crud: number }
+  ssr: number
+  seoAdvanced: number
+  i18n: { none: number; simple: number; advanced: number }
+  tests: { unit: number; e2e: number }
+  responsive: number
+  accessibility: number
+  codeReview: number
+  documentation: number
+  deployment: number
+  componentTypes: {
+    layout: number
+    ui: number
+    form: number
+    chart: number
+    complex: number
+  }
+  levelFactor: {
+    junior: number
+    middle: number
+    senior: number
+  }
+}
+
+// Дефолтные коэффициенты
+const defaultCoefficients: AllCoefficients = {
+  ...DEFAULT_BASE_COEFFS,
+  componentTypes: { ...DEFAULT_COMPONENT_TYPE_COEFFS },
+  levelFactor: { ...DEFAULT_LEVEL_FACTOR }
+}
+
+// Реактивные коэффициенты (можно редактировать)
+const coefficients = reactive<AllCoefficients>({
+  ...defaultCoefficients
+})
 
 /**
  * ИНТЕРФЕЙС состояния формы
@@ -302,7 +358,7 @@ interface FormState {
   documentation: boolean                      // Нужна документация
   deployment: boolean                         // Настройка деплоя
   
-  devLevel: keyof typeof LEVEL_FACTOR         // Уровень разработчика
+  devLevel: "junior" | "middle" | "senior"    // Уровень разработчика
 }
 
 /**
@@ -341,6 +397,7 @@ const state = reactive<FormState>({ ...initial })
 // Состояние модального окна
 const showCalculationDetails = ref(false)
 const showJiraIntegration = ref(false)
+const showCoefficientEditor = ref(false)
 
 /**
  * РАСЧЕТ БАЗОВОГО ВРЕМЕНИ НА ОДИН КОМПОНЕНТ
@@ -352,23 +409,23 @@ const showJiraIntegration = ref(false)
 function baselinePerComponent(s: FormState): number {
   const h =
     // Основные факторы (всегда применяются)
-    BASE_COEFFS.uiComplex[s.uiComplex] +
-    BASE_COEFFS.stateLayer[s.stateLayer] +
-    BASE_COEFFS.apiType[s.apiType] +
+    coefficients.uiComplex[s.uiComplex] +
+    coefficients.stateLayer[s.stateLayer] +
+    coefficients.apiType[s.apiType] +
     
     // Опциональные факторы (применяются только если включены)
-    (s.ssr ? BASE_COEFFS.ssr : 0) +
-    (s.seoAdvanced ? BASE_COEFFS.seoAdvanced : 0) +
-    BASE_COEFFS.i18n[s.i18n] +
-    (s.testsUnit ? BASE_COEFFS.tests.unit : 0) +
-    (s.testsE2E ? BASE_COEFFS.tests.e2e : 0) +
+    (s.ssr ? coefficients.ssr : 0) +
+    (s.seoAdvanced ? coefficients.seoAdvanced : 0) +
+    coefficients.i18n[s.i18n] +
+    (s.testsUnit ? coefficients.tests.unit : 0) +
+    (s.testsE2E ? coefficients.tests.e2e : 0) +
     
     // === НОВЫЕ ФАКТОРЫ ===
-    (s.responsive ? BASE_COEFFS.responsive : 0) +
-    (s.accessibility ? BASE_COEFFS.accessibility : 0) +
-    (s.codeReview ? BASE_COEFFS.codeReview : 0) +
-    (s.documentation ? BASE_COEFFS.documentation : 0) +
-    (s.deployment ? BASE_COEFFS.deployment : 0)
+    (s.responsive ? coefficients.responsive : 0) +
+    (s.accessibility ? coefficients.accessibility : 0) +
+    (s.codeReview ? coefficients.codeReview : 0) +
+    (s.documentation ? coefficients.documentation : 0) +
+    (s.deployment ? coefficients.deployment : 0)
 
   return h
 }
@@ -396,12 +453,12 @@ const calculationDetails = computed(() => {
       const baseTimePerComponent = per
       
       // Время с учетом типа компонента
-      const typeCoeff = COMPONENT_TYPE_COEFFS[type]
+      const typeCoeff = coefficients.componentTypes[type]
       const typeTime = count * typeCoeff
       
       // Экономия от базовых компонентов
       const withoutBase = count - withBase
-      const baseSavings = withBase * (BASE_COEFFS.baseExists.false - BASE_COEFFS.baseExists.true)
+      const baseSavings = withBase * (coefficients.baseExists.false - coefficients.baseExists.true)
       
       // Время на новые props
       let propsTime = 0
@@ -413,7 +470,7 @@ const calculationDetails = computed(() => {
       }
       
       // Общее время с учетом базы и props
-      const baseTime = withBase * BASE_COEFFS.baseExists.true + withoutBase * BASE_COEFFS.baseExists.false
+      const baseTime = withBase * coefficients.baseExists.true + withoutBase * coefficients.baseExists.false
       const totalTime = baseTimePerComponent * baseTime + typeTime + propsTime
       
       return {
@@ -433,7 +490,7 @@ const calculationDetails = computed(() => {
   
   // Дополнительное время в зависимости от типов компонентов
   const additive = componentTypes.reduce(
-    (sum, t) => sum + (state.counts[t] || 0) * COMPONENT_TYPE_COEFFS[t],
+    (sum, t) => sum + (state.counts[t] || 0) * coefficients.componentTypes[t],
     0
   )
   
@@ -443,7 +500,7 @@ const calculationDetails = computed(() => {
     const withBaseCount = Math.min(state.countsWithBase[t] || 0, totalCount)
     const withoutBaseCount = totalCount - withBaseCount
     
-    const baseTimeImpact = withBaseCount * BASE_COEFFS.baseExists.true + withoutBaseCount * BASE_COEFFS.baseExists.false
+    const baseTimeImpact = withBaseCount * coefficients.baseExists.true + withoutBaseCount * coefficients.baseExists.false
     return sum + baseTimeImpact
   }, 0)
   
@@ -466,7 +523,7 @@ const calculationDetails = computed(() => {
   const baseTime = per * total + additive + baseEconomy + propsTime
   
   // С учетом грейда разработчика
-  const withLevelFactor = baseTime * LEVEL_FACTOR[state.devLevel]
+  const withLevelFactor = baseTime * coefficients.levelFactor[state.devLevel]
   
   return {
     totalComponents: total,
@@ -489,7 +546,7 @@ const hours = computed(() => {
   
   // Дополнительное время в зависимости от типов компонентов
   const additive = componentTypes.reduce(
-    (sum, t) => sum + (state.counts[t] || 0) * COMPONENT_TYPE_COEFFS[t],
+    (sum, t) => sum + (state.counts[t] || 0) * coefficients.componentTypes[t],
     0
   )
   
@@ -500,7 +557,7 @@ const hours = computed(() => {
     const withoutBaseCount = totalCount - withBaseCount
     
     // Компоненты с базой экономят время (коэффициент 0.5), без базы используют полный коэффициент (1.0)
-    const baseTimeImpact = withBaseCount * BASE_COEFFS.baseExists.true + withoutBaseCount * BASE_COEFFS.baseExists.false
+    const baseTimeImpact = withBaseCount * coefficients.baseExists.true + withoutBaseCount * coefficients.baseExists.false
     return sum + baseTimeImpact
   }, 0)
   
@@ -521,7 +578,7 @@ const hours = computed(() => {
   }, 0)
   
   // Итоговое время с учетом уровня разработчика
-  const core = (per * total + additive + baseEconomy + propsTime) * LEVEL_FACTOR[state.devLevel]
+  const core = (per * total + additive + baseEconomy + propsTime) * coefficients.levelFactor[state.devLevel]
   
   // Возвращаем три варианта оценки с округлением до десятых
   return {
@@ -859,6 +916,51 @@ function handleJiraSuccess(result: { key: string; url: string }) {
     window.open(result.url, '_blank')
   }
 }
+
+// Функция обновления коэффициентов
+function updateCoefficients(newCoefficients: AllCoefficients) {
+  // Обновляем базовые коэффициенты
+  coefficients.baseExists.true = newCoefficients.baseExists.true
+  coefficients.baseExists.false = newCoefficients.baseExists.false
+  
+  coefficients.uiComplex.static = newCoefficients.uiComplex.static
+  coefficients.uiComplex.interactive = newCoefficients.uiComplex.interactive
+  
+  coefficients.stateLayer.local = newCoefficients.stateLayer.local
+  coefficients.stateLayer.global = newCoefficients.stateLayer.global
+  
+  coefficients.apiType.none = newCoefficients.apiType.none
+  coefficients.apiType.simple = newCoefficients.apiType.simple
+  coefficients.apiType.crud = newCoefficients.apiType.crud
+  
+  coefficients.ssr = newCoefficients.ssr
+  coefficients.seoAdvanced = newCoefficients.seoAdvanced
+  
+  coefficients.i18n.none = newCoefficients.i18n.none
+  coefficients.i18n.simple = newCoefficients.i18n.simple
+  coefficients.i18n.advanced = newCoefficients.i18n.advanced
+  
+  coefficients.tests.unit = newCoefficients.tests.unit
+  coefficients.tests.e2e = newCoefficients.tests.e2e
+  
+  coefficients.responsive = newCoefficients.responsive
+  coefficients.accessibility = newCoefficients.accessibility
+  coefficients.codeReview = newCoefficients.codeReview
+  coefficients.documentation = newCoefficients.documentation
+  coefficients.deployment = newCoefficients.deployment
+  
+  // Обновляем коэффициенты типов компонентов
+  coefficients.componentTypes.layout = newCoefficients.componentTypes.layout
+  coefficients.componentTypes.ui = newCoefficients.componentTypes.ui
+  coefficients.componentTypes.form = newCoefficients.componentTypes.form
+  coefficients.componentTypes.chart = newCoefficients.componentTypes.chart
+  coefficients.componentTypes.complex = newCoefficients.componentTypes.complex
+  
+  // Обновляем множители уровней
+  coefficients.levelFactor.junior = newCoefficients.levelFactor.junior
+  coefficients.levelFactor.middle = newCoefficients.levelFactor.middle
+  coefficients.levelFactor.senior = newCoefficients.levelFactor.senior
+}
 </script>
 
 <style scoped>
@@ -1043,6 +1145,22 @@ function handleJiraSuccess(result: { key: string; url: string }) {
 
 .btn-accent:hover:not(:disabled) {
   background-color: #7c3aed;
+}
+
+.btn-warning {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.btn-warning:hover:not(:disabled) {
+  background-color: #d97706;
+}
+
+.btn-full-width {
+  @media (max-width: 640px) {
+    width: 100%;
+    grid-column: 1 / -1;
+  }
 }
 
 .btn-secondary {
