@@ -3,6 +3,7 @@ import Bio from '@/components/Bio.vue'
 import Experience from '@/components/Experience.vue'
 import Education from '@/components/Education.vue'
 import Tech from '@/components/Tech.vue'
+import Projects from '@/components/Projects.vue'
 </script>
 
 <template>
@@ -11,6 +12,7 @@ import Tech from '@/components/Tech.vue'
     <Experience />
     <Education />
     <Tech />
+    <Projects />
   </div>
 </template>
 
