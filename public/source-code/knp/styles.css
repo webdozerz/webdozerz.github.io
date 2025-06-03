@@ -1,0 +1,283 @@
+/* Стили для дополнительной кнопки "Смотреть" */
+.knp-ext-watch-button {
+  margin-left: 8px !important;
+  background: linear-gradient(135deg, #ff6b35, #f7931e) !important;
+  border: none !important;
+  border-radius: 6px !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 8px 16px !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3) !important;
+  font-size: 14px !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 36px !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.knp-ext-watch-button:hover {
+  background: linear-gradient(135deg, #e55a2b, #e8831a) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4) !important;
+}
+
+.knp-ext-watch-button:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 6px rgba(255, 107, 53, 0.3) !important;
+}
+
+.knp-ext-watch-button::before {
+  content: '';
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
+  transition: left 0.5s !important;
+}
+
+.knp-ext-watch-button:hover::before {
+  left: 100% !important;
+}
+
+/* Специальные стили для кнопки "Буду смотреть" */
+.knp-ext-will-watch-button {
+  background: linear-gradient(135deg, #4a90e2, #357abd) !important;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3) !important;
+}
+
+.knp-ext-will-watch-button:hover {
+  background: linear-gradient(135deg, #3a7bc8, #2d6ba3) !important;
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4) !important;
+}
+
+.knp-ext-will-watch-button:active {
+  box-shadow: 0 2px 6px rgba(74, 144, 226, 0.3) !important;
+}
+
+.knp-ext-will-watch-button::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+  .knp-ext-watch-button {
+    margin-left: 4px !important;
+    padding: 6px 12px !important;
+    font-size: 13px !important;
+    min-height: 32px !important;
+  }
+}
+
+/* Специальные стили для различных контейнеров на Kinopoisk */
+.knp-ext-watch-button[class*="film"] {
+  border-radius: 4px !important;
+}
+
+.knp-ext-watch-button[class*="card"] {
+  margin-top: 4px !important;
+  width: auto !important;
+}
+
+/* Анимация появления */
+@keyframes knpSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.knp-ext-watch-button {
+  animation: knpSlideIn 0.3s ease-out !important;
+}
+
+/* Стили для дополнительной кнопки "Смотреть бесплатно" */
+.knp-ext-free-button {
+  margin-left: 12px !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  border: none !important;
+  border-radius: 28px !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 12px 24px !important;
+  cursor: pointer !important;
+  transition: background 0.2s ease, box-shadow 0.2s ease !important;
+  font-size: 14px !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  min-width: 160px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  font-family: inherit !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+  text-align: center !important;
+}
+
+/* Стили для контейнера кнопок чтобы они были в одну линию */
+.knp-ext-free-button-container {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex-wrap: nowrap !important;
+}
+
+/* Применяем flex к родительскому контейнeru */
+[class*="buttonsContainer"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+}
+
+[class*="watchOnlineBlock"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+}
+
+/* Стили для кнопки "Смотреть бесплатно" (зеленая) */
+.knp-ext-free-watch-button {
+  background: linear-gradient(135deg, #28a745, #20c997) !important;
+  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.25) !important;
+}
+
+.knp-ext-free-watch-button:hover {
+  background: linear-gradient(135deg, #218838, #1ea080) !important;
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35) !important;
+}
+
+.knp-ext-free-watch-button:active {
+  background: linear-gradient(135deg, #1e7e34, #1a6e6e) !important;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3) !important;
+}
+
+/* Стили для кнопки "Буду смотреть бесплатно" (синяя) */
+.knp-ext-free-will-watch-button {
+  background: linear-gradient(135deg, #007bff, #0056b3) !important;
+  box-shadow: 0 4px 16px rgba(0, 123, 255, 0.25) !important;
+}
+
+.knp-ext-free-will-watch-button:hover {
+  background: linear-gradient(135deg, #0056b3, #004085) !important;
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.35) !important;
+}
+
+.knp-ext-free-will-watch-button:active {
+  background: linear-gradient(135deg, #004085, #002752) !important;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3) !important;
+}
+
+/* Принудительно стабилизируем текст */
+.knp-ext-free-button * {
+  color: white !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  background: none !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  display: inline !important;
+  vertical-align: baseline !important;
+  text-align: center !important;
+  position: static !important;
+  transform: none !important;
+}
+
+/* Убираем анимацию блеска которая может вызывать скачки */
+.knp-ext-free-button::before {
+  display: none !important;
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+  .knp-ext-free-button {
+    margin-left: 8px !important;
+    padding: 10px 20px !important;
+    font-size: 13px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    min-width: 140px !important;
+  }
+  
+  .knp-ext-free-button * {
+    font-size: 13px !important;
+    line-height: 1 !important;
+  }
+  
+  [class*="buttonsContainer"],
+  [class*="watchOnlineBlock"] {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .knp-ext-free-button {
+    margin-left: 4px !important;
+    padding: 8px 16px !important;
+    font-size: 12px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    min-width: 120px !important;
+  }
+  
+  .knp-ext-free-button * {
+    font-size: 12px !important;
+    line-height: 1 !important;
+  }
+}
+
+/* Специальные стили для различных контейнеров на Kinopoisk */
+.knp-ext-free-button[class*="film"] {
+  border-radius: 28px !important;
+}
+
+.knp-ext-free-button[class*="card"] {
+  margin-top: 4px !important;
+  width: auto !important;
+}
+
+/* Убираем все анимации */
+.knp-ext-free-button {
+  animation: none !important;
+}
+
+/* Убираем все возможные наследуемые стили */
+.knp-ext-free-button,
+.knp-ext-free-button * {
+  box-sizing: border-box !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  transform: none !important;
+}
+
+/* Фиксируем размеры текста */
+.knp-ext-free-button span {
+  font-size: 14px !important;
+  line-height: 1 !important;
+  display: inline !important;
+  position: static !important;
+  transform: none !important;
+} 

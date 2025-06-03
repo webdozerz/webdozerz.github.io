@@ -7,7 +7,7 @@
           <h4 class="projects__item-title">{{ project.name }}</h4>
           <p class="projects__item-description">{{ project.description }}</p>
           <div class="projects__item-links">
-            <a v-if="project.github" :href="project.github" target="_blank" class="projects__link">
+            <a v-if="project.source" :href="project.source" target="_blank" class="projects__link">
               Исходный код
             </a>
             <a v-if="project.demo" :href="project.demo" target="_blank" class="projects__link">
@@ -29,7 +29,7 @@
 type Project = {
   name: string
   description: string
-  github?: string
+  source?: string
   demo?: string
   technologies: string[]
 }
@@ -38,13 +38,14 @@ const projects: Project[] = [
   {
     name: 'Калькулятор расчета трудозатрат для Frontend разработчиков',
     description: 'Калькулятор расчета трудозатрат для Frontend разработчиков',
-    github: 'https://github.com/webdozerz/webdozerz.github.io/blob/master/pages/effort.vue',
+    source: 'https://github.com/webdozerz/webdozerz.github.io/blob/master/pages/effort.vue',
     demo: 'https://webdozerz.github.io/effort',
     technologies: ['Vue 3', 'Nuxt', 'TypeScript', 'SCSS']
   },
   {
     name: 'Просмотрщик видео на Kinopoisk',
     description: 'Расширение для браузера',
+    source: 'https://github.com/webdozerz/webdozerz.github.io/blob/master/public/source-code/knp',
     demo: 'https://webdozerz.github.io/knp-ext.zip',
     technologies: ['Chrome Extension', 'JavaScript', 'HTML', 'CSS']
   }
