@@ -43,8 +43,8 @@ const projects: Project[] = [
     technologies: ['Vue 3', 'Nuxt', 'TypeScript', 'SCSS']
   },
   {
-    name: 'Просмотрщик видео на Kinopoisk',
-    description: 'Расширение для браузера',
+    name: 'Kinopoisk Finder',
+    description: 'Расширение для поиска альтернативных источников просмотра фильмов и сериалов с Kinopoisk',
     source: 'https://github.com/webdozerz/webdozerz.github.io/blob/master/public/source-code/knp',
     demo: 'https://webdozerz.github.io/knp-ext.zip',
     technologies: ['Chrome Extension', 'JavaScript', 'HTML', 'CSS']
@@ -65,7 +65,7 @@ const projects: Project[] = [
   &__list {
     margin-top: 8px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     grid-gap: 16px;
   }
 
