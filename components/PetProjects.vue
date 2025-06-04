@@ -64,9 +64,9 @@ const projects: Project[] = [
 
   &__list {
     margin-top: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-gap: 16px;
   }
 
   &__item {
@@ -75,6 +75,9 @@ const projects: Project[] = [
     border-radius: 8px;
     background: var(--bg-secondary, rgba(255, 255, 255, 0.02));
     transition: border-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 
     &:hover {
       border-color: var(--green);
@@ -92,12 +95,14 @@ const projects: Project[] = [
     margin: 0 0 12px 0;
     color: var(--text-secondary, #ccc);
     line-height: 1.5;
+    flex-grow: 1;
   }
 
   &__item-links {
     display: flex;
     gap: 12px;
     margin-bottom: 12px;
+    margin-top: auto;
   }
 
   &__link {
