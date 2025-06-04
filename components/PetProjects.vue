@@ -65,7 +65,7 @@ const projects: Project[] = [
   &__list {
     margin-top: 8px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
     grid-gap: 16px;
   }
 
