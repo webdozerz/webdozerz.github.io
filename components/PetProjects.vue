@@ -11,7 +11,7 @@
               Исходный код
             </a>
             <a v-if="project.demo" :href="project.demo" target="_blank" class="projects__link">
-              Демо
+              Демо / Скачать
             </a>
           </div>
           <div class="projects__item-tech">
