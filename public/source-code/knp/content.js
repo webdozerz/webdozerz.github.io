@@ -1,6 +1,16 @@
+// Константы конфигурации
+const CONFIG = {
+  MAX_SEARCH_ATTEMPTS: 8,
+  SEARCH_INTERVAL: 2000,
+  TIMEOUT: 20000,
+  BUTTON_TEXT: 'Смотреть бесплатно',
+  INITIAL_DELAY: 500,
+  DOM_CHANGE_DELAY: 500,
+  NAVIGATION_DELAY: 800
+};
+
 // Функция для проверки, находимся ли мы на странице фильма или сериала
 const isMovieOrSeriesPage = () => {
-  const url = window.location.href;
   const pathname = window.location.pathname;
   
   // Проверяем URL на соответствие паттернам страниц фильмов и сериалов
@@ -14,9 +24,102 @@ const isMovieOrSeriesPage = () => {
 let extensionState = {
   buttonsAdded: false,
   searchAttempts: 0,
-  maxSearchAttempts: 8,
+  maxSearchAttempts: CONFIG.MAX_SEARCH_ATTEMPTS,
   searchInterval: null,
-  observer: null
+  observer: null,
+  urlCheckInterval: null
+};
+
+// Функция для создания CSS стилей текстового контейнера
+const createTextContainerStyles = () => `
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  display: inline !important;
+  vertical-align: baseline !important;
+  position: static !important;
+  transform: none !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: auto !important;
+  min-height: auto !important;
+  max-width: none !important;
+  max-height: none !important;
+  flex: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+`;
+
+// Функция для создания CSS стилей кнопки
+const createButtonStyles = (targetHeight, targetWidth) => `
+  min-height: ${targetHeight}px !important;
+  max-height: ${targetHeight}px !important;
+  height: ${targetHeight}px !important;
+  min-width: ${targetWidth}px !important;
+  width: auto !important;
+  padding: 12px 24px !important;
+  font-size: 14px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: top !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  flex-shrink: 0 !important;
+`;
+
+// Функция для безопасного выполнения операций
+const safeExecute = (fn, errorMessage) => {
+  try {
+    return fn();
+  } catch (error) {
+    console.error(errorMessage, error);
+    return null;
+  }
+};
+
+// Функция для очистки текстового содержимого элемента
+const cleanElementContent = (element) => {
+  // Удаляем текстовое содержимое из всех дочерних элементов
+  const allTextElements = element.querySelectorAll('*');
+  allTextElements.forEach(child => {
+    if (child.childNodes.length > 0) {
+      child.childNodes.forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          node.textContent = '';
+        }
+      });
+    }
+  });
+  
+  // Очищаем прямой текстовый контент элемента
+  element.childNodes.forEach(node => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      node.textContent = '';
+    }
+  });
+};
+
+// Функция для поиска текстового контейнера в кнопке
+const findTextContainer = (button) => {
+  // Ищем основной текстовый контейнер
+  let textContainer = button.querySelector('span[class*="defaultText"], span[data-tid], .styles_defaultText__PgVb9');
+  
+  if (!textContainer) {
+    // Если не нашли основной контейнер, ищем любой span или div с текстом
+    const spans = button.querySelectorAll('span, div');
+    for (const span of spans) {
+      if (span.textContent.trim() || span.innerHTML.trim()) {
+        textContainer = span;
+        break;
+      }
+    }
+  }
+  
+  return textContainer;
 };
 
 // Функция для определения типа кнопки
@@ -41,44 +144,15 @@ const createFreeButton = (originalButton, buttonType) => {
   
   // Получаем размеры оригинальной кнопки
   const originalRect = originalButton.getBoundingClientRect();
-  const originalStyles = window.getComputedStyle(originalButton);
   
   // Полностью очищаем весь текстовый контент
-  const allTextElements = newButton.querySelectorAll('*');
-  allTextElements.forEach(element => {
-    // Удаляем текстовое содержимое из всех элементов
-    if (element.childNodes.length > 0) {
-      element.childNodes.forEach(node => {
-        if (node.nodeType === Node.TEXT_NODE) {
-          node.textContent = '';
-        }
-      });
-    }
-  });
-  
-  // Очищаем прямой текстовый контент кнопки
-  newButton.childNodes.forEach(node => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      node.textContent = '';
-    }
-  });
+  cleanElementContent(newButton);
   
   // Определяем текст для новой кнопки
-  const buttonText =  'Смотреть бесплатно';
+  const buttonText = CONFIG.BUTTON_TEXT;
   
   // Находим основной текстовый контейнер и заменяем его содержимое
-  let textContainer = newButton.querySelector('span[class*="defaultText"], span[data-tid], .styles_defaultText__PgVb9');
-  
-  if (!textContainer) {
-    // Если не нашли основной контейнер, ищем любой span или div с текстом
-    const spans = newButton.querySelectorAll('span, div');
-    for (const span of spans) {
-      if (span.textContent.trim() || span.innerHTML.trim()) {
-        textContainer = span;
-        break;
-      }
-    }
-  }
+  let textContainer = findTextContainer(newButton);
   
   if (textContainer) {
     // Полностью заменяем содержимое контейнера
@@ -86,29 +160,10 @@ const createFreeButton = (originalButton, buttonType) => {
     textContainer.textContent = buttonText;
     
     // Применяем стабильные стили к текстовому контейнеру
-    textContainer.style.cssText = `
-      color: white !important;
-      font-weight: 600 !important;
-      font-size: 14px !important;
-      line-height: 1 !important;
-      text-align: center !important;
-      display: inline !important;
-      vertical-align: baseline !important;
-      position: static !important;
-      transform: none !important;
-      width: auto !important;
-      height: auto !important;
-      min-width: auto !important;
-      min-height: auto !important;
-      max-width: none !important;
-      max-height: none !important;
-      flex: none !important;
-      margin: 0 !important;
-      padding: 0 !important;
-    `;
+    textContainer.style.cssText = createTextContainerStyles();
   } else {
     // Если не нашли контейнер, создаем новый
-    newButton.innerHTML = `<span style="color: white !important; font-weight: 600 !important; font-size: 14px !important; line-height: 1 !important; text-align: center !important; display: inline !important; vertical-align: baseline !important; position: static !important; transform: none !important; width: auto !important; height: auto !important; min-width: auto !important; min-height: auto !important; max-width: none !important; max-height: none !important; flex: none !important; margin: 0 !important; padding: 0 !important;">${buttonText}</span>`;
+    newButton.innerHTML = `<span style="${createTextContainerStyles()}">${buttonText}</span>`;
   }
   
   // Добавляем отличительные классы
@@ -124,23 +179,7 @@ const createFreeButton = (originalButton, buttonType) => {
   const targetWidth = Math.max(Math.min(originalRect.width * 0.9, 200), 160);
   
   // Принудительно устанавливаем размеры и стили для горизонтального расположения
-  newButton.style.cssText += `
-    min-height: ${targetHeight}px !important;
-    max-height: ${targetHeight}px !important;
-    height: ${targetHeight}px !important;
-    min-width: ${targetWidth}px !important;
-    width: auto !important;
-    padding: 12px 24px !important;
-    font-size: 14px !important;
-    box-sizing: border-box !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    vertical-align: top !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    flex-shrink: 0 !important;
-  `;
+  newButton.style.cssText += createButtonStyles(targetHeight, targetWidth);
   
   // Удаляем старый href если есть
   if (newButton.href) {
@@ -380,7 +419,7 @@ const addFreeButtons = () => {
       return;
     }
 
-    try {
+    safeExecute(() => {
       const newButton = createFreeButton(button, type);
       
       // Находим родительский контейнер и применяем к нему flex стили
@@ -402,16 +441,13 @@ const addFreeButtons = () => {
         
         // Вставляем новую кнопку после оригинальной
         parentContainer.insertBefore(newButton, button.nextSibling);
-        const buttonText = 'Смотреть бесплатно';
-        console.log(`🎉 Добавлена кнопка "${buttonText}" в одну линию`);
+        console.log(`🎉 Добавлена кнопка "${CONFIG.BUTTON_TEXT}" в одну линию`);
         
         // Отмечаем, что кнопки добавлены и останавливаем поиск
         extensionState.buttonsAdded = true;
         clearSearchInterval();
       }
-    } catch (error) {
-      console.error('❌ Ошибка при создании кнопки:', error);
-    }
+    }, '❌ Ошибка при создании кнопки:');
   });
 };
 
@@ -428,14 +464,25 @@ const clearSearchInterval = () => {
     extensionState.observer = null;
     console.log('🛑 Observer отключен');
   }
+  
+  if (extensionState.urlCheckInterval) {
+    clearInterval(extensionState.urlCheckInterval);
+    extensionState.urlCheckInterval = null;
+    console.log('🛑 URL проверка остановлена');
+  }
 };
 
 // Функция для сброса состояния при изменении URL
 const resetExtensionState = () => {
   console.log('🔄 Сброс состояния расширения');
+  console.log(`   Кнопки были добавлены: ${extensionState.buttonsAdded}`);
+  console.log(`   Количество попыток: ${extensionState.searchAttempts}`);
+  
   extensionState.buttonsAdded = false;
   extensionState.searchAttempts = 0;
   clearSearchInterval();
+  
+  console.log('✅ Состояние сброшено, готов к новому поиску');
 };
 
 // Функция для наблюдения за изменениями DOM (более оптимизированная)
@@ -443,7 +490,10 @@ const observeDOM = () => {
   // Отключаем предыдущий observer если есть
   if (extensionState.observer) {
     extensionState.observer.disconnect();
+    console.log('🔄 Предыдущий DOM Observer отключен');
   }
+
+  console.log('👁️ Запуск нового DOM Observer...');
 
   extensionState.observer = new MutationObserver((mutations) => {
     // Если кнопки уже добавлены, не реагируем на изменения
@@ -452,6 +502,7 @@ const observeDOM = () => {
     }
 
     let shouldAddButton = false;
+    let hasPageStructureChange = false;
     
     mutations.forEach((mutation) => {
       if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
@@ -461,15 +512,30 @@ const observeDOM = () => {
           (node.tagName === 'BUTTON' || node.tagName === 'A' || node.querySelector('button, a'))
         );
         
+        // Проверяем изменения структуры страницы (возможная SPA навигация)
+        const hasStructuralChanges = Array.from(mutation.addedNodes).some(node =>
+          node.nodeType === Node.ELEMENT_NODE &&
+          (node.classList?.contains('styles_root') || 
+           node.querySelector('[class*="styles_root"]') ||
+           node.querySelector('main, [role="main"]'))
+        );
+        
         if (hasSignificantNodes) {
           shouldAddButton = true;
+          console.log('🔍 DOM Observer: Обнаружены новые кнопки/ссылки');
+        }
+        
+        if (hasStructuralChanges) {
+          hasPageStructureChange = true;
+          console.log('🏗️ DOM Observer: Обнаружены структурные изменения страницы');
         }
       }
     });
     
-    if (shouldAddButton) {
+    if (shouldAddButton || hasPageStructureChange) {
       // Добавляем задержку для завершения рендеринга
-      setTimeout(addFreeButtons, 500);
+      console.log(`🎯 DOM Observer запускает поиск кнопок (shouldAddButton: ${shouldAddButton}, hasStructuralChanges: ${hasPageStructureChange})`);
+      setTimeout(addFreeButtons, CONFIG.DOM_CHANGE_DELAY);
     }
   });
   
@@ -478,41 +544,67 @@ const observeDOM = () => {
     subtree: true
   });
   
+  console.log('✅ DOM Observer активирован');
   return extensionState.observer;
 };
 
 // Функция для наблюдения за изменениями URL
 const observeUrlChange = () => {
   let currentUrl = window.location.href;
+  console.log('🚀 Настройка отслеживания URL изменений...');
+  console.log(`   Начальный URL: ${currentUrl}`);
   
   // Наблюдаем за изменениями в истории браузера
   const originalPushState = history.pushState;
   const originalReplaceState = history.replaceState;
   
   history.pushState = function(...args) {
+    console.log('📌 history.pushState перехвачен:', args);
     originalPushState.apply(history, args);
-    checkUrlChange();
+    setTimeout(checkUrlChange, 100); // Задержка для обновления URL
   };
   
   history.replaceState = function(...args) {
+    console.log('📌 history.replaceState перехвачен:', args);
     originalReplaceState.apply(history, args);
-    checkUrlChange();
+    setTimeout(checkUrlChange, 100); // Задержка для обновления URL
   };
   
-  window.addEventListener('popstate', checkUrlChange);
+  // Множественные способы отслеживания навигации
+  window.addEventListener('popstate', (e) => {
+    console.log('📌 popstate событие:', e);
+    setTimeout(checkUrlChange, 100);
+  });
+  
+  // Дополнительное периодическое сравнение URL
+  setInterval(() => {
+    if (window.location.href !== currentUrl) {
+      console.log('📌 URL изменение обнаружено через polling');
+      checkUrlChange();
+    }
+  }, 1000);
   
   function checkUrlChange() {
-    if (window.location.href !== currentUrl) {
-      console.log(`🌐 URL изменился: ${currentUrl} -> ${window.location.href}`);
-      currentUrl = window.location.href;
+    const newUrl = window.location.href;
+    if (newUrl !== currentUrl) {
+      const oldUrl = currentUrl;
+      currentUrl = newUrl;
+      console.log(`🌐 URL изменился:`);
+      console.log(`   Старый: ${oldUrl}`);
+      console.log(`   Новый: ${currentUrl}`);
+      
       resetExtensionState();
       
-      // Запускаем поиск кнопок на новой странице с задержкой
+      // Запускаем поиск кнопок на новой странице с увеличенной задержкой для SPA
       setTimeout(() => {
+        console.log(`🔍 Проверка новой страницы: ${window.location.pathname}`);
         if (isMovieOrSeriesPage()) {
+          console.log('🎯 Начинаем поиск кнопок на новой странице...');
           startButtonSearch();
+        } else {
+          console.log('🚫 Новая страница не является страницей фильма/сериала');
         }
-      }, 1000);
+      }, CONFIG.NAVIGATION_DELAY);
     }
   }
 };
@@ -520,9 +612,11 @@ const observeUrlChange = () => {
 // Функция для запуска поиска кнопок с ограниченными попытками
 const startButtonSearch = () => {
   console.log('🔍 Запуск поиска кнопок...');
+  console.log(`   URL: ${window.location.href}`);
+  console.log(`   Состояние: buttonsAdded=${extensionState.buttonsAdded}, attempts=${extensionState.searchAttempts}`);
   
   // Первая попытка сразу
-  setTimeout(addFreeButtons, 500);
+  setTimeout(addFreeButtons, CONFIG.INITIAL_DELAY);
   
   // Настраиваем интервал с ограниченным количеством попыток
   extensionState.searchInterval = setInterval(() => {
@@ -531,10 +625,18 @@ const startButtonSearch = () => {
       return;
     }
     addFreeButtons();
-  }, 2000); // Увеличиваем интервал до 2 секунд
+  }, CONFIG.SEARCH_INTERVAL);
   
   // Настраиваем наблюдение за DOM
   observeDOM();
+  
+  // Дополнительная проверка каждые 3 секунды (резервный механизм)
+  extensionState.urlCheckInterval = setInterval(() => {
+    if (!extensionState.buttonsAdded && isMovieOrSeriesPage()) {
+      console.log('🔄 Резервная проверка: ищем кнопки...');
+      addFreeButtons();
+    }
+  }, 3000);
   
   // Остановка поиска через максимальное время (20 секунд)
   setTimeout(() => {
@@ -542,7 +644,7 @@ const startButtonSearch = () => {
       console.log('⏰ Время поиска истекло, остановка');
       clearSearchInterval();
     }
-  }, 20000);
+  }, CONFIG.TIMEOUT);
 };
 
 // Инициализация расширения
