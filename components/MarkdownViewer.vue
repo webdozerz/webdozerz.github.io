@@ -32,7 +32,12 @@ function parseMarkdown(text) {
   const codeBlocks = []
   html = html.replace(/```(\w+)?\s*([\s\S]*?)```/g, (match, lang, code) => {
     const index = codeBlocks.length
-    codeBlocks.push({ code: code.trim(), lang: lang || '' })
+    // Экранируем HTML внутри блоков кода
+    const escapedCode = code.trim()
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+    codeBlocks.push({ code: escapedCode, lang: lang || '' })
     return `__CODE_BLOCK_${index}__`
   })
   
@@ -40,7 +45,12 @@ function parseMarkdown(text) {
   const inlineCodes = []
   html = html.replace(/`([^`]+)`/g, (match, code) => {
     const index = inlineCodes.length
-    inlineCodes.push(code)
+    // Экранируем HTML внутри inline кода
+    const escapedCode = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+    inlineCodes.push(escapedCode)
     return `__INLINE_CODE_${index}__`
   })
   
@@ -70,12 +80,10 @@ function parseMarkdown(text) {
   const tables = []
   html = parseTableMarkdown(html, tables)
   
-  // СНАЧАЛА экранируем HTML
-  html = html.replace(/&/g, '&amp;')
-  html = html.replace(/</g, '&lt;')
-  html = html.replace(/>/g, '&gt;')
+  // Экранируем только оставшийся HTML (не в блоках кода и не в таблицах)
+  html = html.replace(/&(?!amp;|lt;|gt;|#)/g, '&amp;')
   
-  // ПОТОМ обрабатываем markdown элементы (теперь они будут создавать правильные теги)
+  // ПОТОМ обрабатываем markdown элементы
   
   // Жирный текст и курсив
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -84,15 +92,18 @@ function parseMarkdown(text) {
   // Ссылки
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
   
-  // Заголовки
+  // Заголовки (обрабатываем от самых длинных к самым коротким)
+  html = html.replace(/^###### (.+)$/gm, '<h6>$1</h6>')
+  html = html.replace(/^##### (.+)$/gm, '<h5>$1</h5>')
+  html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>')
   html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>')
   html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>')
   html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>')
   
   // TODO списки
-  html = html.replace(/^- \[ \] (.+)$/gm, '<div class="todo"><input type="checkbox" disabled> $1</div>')
-  html = html.replace(/^- \[x\] (.+)$/gm, '<div class="todo done"><input type="checkbox" checked disabled> $1</div>')
-  html = html.replace(/^- ✅ (.+)$/gm, '<div class="todo done"><span class="check">✅</span> $1</div>')
+  html = html.replace(/^- \[ \] (.+)$/gm, '<div class="todo"><input type="checkbox" disabled> <span class="todo-text">$1</span></div>')
+  html = html.replace(/^- \[x\] (.+)$/gm, '<div class="todo done"><input type="checkbox" checked disabled> <span class="todo-text">$1</span></div>')
+  html = html.replace(/^- ✅ (.+)$/gm, '<div class="todo done"><span class="check">✅</span> <span class="todo-text">$1</span></div>')
   
   // Обычные списки
   html = html.replace(/^- (.+)$/gm, '<li>$1</li>')
@@ -120,14 +131,9 @@ function parseMarkdown(text) {
   html = html.replace(/<p>(__TABLE_\d+__)<\/p>/g, '$1')
   html = html.replace(/<p><\/p>/g, '')
   
-  // Восстанавливаем таблицы (нужно восстановить теги)
+  // Восстанавливаем таблицы
   tables.forEach((tableHtml, index) => {
-    // Восстанавливаем HTML теги в таблицах
-    let restoredTable = tableHtml
-    restoredTable = restoredTable.replace(/&lt;/g, '<')
-    restoredTable = restoredTable.replace(/&gt;/g, '>')
-    restoredTable = restoredTable.replace(/&amp;/g, '&')
-    html = html.replace(`__TABLE_${index}__`, restoredTable)
+    html = html.replace(`__TABLE_${index}__`, tableHtml)
   })
   
   // Восстанавливаем inline код
@@ -159,9 +165,12 @@ function parseMarkdown(text) {
       processedCode = processedCode.replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="comment">$1</span>')
     }
     
-    // HTML комментарии
+    // HTML комментарии (уже экранированы)
     if (['html', 'xml'].includes(lang)) {
       processedCode = processedCode.replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="comment">$1</span>')
+      // HTML теги
+      processedCode = processedCode.replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9]*)([\s\S]*?)(&gt;)/g, 
+        '<span class="html-tag">$1</span><span class="html-tag-name">$2</span><span class="html-attr">$3</span><span class="html-tag">$4</span>')
     }
     
     // Строки в кавычках
@@ -338,6 +347,21 @@ onMounted(async () => {
   color: #ffb74d;
 }
 
+:deep(h4) {
+  color: #ff8a65;
+  font-size: 1.1rem;
+}
+
+:deep(h5) {
+  color: #ba68c8;
+  font-size: 1rem;
+}
+
+:deep(h6) {
+  color: #90a4ae;
+  font-size: 0.9rem;
+}
+
 :deep(p) {
   color: #e0e0e0;
   margin: 15px 0;
@@ -346,6 +370,25 @@ onMounted(async () => {
 :deep(ul) {
   margin: 15px 0;
   padding-left: 20px;
+  list-style: none;
+}
+
+:deep(ul:has(.todo)) {
+  padding-left: 0;
+  margin: 20px 0;
+}
+
+:deep(ul ul:has(.todo)) {
+  margin-left: 24px;
+  padding-left: 0;
+  border-left: 2px solid #404040;
+  padding-left: 16px;
+}
+
+:deep(ul ul .todo) {
+  margin: 8px 0;
+  padding: 8px 12px;
+  font-size: 0.9rem;
 }
 
 :deep(li) {
@@ -356,13 +399,148 @@ onMounted(async () => {
 :deep(.todo) {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 8px 0;
+  gap: 12px;
+  margin: 12px 0;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #2d2d2d, #343434);
+  border-radius: 8px;
+  border-left: 4px solid #4fc3f7;
   color: #e0e0e0;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+:deep(.todo::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 49%, rgba(79, 195, 247, 0.05) 50%, transparent 51%);
+  z-index: 0;
+}
+
+:deep(.todo > *) {
+  position: relative;
+  z-index: 1;
+}
+
+:deep(.todo:hover) {
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(79, 195, 247, 0.2);
+  border-left-color: #64b5f6;
 }
 
 :deep(.todo.done) {
-  color: #81c784;
+  background: linear-gradient(135deg, #2d4a2d, #3a5a3a);
+  border-left-color: #81c784;
+  color: #a5d6a7;
+}
+
+:deep(.todo.done::before) {
+  background: linear-gradient(45deg, transparent 49%, rgba(129, 199, 132, 0.1) 50%, transparent 51%);
+}
+
+:deep(.todo.done:hover) {
+  border-left-color: #a5d6a7;
+  box-shadow: 0 4px 16px rgba(129, 199, 132, 0.2);
+}
+
+:deep(.todo input[type="checkbox"]) {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #4fc3f7;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+:deep(.todo input[type="checkbox"]:checked) {
+  background: #81c784;
+  border-color: #81c784;
+}
+
+:deep(.todo input[type="checkbox"]:checked::before) {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+:deep(.todo input[type="checkbox"]:hover) {
+  border-color: #64b5f6;
+  box-shadow: 0 0 8px rgba(79, 195, 247, 0.3);
+}
+
+:deep(.todo .check) {
+  font-size: 18px;
+  animation: bounce 0.6s ease;
+}
+
+:deep(.todo-text) {
+  flex: 1;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+:deep(.todo.done .todo-text) {
+  text-decoration: line-through;
+  opacity: 0.8;
+}
+
+:deep(.todo:not(.done) .todo-text) {
+  font-weight: 400;
+}
+
+/* Приоритет задач по цветам левой границы */
+:deep(.todo:contains("🔴")) {
+  border-left-color: #f44336;
+}
+
+:deep(.todo:contains("🟡")) {
+  border-left-color: #ff9800;
+}
+
+:deep(.todo:contains("🟢")) {
+  border-left-color: #4caf50;
+}
+
+@keyframes bounce {
+  0%, 20%, 60%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-4px);
+  }
+  80% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+:deep(.todo) {
+  animation: slideIn 0.4s ease-out;
 }
 
 :deep(code) {
@@ -423,6 +601,19 @@ onMounted(async () => {
 
 :deep(pre code .operator) {
   color: #f8f8f2;
+}
+
+:deep(pre code .html-tag) {
+  color: #f92672;
+}
+
+:deep(pre code .html-tag-name) {
+  color: #66d9ef;
+  font-weight: bold;
+}
+
+:deep(pre code .html-attr) {
+  color: #a6e22e;
 }
 
 :deep(a) {
