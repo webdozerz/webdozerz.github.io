@@ -6,12 +6,43 @@
     <div v-else-if="error" class="error">
       {{ error }}
     </div>
-    <div v-else class="content" v-html="parsedContent"></div>
+    <div v-else class="content" v-html="parsedContent"/>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import hljs from 'highlight.js/lib/core'
+import 'highlight.js/styles/github-dark.css'
+
+// Импортируем только нужные языки для оптимизации
+import javascript from 'highlight.js/lib/languages/javascript'
+import typescript from 'highlight.js/lib/languages/typescript'
+import python from 'highlight.js/lib/languages/python'
+import bash from 'highlight.js/lib/languages/bash'
+import css from 'highlight.js/lib/languages/css'
+import xml from 'highlight.js/lib/languages/xml'
+import json from 'highlight.js/lib/languages/json'
+import yaml from 'highlight.js/lib/languages/yaml'
+import sql from 'highlight.js/lib/languages/sql'
+
+// Регистрируем языки
+hljs.registerLanguage('javascript', javascript)
+hljs.registerLanguage('js', javascript)
+hljs.registerLanguage('typescript', typescript)
+hljs.registerLanguage('ts', typescript)
+hljs.registerLanguage('python', python)
+hljs.registerLanguage('py', python)
+hljs.registerLanguage('bash', bash)
+hljs.registerLanguage('shell', bash)
+hljs.registerLanguage('sh', bash)
+hljs.registerLanguage('css', css)
+hljs.registerLanguage('html', xml)
+hljs.registerLanguage('xml', xml)
+hljs.registerLanguage('json', json)
+hljs.registerLanguage('yaml', yaml)
+hljs.registerLanguage('yml', yaml)
+hljs.registerLanguage('sql', sql)
 
 const props = defineProps({
   filePath: {
@@ -32,12 +63,32 @@ function parseMarkdown(text) {
   const codeBlocks = []
   html = html.replace(/```(\w+)?\s*([\s\S]*?)```/g, (match, lang, code) => {
     const index = codeBlocks.length
-    // Экранируем HTML внутри блоков кода
-    const escapedCode = code.trim()
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-    codeBlocks.push({ code: escapedCode, lang: lang || '' })
+    // Используем highlight.js для подсветки
+    let highlightedCode
+    const cleanCode = code.trim()
+    
+    try {
+      if (lang && hljs.getLanguage(lang)) {
+        highlightedCode = hljs.highlight(cleanCode, { language: lang }).value
+      } else {
+        // Автоопределение языка
+        const result = hljs.highlightAuto(cleanCode)
+        highlightedCode = result.value
+        // Если язык не был указан, но автоопределение сработало
+        if (!lang && result.language) {
+          lang = result.language
+        }
+      }
+    } catch (err) {
+      // Если подсветка не удалась, экранируем HTML и показываем как обычный текст
+      console.warn('Highlight.js error:', err)
+      highlightedCode = cleanCode
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+    }
+    
+    codeBlocks.push({ code: highlightedCode, lang: lang || 'text' })
     return `__CODE_BLOCK_${index}__`
   })
   
@@ -155,48 +206,10 @@ function parseMarkdown(text) {
     html = html.replace(`__ASCII_DIAGRAM_${index}__`, `<pre class="ascii-diagram"><code>${diagram}</code></pre>`)
   })
   
-  // Восстанавливаем блоки кода (с сохранением комментариев и форматирования)
+  // Восстанавливаем блоки кода с highlight.js подсветкой
   codeBlocks.forEach((block, index) => {
-    let processedCode = block.code
-    const lang = block.lang.toLowerCase()
-    
-    // Подсвечиваем комментарии в зависимости от языка
-    if (['bash', 'shell', 'sh', 'python', 'py', 'ruby', 'yaml', 'yml'].includes(lang)) {
-      // Комментарии с #
-      processedCode = processedCode.replace(/(^|\n)(#[^\n]*)/g, '$1<span class="comment">$2</span>')
-    } else if (['javascript', 'js', 'typescript', 'ts', 'java', 'c', 'cpp', 'csharp'].includes(lang)) {
-      // Комментарии с //
-      processedCode = processedCode.replace(/(^|\n)(\/\/[^\n]*)/g, '$1<span class="comment">$2</span>')
-    }
-    
-    // Многострочные комментарии /* */
-    if (['javascript', 'js', 'typescript', 'ts', 'css', 'java', 'c', 'cpp'].includes(lang)) {
-      processedCode = processedCode.replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="comment">$1</span>')
-    }
-    
-    // HTML комментарии (уже экранированы)
-    if (['html', 'xml'].includes(lang)) {
-      processedCode = processedCode.replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="comment">$1</span>')
-      // HTML теги
-      processedCode = processedCode.replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9]*)([\s\S]*?)(&gt;)/g, 
-        '<span class="html-tag">$1</span><span class="html-tag-name">$2</span><span class="html-attr">$3</span><span class="html-tag">$4</span>')
-    }
-    
-    // Строки в кавычках
-    if (['javascript', 'js', 'typescript', 'ts', 'python', 'py'].includes(lang)) {
-      processedCode = processedCode.replace(/(['"])((?:\\.|(?!\1)[^\\])*)\1/g, '<span class="string">$1$2$1</span>')
-    }
-    
-    // Ключевые слова для разных языков
-    if (['javascript', 'js', 'typescript', 'ts'].includes(lang)) {
-      const keywords = ['const', 'let', 'var', 'function', 'class', 'import', 'export', 'if', 'else', 'for', 'while', 'return', 'async', 'await']
-      keywords.forEach(keyword => {
-        processedCode = processedCode.replace(new RegExp(`\\b(${keyword})\\b`, 'g'), '<span class="keyword">$1</span>')
-      })
-    }
-    
-    const langLabel = lang ? ` data-lang="${lang}"` : ''
-    html = html.replace(`__CODE_BLOCK_${index}__`, `<pre${langLabel}><code>${processedCode}</code></pre>`)
+    const langLabel = block.lang !== 'auto' ? ` data-lang="${block.lang}"` : ''
+    html = html.replace(`__CODE_BLOCK_${index}__`, `<pre class="hljs"${langLabel}><code>${block.code}</code></pre>`)
   })
   
   return html
@@ -205,7 +218,7 @@ function parseMarkdown(text) {
 // Функция для обработки таблиц
 function parseTableMarkdown(text, tables) {
   const lines = text.split('\n')
-  let result = []
+  const result = []
   let i = 0
   
   while (i < lines.length) {
@@ -567,8 +580,18 @@ onMounted(async () => {
 }
 
 :deep(pre) {
-  background: #262626;
-  border: 1px solid #404040;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 16px;
+  overflow-x: auto;
+  margin: 20px 0;
+  position: relative;
+}
+
+:deep(pre.hljs) {
+  background: #0d1117 !important;
+  border: 1px solid #30363d;
   border-radius: 6px;
   padding: 16px;
   overflow-x: auto;
@@ -582,53 +605,61 @@ onMounted(async () => {
   top: 8px;
   right: 12px;
   font-size: 12px;
-  color: #888;
+  color: #7d8590;
   text-transform: uppercase;
+  font-weight: 600;
+  z-index: 10;
 }
 
 :deep(pre code) {
-  background: none;
-  color: #e0e0e0;
+  background: none !important;
   padding: 0;
   white-space: pre;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 14px;
   line-height: 1.5;
+  color: #e6edf3;
 }
 
-:deep(pre code .comment) {
-  color: #75715e;
+/* Дополнительная настройка для highlight.js тем */
+:deep(.hljs) {
+  background: #0d1117 !important;
+  color: #e6edf3 !important;
+}
+
+/* Переопределяем некоторые цвета для лучшей читаемости */
+:deep(.hljs-comment),
+:deep(.hljs-quote) {
+  color: #7d8590 !important;
   font-style: italic;
 }
 
-:deep(pre code .string) {
-  color: #a6e22e;
+:deep(.hljs-keyword),
+:deep(.hljs-selector-tag),
+:deep(.hljs-literal),
+:deep(.hljs-type) {
+  color: #ff7b72 !important;
 }
 
-:deep(pre code .keyword) {
-  color: #f92672;
-  font-weight: bold;
+:deep(.hljs-string),
+:deep(.hljs-title) {
+  color: #a5d6ff !important;
 }
 
-:deep(pre code .number) {
-  color: #ae81ff;
+:deep(.hljs-number),
+:deep(.hljs-symbol),
+:deep(.hljs-bullet) {
+  color: #79c0ff !important;
 }
 
-:deep(pre code .operator) {
-  color: #f8f8f2;
+:deep(.hljs-function),
+:deep(.hljs-title.function_) {
+  color: #d2a8ff !important;
 }
 
-:deep(pre code .html-tag) {
-  color: #f92672;
-}
-
-:deep(pre code .html-tag-name) {
-  color: #66d9ef;
-  font-weight: bold;
-}
-
-:deep(pre code .html-attr) {
-  color: #a6e22e;
+:deep(.hljs-variable),
+:deep(.hljs-attr) {
+  color: #ffa657 !important;
 }
 
 :deep(a) {
