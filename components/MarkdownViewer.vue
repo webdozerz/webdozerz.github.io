@@ -120,6 +120,11 @@ function parseMarkdown(text) {
   html = html.replace(/\n/g, '<br>')
   html = '<p>' + html + '</p>'
   
+  // Убираем лишние <br> вокруг TODO элементов
+  html = html.replace(/<br>\s*<div class="todo">/g, '<div class="todo">')
+  html = html.replace(/<\/div>\s*<br>/g, '</div>')
+  html = html.replace(/<br>\s*<\/div>/g, '</div>')
+  
   // Убираем лишние p вокруг блочных элементов
   html = html.replace(/<p>(<h[1-6]>)/g, '$1')
   html = html.replace(/(<\/h[1-6]>)<\/p>/g, '$1')
@@ -130,6 +135,10 @@ function parseMarkdown(text) {
   html = html.replace(/<p>(<hr>)<\/p>/g, '$1')
   html = html.replace(/<p>(__TABLE_\d+__)<\/p>/g, '$1')
   html = html.replace(/<p><\/p>/g, '')
+  
+  // Специально для TODO элементов - убираем p теги и br вокруг них
+  html = html.replace(/<p>\s*(<div class="todo")/g, '$1')
+  html = html.replace(/(<\/div>)\s*<\/p>/g, '$1')
   
   // Восстанавливаем таблицы
   tables.forEach((tableHtml, index) => {
@@ -335,47 +344,53 @@ onMounted(async () => {
   color: #4fc3f7;
   border-bottom: 3px solid #4fc3f7;
   padding-bottom: 10px;
+  margin: 40px 0 25px 0;
 }
 
 :deep(h2) {
   color: #81c784;
   border-bottom: 2px solid #424242;
   padding-bottom: 8px;
+  margin: 35px 0 20px 0;
 }
 
 :deep(h3) {
   color: #ffb74d;
+  margin: 30px 0 18px 0;
 }
 
 :deep(h4) {
   color: #ff8a65;
   font-size: 1.1rem;
+  margin: 25px 0 15px 0;
 }
 
 :deep(h5) {
   color: #ba68c8;
   font-size: 1rem;
+  margin: 20px 0 12px 0;
 }
 
 :deep(h6) {
   color: #90a4ae;
   font-size: 0.9rem;
+  margin: 18px 0 10px 0;
 }
 
 :deep(p) {
   color: #e0e0e0;
-  margin: 15px 0;
+  margin: 10px 0;
 }
 
 :deep(ul) {
-  margin: 15px 0;
+  margin: 8px 0;
   padding-left: 20px;
   list-style: none;
 }
 
 :deep(ul:has(.todo)) {
   padding-left: 0;
-  margin: 20px 0;
+  margin: 12px 0;
 }
 
 :deep(ul ul:has(.todo)) {
@@ -386,22 +401,22 @@ onMounted(async () => {
 }
 
 :deep(ul ul .todo) {
-  margin: 8px 0;
+  margin: 6px 0;
   padding: 8px 12px;
   font-size: 0.9rem;
 }
 
 :deep(li) {
   color: #e0e0e0;
-  margin: 8px 0;
+  margin: 4px 0;
 }
 
 :deep(.todo) {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 12px 0;
-  padding: 12px 16px;
+  margin: 8px 0;
+  padding: 10px 14px;
   background: linear-gradient(135deg, #2d2d2d, #343434);
   border-radius: 8px;
   border-left: 4px solid #4fc3f7;
