@@ -373,6 +373,40 @@ function selectMaterial(material) {
 </script>
 
 <style scoped>
+/* Глобальные стили для темного скроллбара */
+:global(*) {
+  /* Темный скроллбар для WebKit браузеров */
+  &::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #333, #555);
+    border-radius: 6px;
+    border: 1px solid #1a1a1a;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #4fc3f7, #29b6f6);
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: #1a1a1a;
+  }
+}
+
+/* Поддержка для Firefox */
+:global(html) {
+  scrollbar-width: thin;
+  scrollbar-color: #333 #1a1a1a;
+}
+
 .ipr-page {
   background: #0f0f0f;
   min-height: 100vh;
@@ -624,16 +658,50 @@ function selectMaterial(material) {
   background: #0f0f0f;
   z-index: 1000;
   overflow-y: auto;
-  padding: 20px 0;
+  
+  /* Темный скроллбар для WebKit браузеров */
+  &::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4fc3f7, #29b6f6);
+    border-radius: 6px;
+    border: 2px solid #1a1a1a;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #29b6f6, #1976d2);
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: #1a1a1a;
+  }
+  
+  /* Поддержка для Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #4fc3f7 #1a1a1a;
 }
 
 .detail-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #0f0f0f;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #333;
   max-width: 900px;
   margin: 0 auto 20px;
-  padding: 0 20px;
+  padding: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .detail-header h2 {
@@ -643,20 +711,31 @@ function selectMaterial(material) {
 }
 
 .close-btn {
-  background: #ff5252;
+  background: linear-gradient(135deg, #ff5252, #ff1744);
   color: #fff;
   border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  font-weight: bold;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 82, 82, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .close-btn:hover {
-  background: #ff1744;
-  transform: scale(1.1);
+  background: linear-gradient(135deg, #ff1744, #d50000);
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(255, 82, 82, 0.4);
+}
+
+.close-btn:active {
+  transform: scale(0.95);
 }
 
 @media (max-width: 768px) {
@@ -684,6 +763,21 @@ function selectMaterial(material) {
   .material-card {
     flex-direction: column;
     text-align: center;
+  }
+
+  .detail-header {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+
+  .detail-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .close-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
   }
 }
 </style> 
