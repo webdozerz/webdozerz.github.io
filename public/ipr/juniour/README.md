@@ -24,7 +24,7 @@
 ```
 crypto-learning-hub/
 ├── 📄 crypto-learning-hub-concept.md      # Общая концепция проекта
-├── 📄 stage-1-html-css.md                 # ТЗ: HTML/CSS
+├── 📄 stage-1-html-css.md                 # ТЗ: HTML/CSS/SCSS/BEM
 ├── 📄 stage-2-javascript-basic.md         # ТЗ: JavaScript основы
 ├── 📄 stage-3-typescript.md               # ТЗ: TypeScript + ООП
 ├── 📄 stage-4-vue-components.md           # ТЗ: Vue.js компоненты + Composition API
@@ -36,32 +36,6 @@ crypto-learning-hub/
 ```
 
 ## 🗺️ Карта развития (10 этапов)
-
-### 📊 Схема прогресса
-
-```mermaid
-graph TD
-    A["🎨 Этап 1: HTML/CSS<br/>2 недели"] --> B["📱 Этап 2: JavaScript<br/>3 недели"]
-    B --> C["🔷 Этап 3: TypeScript<br/>2 недели"]
-    C --> D["⚡ Этап 4: Vue.js<br/>3 недели"]
-    D --> E["🌐 Этап 5: Nuxt.js<br/>2 недели"]
-    E --> F["🔄 Этап 6: API/HTTP<br/>2 недели"]
-    F --> G["🔐 Этап 7: Auth/JWT<br/>2 недели"]
-    G --> H["🌍 Этап 8: Web3<br/>3 недели"]
-    H --> I["🧪 Этап 9: Testing<br/>2 недели"]
-    I --> J["📈 Этап 10: SEO/Docs<br/>1 неделя"]
-
-    style A fill:#ff9999
-    style B fill:#ffcc99
-    style C fill:#ffff99
-    style D fill:#ccff99
-    style E fill:#99ffcc
-    style F fill:#99ccff
-    style G fill:#cc99ff
-    style H fill:#ff99cc
-    style I fill:#ffcccc
-    style J fill:#ccffcc
-```
 
 ### 📋 Детальный план этапов
 
