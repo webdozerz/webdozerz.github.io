@@ -358,13 +358,6 @@ const generalMaterials = ref([
     description: 'Продвинутый шаблон дневника обучения',
     icon: '📋',
     filePath: 'ipr/middle/learning-log-template.md'
-  },
-  {
-    id: 'test-calculator',
-    title: 'Калькулятор трудозатрат',
-    description: 'Инструмент для оценки времени тестирования',
-    icon: '🧮',
-    filePath: 'test-effort-calculator.md'
   }
 ])
 
