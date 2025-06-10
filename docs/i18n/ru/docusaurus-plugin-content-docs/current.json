@@ -1,0 +1,14 @@
+{
+  "version.label": {
+    "message": "Далее",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.Tutorial - Basics": {
+    "message": "Руководство - Основы",
+    "description": "The label for category Tutorial - Basics in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.link.Tutorial Intro": {
+    "message": "Введение в руководство",
+    "description": "The label for link Tutorial Intro in sidebar tutorialSidebar"
+  }
+} 
