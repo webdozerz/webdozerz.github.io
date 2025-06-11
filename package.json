@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@nuxtjs/google-fonts": "^3.2.0",
+    "axios": "^1.9.0",
     "highlight.js": "^11.11.1",
     "nuxt": "^3.12.2",
     "vue": "latest"
