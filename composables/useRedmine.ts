@@ -109,8 +109,7 @@ export const useRedmine = () => {
   };
 
   const getVacations = async (): Promise<VacationInfo[]> => {
-    // Проверяем, выполняется ли код на сервере (во время сборки)
-    if (import.meta.server) {
+    try {
       console.log('🔧 Начинаем загрузку данных из Redmine...');
       console.log('🔧 Runtime config:', {
         redmineUrl: config.public.redmineUrl,
@@ -120,23 +119,24 @@ export const useRedmine = () => {
         hasPassword: !!config.redminePassword,
       });
       
-      try {
-        // На сервере делаем прямой запрос к Redmine API
-        const issues = await getVacationIssues();
-        console.log(`✅ Получено ${issues.length} задач из Redmine`);
-        
-        const vacations = deduplicateVacations(issues).map(issue => mapIssueToVacationInfo(issue));
-        console.log(`✅ Обработано ${vacations.length} отпусков после дедупликации`);
-        
-        return vacations;
-      } catch (error) {
-        console.error('❌ Ошибка при получении данных:', error);
-        throw error;
+      // Делаем прямой запрос к Redmine API
+      const issues = await getVacationIssues();
+      console.log(`✅ Получено ${issues.length} задач из Redmine`);
+      
+      const vacations = deduplicateVacations(issues).map(issue => mapIssueToVacationInfo(issue));
+      console.log(`✅ Обработано ${vacations.length} отпусков после дедупликации`);
+      
+      return vacations;
+    } catch (error) {
+      console.error('❌ Ошибка при получении данных:', error);
+      
+      // Если ошибка CORS, возвращаем пустой массив вместо ошибки
+      if (error instanceof Error && error.message.includes('CORS')) {
+        console.log('⚠️ CORS ошибка - возвращаем пустой массив');
+        return [];
       }
-    } else {
-      // На клиенте возвращаем пустой массив или показываем ошибку
-      console.log('ℹ️ Код выполняется на клиенте, данные должны быть предзагружены');
-      throw new Error('Данные доступны только во время сборки');
+      
+      throw error;
     }
   };
 

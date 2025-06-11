@@ -58,15 +58,14 @@
 import type { VacationInfo } from '~/types/redmine';
 
 // Получаем данные об отпусках во время сборки (SSG)
-const { data: allVacations, pending, error, refresh } = await useLazyAsyncData(
+const { data: allVacations, pending, error, refresh } = await useAsyncData(
   'vacations',
   async () => {
     const { getVacations } = useRedmine();
     return await getVacations();
   },
   {
-    default: () => [] as VacationInfo[],
-    server: true // Выполняется только на сервере
+    default: () => [] as VacationInfo[]
   }
 );
 
