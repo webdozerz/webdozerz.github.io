@@ -8,18 +8,25 @@
     <!-- Переключатель между уровнями -->
     <div class="level-switcher">
       <button 
-        @click="currentLevel = 'junior'" 
-        :class="{ active: currentLevel === 'junior' }"
+        :class="{ active: currentLevel === 'junior' }" 
         class="level-btn"
+        @click="currentLevel = 'junior'"
       >
         📚 Junior Level
       </button>
       <button 
-        @click="currentLevel = 'middle'" 
-        :class="{ active: currentLevel === 'middle' }"
+        :class="{ active: currentLevel === 'middle' }" 
         class="level-btn"
+        @click="currentLevel = 'middle'"
       >
         💎 Middle Level
+      </button>
+      <button 
+        :class="{ active: currentLevel === 'senior' }" 
+        class="level-btn senior-btn"
+        @click="currentLevel = 'senior'"
+      >
+        🌟 Senior Level
       </button>
     </div>
 
@@ -49,9 +56,9 @@
         <div 
           v-for="stage in juniorStages" 
           :key="stage.id"
-          @click="selectStage(stage)"
           :class="{ active: selectedStage?.id === stage.id }"
           class="stage-card"
+          @click="selectStage(stage)"
         >
           <div class="stage-number">{{ stage.number }}</div>
           <div class="stage-info">
@@ -93,9 +100,9 @@
         <div 
           v-for="stage in middleStages" 
           :key="stage.id"
-          @click="selectStage(stage)"
           :class="{ active: selectedStage?.id === stage.id }"
           class="stage-card"
+          @click="selectStage(stage)"
         >
           <div class="stage-number">{{ stage.number }}</div>
           <div class="stage-info">
@@ -111,13 +118,61 @@
       </div>
     </div>
 
+    <!-- Контент для Senior -->
+    <div v-if="currentLevel === 'senior'" class="level-content">
+      <div class="level-header senior-header">
+        <h2>🌟 Senior Frontend Developer</h2>
+        <p>Экспертный уровень: enterprise архитектура, техническое лидерство, индустриальное влияние</p>
+        <div class="stats">
+          <div class="stat-item">
+            <span class="label">Этапов:</span>
+            <span class="value">10</span>
+          </div>
+          <div class="stat-item">
+            <span class="label">Время:</span>
+            <span class="value">31 неделя</span>
+          </div>
+          <div class="stat-item">
+            <span class="label">Максимум баллов:</span>
+            <span class="value">1500</span>
+          </div>
+          <div class="stat-item">
+            <span class="label">Уровень масштаба:</span>
+            <span class="value">Enterprise</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Этапы Senior -->
+      <div class="stages-grid">
+        <div 
+          v-for="stage in seniorStages" 
+          :key="stage.id"
+          :class="{ active: selectedStage?.id === stage.id }"
+          class="stage-card senior-card"
+          @click="selectStage(stage)"
+        >
+          <div class="stage-number senior-number">{{ stage.number }}</div>
+          <div class="stage-info">
+            <h3>{{ stage.title }}</h3>
+            <p class="duration">{{ stage.duration }}</p>
+            <div class="technologies">
+              <span v-for="tech in stage.technologies" :key="tech" class="tech-tag senior-tech">
+                {{ tech }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Детальный просмотр этапа -->
     <div v-if="selectedStage" class="stage-detail">
       <div class="detail-header">
         <h2>{{ selectedStage.title }}</h2>
-        <button @click="selectedStage = null" class="close-btn">✕</button>
+        <button class="close-btn" @click="selectedStage = null">✕</button>
       </div>
-      <MarkdownViewer :file-path="selectedStage.filePath" :key="selectedStage.filePath" />
+      <MarkdownViewer :key="selectedStage.filePath" :file-path="selectedStage.filePath" />
     </div>
 
     <!-- Общие материалы -->
@@ -127,8 +182,8 @@
         <div 
           v-for="material in generalMaterials" 
           :key="material.id"
-          @click="selectMaterial(material)"
           class="material-card"
+          @click="selectMaterial(material)"
         >
           <div class="material-icon">{{ material.icon }}</div>
           <div class="material-info">
@@ -143,9 +198,9 @@
     <div v-if="selectedMaterial" class="material-detail">
       <div class="detail-header">
         <h2>{{ selectedMaterial.title }}</h2>
-        <button @click="selectedMaterial = null" class="close-btn">✕</button>
+        <button class="close-btn" @click="selectedMaterial = null">✕</button>
       </div>
-      <MarkdownViewer :file-path="selectedMaterial.filePath" :key="selectedMaterial.filePath" />
+      <MarkdownViewer :key="selectedMaterial.filePath" :file-path="selectedMaterial.filePath" />
     </div>
   </div>
 </template>
@@ -315,6 +370,90 @@ const middleStages = ref([
   }
 ])
 
+// Этапы для Senior
+const seniorStages = ref([
+  {
+    id: 'stage-23',
+    number: 23,
+    title: 'Enterprise Architecture',
+    duration: '4 недели',
+    technologies: ['Microservices', 'Service Mesh', 'Event Sourcing'],
+    filePath: 'ipr/senior/stage-23-enterprise-architecture.md'
+  },
+  {
+    id: 'stage-24',
+    number: 24,
+    title: 'Platform Engineering',
+    duration: '3 недели',
+    technologies: ['Backstage', 'CI/CD Platform', 'Developer Tools'],
+    filePath: 'ipr/senior/stage-24-platform-engineering.md'
+  },
+  {
+    id: 'stage-25',
+    number: 25,
+    title: 'Data Engineering',
+    duration: '4 недели',
+    technologies: ['Data Lake', 'ClickHouse', 'Apache Airflow'],
+    filePath: 'ipr/senior/stage-25-data-engineering.md'
+  },
+  {
+    id: 'stage-26',
+    number: 26,
+    title: 'AI/ML Integration',
+    duration: '4 недели',
+    technologies: ['TensorFlow', 'MLOps', 'Prediction Models'],
+    filePath: 'ipr/senior/stage-26-ai-ml-integration.md'
+  },
+  {
+    id: 'stage-27',
+    number: 27,
+    title: 'Research & Innovation',
+    duration: '3 недели',
+    technologies: ['Web3', 'Edge Computing', 'Emerging Tech'],
+    filePath: 'ipr/senior/stage-27-research-innovation.md'
+  },
+  {
+    id: 'stage-28',
+    number: 28,
+    title: 'Business Metrics',
+    duration: '3 недели',
+    technologies: ['KPIs', 'A/B Testing', 'Product Analytics'],
+    filePath: 'ipr/senior/stage-28-business-metrics.md'
+  },
+  {
+    id: 'stage-29',
+    number: 29,
+    title: 'Team Platform',
+    duration: '3 недели',
+    technologies: ['Developer Experience', 'Internal Tools', 'Automation'],
+    filePath: 'ipr/senior/stage-29-team-platform.md'
+  },
+  {
+    id: 'stage-30',
+    number: 30,
+    title: 'Strategic Planning',
+    duration: '2 недели',
+    technologies: ['Tech Roadmap', 'ADRs', 'Governance'],
+    filePath: 'ipr/senior/stage-30-strategic-planning.md'
+  },
+  {
+    id: 'stage-31',
+    number: 31,
+    title: 'Industry Impact',
+    duration: '3 недели',
+    technologies: ['Open Source', 'Thought Leadership', 'Community'],
+    filePath: 'ipr/senior/stage-31-industry-impact.md'
+  },
+  {
+    id: 'stage-32',
+    number: 32,
+    title: 'Thought Leadership',
+    duration: '2 недели',
+    technologies: ['Knowledge Platform', 'Mentoring Scale', 'Legacy'],
+    filePath: 'ipr/senior/stage-32-thought-leadership.md'
+  }
+])
+
 // Общие материалы
 const generalMaterials = ref([
   {
@@ -332,6 +471,13 @@ const generalMaterials = ref([
     filePath: 'ipr/middle/README.md'
   },
   {
+    id: 'senior-readme',
+    title: 'Senior README',
+    description: 'Общая информация о Senior треке',
+    icon: '🌟',
+    filePath: 'ipr/senior/README.md'
+  },
+  {
     id: 'junior-concept',
     title: 'Концепция Junior проекта',
     description: 'Crypto Learning Hub - концепция проекта',
@@ -346,6 +492,13 @@ const generalMaterials = ref([
     filePath: 'ipr/middle/crypto-learning-hub-advanced-concept.md'
   },
   {
+    id: 'senior-concept',
+    title: 'Концепция Senior проекта',
+    description: 'Enterprise экосистема для Senior разработчиков',
+    icon: '🏗️',
+    filePath: 'ipr/senior/senior-concept.md'
+  },
+  {
     id: 'junior-log',
     title: 'Шаблон дневника Junior',
     description: 'Шаблон для ведения дневника обучения',
@@ -358,6 +511,13 @@ const generalMaterials = ref([
     description: 'Продвинутый шаблон дневника обучения',
     icon: '📋',
     filePath: 'ipr/middle/learning-log-template.md'
+  },
+  {
+    id: 'senior-log',
+    title: 'Шаблон дневника Senior',
+    description: 'Экспертный шаблон дневника обучения',
+    icon: '📊',
+    filePath: 'ipr/senior/senior-learning-log-template.md'
   }
 ])
 
@@ -742,11 +902,14 @@ function selectMaterial(material) {
   .level-switcher {
     flex-direction: column;
     align-items: center;
+    gap: 15px;
   }
 
   .level-btn {
     width: 100%;
     max-width: 300px;
+    padding: 12px 25px;
+    font-size: 1rem;
   }
 
   .stats {
@@ -779,5 +942,52 @@ function selectMaterial(material) {
     height: 40px;
     font-size: 1.1rem;
   }
+}
+
+/* Стили для Senior уровня */
+.senior-btn {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+}
+
+.senior-btn:hover {
+  background: linear-gradient(135deg, #f57c00, #ef6c00);
+}
+
+.senior-btn.active {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  box-shadow: 0 8px 25px rgba(255, 152, 0, 0.3);
+}
+
+.senior-header {
+  background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+  border: 1px solid #ff9800;
+}
+
+.senior-header h2 {
+  color: #ff9800;
+}
+
+.senior-card {
+  border: 1px solid #444;
+}
+
+.senior-card:hover {
+  border-color: #ff9800;
+  box-shadow: 0 8px 25px rgba(255, 152, 0, 0.2);
+}
+
+.senior-card.active {
+  border-color: #ff9800;
+  background: linear-gradient(135deg, #2a1f0e, #3d2914);
+  box-shadow: 0 8px 25px rgba(255, 152, 0, 0.3);
+}
+
+.senior-number {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+}
+
+.senior-tech {
+  background: #444;
+  color: #ff9800;
 }
 </style> 
