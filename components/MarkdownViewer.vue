@@ -522,11 +522,6 @@ onMounted(async () => {
   font-weight: 500;
 }
 
-:deep(.todo.done .todo-text) {
-  text-decoration: line-through;
-  opacity: 0.8;
-}
-
 :deep(.todo:not(.done) .todo-text) {
   font-weight: 400;
 }

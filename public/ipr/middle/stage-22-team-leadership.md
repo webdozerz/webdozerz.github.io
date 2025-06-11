@@ -45,12 +45,11 @@
 
 ### 📖 22.1 Техническая документация
 
-````markdown
-# 📚 Crypto Learning Hub - Technical Documentation
+# 📚 Crypto Learning Hub - Техническая документация
 
-## 🏗️ Architecture Overview
+## 🏗️ Обзор архитектуры
 
-### System Architecture
+### Системная архитектура
 
 ```mermaid
 graph TB
@@ -63,13 +62,13 @@ graph TB
     E --> H[Message Queue]
     E --> I[Blockchain Network]
 
-    subgraph "Frontend Layer"
+    subgraph "Уровень Frontend"
         C --> C1[Nuxt.js App]
         C --> C2[PWA]
         C --> C3[Browser Extension]
     end
 
-    subgraph "Backend Services"
+    subgraph "Backend Сервисы"
         E --> E1[User Service]
         E --> E2[Trading Service]
         E --> E3[Portfolio Service]
@@ -77,16 +76,15 @@ graph TB
         E --> E5[Analytics Service]
     end
 
-    subgraph "Data Layer"
+    subgraph "Уровень данных"
         F --> F1[PostgreSQL]
         F --> F2[MongoDB]
         G --> G1[Redis]
         H --> H1[RabbitMQ]
     end
 ```
-````
 
-### Data Flow Architecture
+### Архитектура потока данных
 
 ```mermaid
 sequenceDiagram
@@ -109,56 +107,56 @@ sequenceDiagram
     F-->>U: UI Update
 ```
 
-## 🚀 Getting Started
+## 🚀 Начало работы
 
-### Prerequisites
+### Предварительные требования
 
 - Node.js 18+
 - Docker & Docker Compose
 - Git
-- VS Code or similar IDE
+- VS Code или аналогичная IDE
 
-### Quick Setup
+### Быстрая настройка
 
 ```bash
-# Clone repository
+# Клонирование репозитория
 git clone https://github.com/company/crypto-learning-hub.git
 cd crypto-learning-hub
 
-# Install dependencies
+# Установка зависимостей
 npm install
 
-# Setup environment
+# Настройка окружения
 cp .env.example .env.local
 
-# Start development environment
+# Запуск среды разработки
 docker-compose up -d
 npm run dev
 ```
 
-### Project Structure
+### Структура проекта
 
 ```
 crypto-learning-hub/
 ├── 📁 apps/
-│   ├── 📁 frontend/          # Nuxt.js application
+│   ├── 📁 frontend/          # Nuxt.js приложение
 │   ├── 📁 api/               # Node.js API
-│   ├── 📁 extension/         # Browser extension
-│   └── 📁 pwa/               # PWA specific code
+│   ├── 📁 extension/         # Браузерное расширение
+│   └── 📁 pwa/               # PWA специфичный код
 ├── 📁 packages/
-│   ├── 📁 shared/            # Shared utilities
-│   ├── 📁 ui/                # UI components library
-│   └── 📁 types/             # TypeScript definitions
-├── 📁 docs/                  # Documentation
-├── 📁 tools/                 # Build tools and scripts
-└── 📁 infrastructure/        # Docker, K8s, etc.
+│   ├── 📁 shared/            # Общие утилиты
+│   ├── 📁 ui/                # Библиотека UI компонентов
+│   └── 📁 types/             # TypeScript определения
+├── 📁 docs/                  # Документация
+├── 📁 tools/                 # Инструменты сборки и скрипты
+└── 📁 infrastructure/        # Docker, K8s, и т.д.
 ```
 
-## 💻 Development Guidelines
+## 💻 Руководство по разработке
 
-### Code Style
+### Стиль кода
 
-We use ESLint and Prettier for consistent code formatting:
+Мы используем ESLint и Prettier для единообразного форматирования кода:
 
 ```json
 // .eslintrc.js
@@ -177,17 +175,17 @@ We use ESLint and Prettier for consistent code formatting:
 
 ### Git Workflow
 
-We follow GitFlow with the following branches:
+Мы следуем GitFlow со следующими ветками:
 
-- `main` - production code
-- `develop` - integration branch
-- `feature/*` - feature development
-- `release/*` - release preparation
-- `hotfix/*` - production fixes
+- `main` - производственный код
+- `develop` - ветка интеграции
+- `feature/*` - разработка функций
+- `release/*` - подготовка релиза
+- `hotfix/*` - исправления продакшена
 
-### Commit Convention
+### Соглашение о коммитах
 
-We use Conventional Commits:
+Мы используем Conventional Commits:
 
 ```
 type(scope): description
@@ -197,10 +195,10 @@ fix(trading): resolve order execution bug
 docs(api): update endpoint documentation
 ```
 
-### TypeScript Guidelines
+### Руководство по TypeScript
 
 ```typescript
-// ✅ Good: Use explicit types
+// ✅ Хорошо: Используйте явные типы
 interface User {
   id: string;
   email: string;
@@ -208,58 +206,58 @@ interface User {
 }
 
 const createUser = (userData: User): Promise<User> => {
-  // Implementation
+  // Реализация
 };
 
-// ✅ Good: Use utility types
+// ✅ Хорошо: Используйте утилитарные типы
 type UserUpdate = Partial<Pick<User, "email">>;
 
-// ❌ Bad: Using any
+// ❌ Плохо: Использование any
 const processData = (data: any) => {
-  // Avoid this
+  // Избегайте этого
 };
 ```
 
-## 🧪 Testing Strategy
+## 🧪 Стратегия тестирования
 
-### Testing Pyramid
+### Пирамида тестирования
 
 ```mermaid
 graph TB
-    A[E2E Tests<br/>High-level scenarios] --> B[Integration Tests<br/>API & Component interactions]
-    B --> C[Unit Tests<br/>Individual functions & components]
+    A[E2E тесты<br/>Высокоуровневые сценарии] --> B[Интеграционные тесты<br/>API и взаимодействие компонентов]
+    B --> C[Модульные тесты<br/>Отдельные функции и компоненты]
 
     style A fill:#ff6b6b
     style B fill:#4ecdc4
     style C fill:#45b7d1
 ```
 
-### Test Categories
+### Категории тестов
 
-- **Unit Tests**: 70% coverage minimum
-- **Integration Tests**: API endpoints and component interactions
-- **E2E Tests**: Critical user journeys
-- **Performance Tests**: Load testing and optimization
+- **Модульные тесты**: минимум 70% покрытия
+- **Интеграционные тесты**: API эндпоинты и взаимодействие компонентов
+- **E2E тесты**: критические пользовательские сценарии
+- **Нагрузочные тесты**: тестирование нагрузки и оптимизация
 
-### Writing Good Tests
+### Написание хороших тестов
 
 ```typescript
-// ✅ Good test structure
+// ✅ Хорошая структура теста
 describe("CryptoCard Component", () => {
   it("should display crypto information correctly", () => {
-    // Arrange
+    // Подготовка
     const mockCrypto = {
       id: "bitcoin",
       name: "Bitcoin",
       current_price: 45000,
     };
 
-    // Act
+    // Действие
     const wrapper = mount(CryptoCard, {
       props: { crypto: mockCrypto },
     });
 
-    // Assert
+    // Проверка
     expect(wrapper.find('[data-testid="crypto-name"]').text()).toBe("Bitcoin");
     expect(wrapper.find('[data-testid="crypto-price"]').text()).toContain(
       "$45,000"
@@ -268,9 +266,9 @@ describe("CryptoCard Component", () => {
 });
 ```
 
-## 🔄 CI/CD Pipeline
+## 🔄 CI/CD конвейер
 
-### Pipeline Stages
+### Этапы конвейера
 
 ```mermaid
 graph LR
@@ -284,54 +282,54 @@ graph LR
     H --> I[Deploy to Production]
 ```
 
-### Quality Gates
+### Контрольные точки качества
 
-Before merging to main:
+Перед слиянием в main:
 
-- ✅ All tests pass
-- ✅ Code coverage > 80%
-- ✅ No security vulnerabilities
-- ✅ Performance benchmarks met
-- ✅ Code review approved
+- ✅ Все тесты проходят
+- ✅ Покрытие кода > 80%
+- ✅ Нет уязвимостей безопасности
+- ✅ Тесты производительности пройдены
+- ✅ Code review одобрен
 
-## 🏗️ Architecture Decisions
+## 🏗️ Архитектурные решения
 
-### ADR-001: State Management Strategy
+### ADR-001: Стратегия управления состоянием
 
-**Status**: Accepted  
-**Date**: 2024-01-15
+**Статус**: Принято
+**Дата**: 2024-01-15
 
-**Context**: Need to choose state management solution for complex crypto trading application.
+**Контекст**: Необходимо выбрать решение для управления состоянием в сложном криптотрейдинговом приложении.
 
-**Decision**: Use Pinia for Vue.js state management with the following rationale:
+**Решение**: Использовать Pinia для управления состоянием Vue.js по следующим причинам:
 
-- Type-safe with TypeScript
-- Modular store structure
-- DevTools support
-- SSR compatibility
+- Типобезопасность с TypeScript
+- Модульная структура хранилища
+- Поддержка DevTools
+- Совместимость с SSR
 
-**Consequences**:
+**Последствия**:
 
-- Better maintainability
-- Easier testing
-- Learning curve for team
+- Лучшая поддерживаемость
+- Упрощенное тестирование
+- Кривая обучения для команды
 
-### ADR-002: API Design Pattern
+### ADR-002: Паттерн проектирования API
 
-**Status**: Accepted  
-**Date**: 2024-01-20
+**Статус**: Принято
+**Дата**: 2024-01-20
 
-**Decision**: Implement Repository pattern with DTO validation:
+**Решение**: Реализовать паттерн Repository с валидацией DTO:
 
 ```typescript
-// Repository interface
+// Интерфейс Repository
 interface CryptoRepository {
   findById(id: string): Promise<Crypto>;
   findAll(filters: CryptoFilters): Promise<Crypto[]>;
   create(data: CreateCryptoDto): Promise<Crypto>;
 }
 
-// Implementation
+// Реализация
 export class ApiCryptoRepository implements CryptoRepository {
   async findById(id: string): Promise<Crypto> {
     const response = await $fetch<CryptoDto>(`/api/crypto/${id}`);
@@ -340,442 +338,451 @@ export class ApiCryptoRepository implements CryptoRepository {
 }
 ```
 
-## 🚀 Deployment Guide
+## 🚀 Руководство по развертыванию
 
 ### Environment Configuration
 
-| Environment | URL                   | Purpose           |
-| ----------- | --------------------- | ----------------- |
-| Development | localhost:3000        | Local development |
-| Staging     | staging.cryptohub.com | QA testing        |
-| Production  | cryptohub.com         | Live application  |
+| Environment | URL                   | Purpose              |
+| ----------- | --------------------- | -------------------- |
+| Development | localhost:3000        | Локальная разработка |
+| Staging     | staging.cryptohub.com | QA тестирование      |
+| Production  | cryptohub.com         | Живое приложение     |
 
-### Deployment Process
+### Процесс развертывания
 
-1. **Staging Deployment**
+1. **Развертывание Staging**
 
-   - Automatic on merge to `develop`
-   - Runs full test suite
-   - Available for QA testing
+   - Автоматическое при слиянии в `develop`
+   - Запускается полный набор тестов
+   - Доступно для QA тестирования
 
-2. **Production Deployment**
-   - Manual approval required
-   - Blue-green deployment strategy
-   - Automatic rollback on failure
+2. **Развертывание Production**
+   - Требуется ручное одобрение
+   - Стратегия blue-green развертывания
+   - Автоматический откат при сбое
 
-### Monitoring & Alerting
+### Мониторинг и оповещения
 
-- **Application**: Sentry for error tracking
-- **Infrastructure**: Prometheus + Grafana
-- **Logs**: ELK Stack
-- **Uptime**: StatusPage integration
+- **Приложение**: Sentry для отслеживания ошибок
+- **Инфраструктура**: Prometheus + Grafana
+- **Логи**: ELK Stack
+- **Время работы**: Интеграция StatusPage
 
-## 🔧 Troubleshooting
+## 🔧 Устранение неполадок
 
-### Common Issues
+### Распространенные проблемы
 
-**Issue**: Build fails with TypeScript errors
+**Проблема**: Сборка не удается из-за ошибок TypeScript
 
 ```bash
-# Solution: Clear cache and reinstall
+# Решение: Очистить кеш и переустановить
 rm -rf node_modules package-lock.json
 npm install
 npm run type-check
 ```
 
-**Issue**: Tests failing in CI but passing locally
+**Проблема**: Тесты падают в CI, но проходят локально
 
 ```bash
-# Solution: Ensure consistent Node.js version
+# Решение: Обеспечить единообразную версию Node.js
 nvm use 18
-npm ci  # Use exact versions from lock file
+npm ci  # Использовать точные версии из lock файла
 ```
 
-### Performance Debugging
+### Отладка производительности
 
 ```typescript
-// Use performance API for debugging
+// Используйте performance API для отладки
 const start = performance.now();
 await heavyOperation();
 const end = performance.now();
-console.log(`Operation took ${end - start} milliseconds`);
+console.log(`Операция заняла ${end - start} миллисекунд`);
 ```
 
-## 📞 Support & Resources
+## 📞 Поддержка и ресурсы
 
-- **Technical Lead**: @technical-lead
+- **Технический лидер**: @technical-lead
 - **DevOps**: @devops-team
-- **Documentation**: [Internal Wiki](https://wiki.company.com)
-- **Architecture Reviews**: Every Friday 2PM
+- **Документация**: [Внутренняя вики](https://wiki.company.com)
+- **Архитектурные ревью**: Каждую пятницу в 14:00
 
 ````
 
-### 👨‍🏫 22.2 Code Review Guidelines
+### 👨‍🏫 22.2 Руководство по Code Review
 
 ```markdown
-# 📋 Code Review Guidelines
+# 📋 Руководство по Code Review
 
-## 🎯 Review Objectives
+## 🎯 Цели обзора
 
-1. **Correctness**: Does the code solve the problem correctly?
-2. **Maintainability**: Is the code easy to understand and modify?
-3. **Performance**: Are there any performance concerns?
-4. **Security**: Are there security vulnerabilities?
-5. **Testing**: Is the code properly tested?
+1. **Корректность**: Решает ли код проблему правильно?
+2. **Поддерживаемость**: Легко ли понять и изменить код?
+3. **Производительность**: Есть ли проблемы с производительностью?
+4. **Безопасность**: Есть ли уязвимости безопасности?
+5. **Тестирование**: Правильно ли протестирован код?
 
-## ✅ Review Checklist
+## ✅ Чек-лист обзора
 
-### General Code Quality
+### Общее качество кода
 
-- [ ] Code follows established style guidelines
-- [ ] Functions and variables have descriptive names
-- [ ] Code is properly commented where necessary
-- [ ] No console.log or debug code left behind
-- [ ] Error handling is implemented appropriately
+- [ ] Код следует установленным руководящим принципам стиля
+- [ ] Функции и переменные имеют описательные имена
+- [ ] Код правильно прокомментирован где необходимо
+- [ ] Нет console.log или отладочного кода
+- [ ] Обработка ошибок реализована соответствующе
 
-### TypeScript Specific
+### Специфично для TypeScript
 
-- [ ] Proper type definitions used
-- [ ] No use of `any` type without justification
-- [ ] Interfaces and types are properly exported
-- [ ] Generic types used appropriately
+- [ ] Использованы правильные определения типов
+- [ ] Нет использования типа `any` без обоснования
+- [ ] Интерфейсы и типы правильно экспортированы
+- [ ] Обобщенные типы используются соответствующе
 
-### Vue.js/Nuxt.js Specific
+### Специфично для Vue.js/Nuxt.js
 
-- [ ] Components follow composition API patterns
-- [ ] Proper reactive state management
-- [ ] Lifecycle hooks used correctly
-- [ ] Props and events properly typed
+- [ ] Компоненты следуют паттернам composition API
+- [ ] Правильное управление реактивным состоянием
+- [ ] Lifecycle хуки используются корректно
+- [ ] Props и события правильно типизированы
 
-### Performance
+### Производительность
 
-- [ ] No unnecessary re-renders or computations
-- [ ] Proper use of computed properties
-- [ ] Images and assets optimized
-- [ ] Bundle size impact considered
+- [ ] Нет ненужных повторных рендеров или вычислений
+- [ ] Правильное использование computed свойств
+- [ ] Изображения и ресурсы оптимизированы
+- [ ] Влияние на размер bundle рассмотрено
 
-### Security
+### Безопасность
 
-- [ ] User input properly validated
-- [ ] No sensitive data in client-side code
-- [ ] Proper authentication checks
-- [ ] CORS and CSP headers configured
+- [ ] Пользовательский ввод правильно валидирован
+- [ ] Нет чувствительных данных в клиентском коде
+- [ ] Правильные проверки аутентификации
+- [ ] Настроены заголовки CORS и CSP
 
-### Testing
+### Тестирование
 
-- [ ] Unit tests cover new functionality
-- [ ] Integration tests for complex features
-- [ ] Edge cases considered
-- [ ] Mock data is realistic
+- [ ] Модульные тесты покрывают новую функциональность
+- [ ] Интеграционные тесты для сложных функций
+- [ ] Рассмотрены крайние случаи
+- [ ] Мок данные реалистичны
 
-## 💬 Review Communication
+## 💬 Коммуникация в обзоре
 
-### Giving Feedback
+### Предоставление обратной связи
 
-**✅ Good Examples:**
+**✅ Хорошие примеры:**
 
-````
-
-Consider using a more descriptive variable name here:
+Рассмотрите использование более описательного имени переменной:
 `const data` → `const cryptoPrices`
 
-This could be optimized by memoizing the expensive calculation:
+Это можно оптимизировать мемоизацией дорогого вычисления:
 
 ```typescript
 const expensiveValue = computed(() => heavyCalculation(props.data));
 ```
 
-**❌ Bad Examples:**
+**❌ Плохие примеры:**
 
 ```
-This is wrong.
-Change this.
-Bad code.
+Это неправильно.
+Измени это.
+Плохой код.
 ```
 
-### Receiving Feedback
+### Получение обратной связи
 
-- View feedback as learning opportunity
-- Ask questions if unclear
-- Implement suggestions promptly
-- Thank reviewers for their time
+- Рассматривайте обратную связь как возможность обучения
+- Задавайте вопросы, если неясно
+- Быстро внедряйте предложения
+- Благодарите рецензентов за их время
 
-## 🔄 Review Process
+## 🔄 Процесс обзора
 
-1. **Self-Review**: Review your own code first
-2. **Create PR**: Include clear description and context
-3. **Request Review**: Tag appropriate reviewers
-4. **Address Feedback**: Make requested changes
-5. **Re-request Review**: After significant changes
-6. **Merge**: After approval and CI passes
+1. **Самоанализ**: Сначала просмотрите свой собственный код
+2. **Создание PR**: Включите четкое описание и контекст
+3. **Запрос обзора**: Отметьте подходящих рецензентов
+4. **Обработка обратной связи**: Внесите запрошенные изменения
+5. **Повторный запрос обзора**: После значительных изменений
+6. **Слияние**: После одобрения и прохождения CI
 
-## 🚨 Red Flags
+## 🚨 Красные флаги
 
-Immediately escalate if you see:
+Немедленно эскалируйте, если видите:
 
-- Hardcoded credentials or secrets
-- Direct database queries in frontend
-- Unvalidated user input
-- Performance degradation
-- Breaking changes without migration
+- Жестко закодированные учетные данные или секреты
+- Прямые запросы к базе данных во frontend
+- Невалидированный пользовательский ввод
+- Деградацию производительности
+- Ломающие изменения без миграции
 
 ````
 
-### 🎓 22.3 Junior Developer Onboarding Program
+### 🎓 22.3 Программа адаптации Junior разработчиков
 
 ```markdown
-# 🚀 Junior Developer Onboarding Program
+# 🚀 Программа адаптации Junior разработчиков
 
-## Week 1: Foundation & Setup
+## Неделя 1: Основы и настройка
 
-### Day 1-2: Environment Setup
-- [ ] Account access (GitHub, Slack, etc.)
-- [ ] Development environment setup
-- [ ] Run project locally
-- [ ] Complete "Hello World" task
+### День 1-2: Настройка окружения
 
-### Day 3-4: Codebase Exploration
-- [ ] Read technical documentation
-- [ ] Explore project structure
-- [ ] Run test suites
-- [ ] Review recent pull requests
+- [ ] Доступ к аккаунтам (GitHub, Slack, и т.д.)
+- [ ] Настройка среды разработки
+- [ ] Запуск проекта локально
+- [ ] Завершение задачи "Hello World"
 
-### Day 5: First Contribution
-- [ ] Fix a "good first issue"
-- [ ] Create first pull request
-- [ ] Go through code review process
+### День 3-4: Изучение кодовой базы
 
-## Week 2: Feature Development
+- [ ] Чтение технической документации
+- [ ] Изучение структуры проекта
+- [ ] Запуск тестовых наборов
+- [ ] Обзор недавних pull request'ов
 
-### Tasks:
-1. **Simple Component**: Create a reusable UI component
-2. **API Integration**: Fetch and display data from API
-3. **Form Handling**: Implement form with validation
-4. **Testing**: Write unit tests for your components
+### День 5: Первый вклад
 
-### Learning Resources:
-- Vue.js documentation
-- TypeScript handbook
-- Company coding standards
-- Testing best practices
+- [ ] Исправление "good first issue"
+- [ ] Создание первого pull request
+- [ ] Прохождение процесса code review
 
-## Week 3-4: Complex Features
+## Неделя 2: Разработка функциональности
 
-### Mentoring Sessions:
-- Daily 30-minute check-ins
-- Weekly 1-hour deep dive sessions
-- Code review walkthroughs
-- Architecture discussions
+### Задачи:
 
-### Milestone Project:
-Build a small feature end-to-end:
-- Frontend component
-- API endpoint
-- Database integration
-- Tests
-- Documentation
+1. **Простой компонент**: Создать переиспользуемый UI компонент
+2. **Интеграция с API**: Получение и отображение данных из API
+3. **Обработка форм**: Реализовать форму с валидацией
+4. **Тестирование**: Написать модульные тесты для ваших компонентов
 
-## Evaluation Criteria
+### Ресурсы для изучения:
 
-### Technical Skills (40%)
-- Code quality and consistency
-- Problem-solving approach
-- Understanding of patterns
-- Testing practices
+- Документация Vue.js
+- Руководство по TypeScript
+- Стандарты кодирования компании
+- Лучшие практики тестирования
 
-### Collaboration (30%)
-- Communication skills
-- Code review participation
-- Help-seeking behavior
-- Team integration
+## Неделя 3-4: Сложные функции
 
-### Growth Mindset (30%)
-- Learning velocity
-- Feedback incorporation
-- Initiative taking
-- Knowledge sharing
+### Сессии менторинга:
 
-## Resources for Mentors
+- Ежедневные 30-минутные проверки
+- Еженедельные 1-часовые углубленные сессии
+- Прохождения code review
+- Обсуждения архитектуры
 
-### Daily Check-in Template:
-````
+### Проект-веха:
 
-1. What did you work on yesterday?
-2. What are you working on today?
-3. Any blockers or questions?
-4. One thing you learned?
+Создать небольшую функцию от начала до конца:
+
+- Frontend компонент
+- API эндпоинт
+- Интеграция с базой данных
+- Тесты
+- Документация
+
+## Критерии оценки
+
+### Технические навыки (40%)
+
+- Качество и консистентность кода
+- Подход к решению проблем
+- Понимание паттернов
+- Практики тестирования
+
+### Сотрудничество (30%)
+
+- Навыки коммуникации
+- Участие в code review
+- Поведение при поиске помощи
+- Интеграция в команду
+
+### Установка на рост (30%)
+
+- Скорость обучения
+- Внедрение обратной связи
+- Проявление инициативы
+- Обмен знаниями
+
+## Ресурсы для менторов
+
+### Шаблон ежедневной проверки:
+```
+
+1. Над чем вы работали вчера?
+2. Над чем вы работаете сегодня?
+3. Есть ли блокеры или вопросы?
+4. Что нового узнали?
 
 ```
 
-### Weekly Review Template:
+### Шаблон еженедельного обзора:
 ```
 
-1. Technical progress this week
-2. Challenges faced and solutions
-3. Feedback on mentoring process
-4. Goals for next week
+1. Технический прогресс на этой неделе
+2. Столкнувшиеся проблемы и решения
+3. Обратная связь по процессу менторинга
+4. Цели на следующую неделю
 
 ```
 
 ```
 
-### 📊 22.4 Technical Roadmap & Strategy
+### 📊 22.4 Техническая дорожная карта и стратегия
 
 ```markdown
-# 🗺️ Technical Roadmap 2024-2025
+# 🗺️ Техническая дорожная карта 2024-2025
 
-## Q1 2024: Foundation Strengthening
+## Q1 2024: Укрепление фундамента
 
-### Performance Optimization
+### Оптимизация производительности
 
-- [ ] Core Web Vitals score > 90
-- [ ] Bundle size reduction (30%)
-- [ ] SSR optimization
-- [ ] Database query optimization
+- [ ] Оценка Core Web Vitals > 90
+- [ ] Уменьшение размера bundle (30%)
+- [ ] Оптимизация SSR
+- [ ] Оптимизация запросов к базе данных
 
-### Infrastructure
+### Инфраструктура
 
-- [ ] Kubernetes migration
-- [ ] Multi-region deployment
-- [ ] Auto-scaling implementation
-- [ ] Disaster recovery setup
+- [ ] Миграция на Kubernetes
+- [ ] Развертывание в нескольких регионах
+- [ ] Реализация автомасштабирования
+- [ ] Настройка аварийного восстановления
 
-### Developer Experience
+### Опыт разработчиков
 
-- [ ] Improved development environment
-- [ ] Better debugging tools
-- [ ] Automated testing pipeline
-- [ ] Documentation improvements
+- [ ] Улучшенная среда разработки
+- [ ] Лучшие инструменты отладки
+- [ ] Автоматизированный конвейер тестирования
+- [ ] Улучшения документации
 
-## Q2 2024: Feature Expansion
+## Q2 2024: Расширение функциональности
 
-### Advanced Trading Features
+### Продвинутые торговые функции
 
-- [ ] Algorithmic trading support
-- [ ] Advanced charting tools
-- [ ] Portfolio optimization
-- [ ] Risk management tools
+- [ ] Поддержка алгоритмической торговли
+- [ ] Продвинутые инструменты графиков
+- [ ] Оптимизация портфеля
+- [ ] Инструменты управления рисками
 
-### Mobile Experience
+### Мобильный опыт
 
-- [ ] Native mobile apps
-- [ ] Offline-first architecture
-- [ ] Push notification system
-- [ ] Mobile-specific UI/UX
+- [ ] Нативные мобильные приложения
+- [ ] Архитектура offline-first
+- [ ] Система push-уведомлений
+- [ ] Мобильный специфичный UI/UX
 
-### Integration Expansion
+### Расширение интеграций
 
-- [ ] More exchange integrations
-- [ ] DeFi protocol support
-- [ ] Cross-chain capabilities
-- [ ] Traditional finance APIs
+- [ ] Больше интеграций с биржами
+- [ ] Поддержка DeFi протоколов
+- [ ] Возможности межцепочечного взаимодействия
+- [ ] API традиционных финансов
 
-## Q3 2024: Scale & Reliability
+## Q3 2024: Масштабирование и надежность
 
-### Scalability
+### Масштабируемость
 
-- [ ] Microservices architecture
-- [ ] Event-driven architecture
-- [ ] CQRS implementation
-- [ ] Global CDN optimization
+- [ ] Микросервисная архитектура
+- [ ] Событийно-ориентированная архитектура
+- [ ] Реализация CQRS
+- [ ] Оптимизация глобального CDN
 
-### Security & Compliance
+### Безопасность и соответствие
 
-- [ ] Security audit completion
-- [ ] Compliance framework
-- [ ] Advanced authentication
-- [ ] Data encryption at rest
+- [ ] Завершение аудита безопасности
+- [ ] Фреймворк соответствия
+- [ ] Продвинутая аутентификация
+- [ ] Шифрование данных в состоянии покоя
 
-### AI/ML Integration
+### Интеграция AI/ML
 
-- [ ] Price prediction models
-- [ ] Portfolio recommendations
-- [ ] Risk assessment AI
-- [ ] Automated trading signals
+- [ ] Модели предсказания цен
+- [ ] Рекомендации портфеля
+- [ ] AI для оценки рисков
+- [ ] Автоматизированные торговые сигналы
 
-## Q4 2024: Innovation & Future
+## Q4 2024: Инновации и будущее
 
-### Emerging Technologies
+### Развивающиеся технологии
 
-- [ ] Web3 wallet integration
-- [ ] NFT marketplace
-- [ ] DAO governance features
-- [ ] Metaverse integration
+- [ ] Интеграция Web3 кошельков
+- [ ] NFT маркетплейс
+- [ ] Функции управления DAO
+- [ ] Интеграция с метавселенной
 
-### Advanced Analytics
+### Продвинутая аналитика
 
-- [ ] Real-time analytics
-- [ ] Predictive modeling
-- [ ] User behavior analysis
-- [ ] Market sentiment analysis
+- [ ] Аналитика в реальном времени
+- [ ] Предиктивное моделирование
+- [ ] Анализ поведения пользователей
+- [ ] Анализ настроений рынка
 
-## Technical Debt Management
+## Управление техническим долгом
 
-### High Priority
+### Высокий приоритет
 
-1. Legacy API refactoring
-2. Database schema optimization
-3. Frontend bundle optimization
-4. Test coverage improvement
+1. Рефакторинг устаревшего API
+2. Оптимизация схемы базы данных
+3. Оптимизация frontend bundle
+4. Улучшение покрытия тестами
 
-### Medium Priority
+### Средний приоритет
 
-1. Documentation updates
-2. Code style consistency
-3. Dependency updates
-4. Performance monitoring
+1. Обновления документации
+2. Консистентность стиля кода
+3. Обновления зависимостей
+4. Мониторинг производительности
 
-### Technical Metrics Goals
+### Цели технических метрик
 
-| Metric            | Current | Q2 Target | Q4 Target |
-| ----------------- | ------- | --------- | --------- |
-| Test Coverage     | 65%     | 80%       | 90%       |
-| Performance Score | 75      | 85        | 95        |
-| Bundle Size       | 2.5MB   | 1.8MB     | 1.2MB     |
-| API Response Time | 150ms   | 100ms     | 75ms      |
-| Uptime            | 99.5%   | 99.8%     | 99.9%     |
+| Метрика                   | Текущее | Цель Q2 | Цель Q4 |
+| ------------------------- | ------- | ------- | ------- |
+| Покрытие тестами          | 65%     | 80%     | 90%     |
+| Оценка производительности | 75      | 85      | 95      |
+| Размер Bundle             | 2.5MB   | 1.8MB   | 1.2MB   |
+| Время ответа API          | 150ms   | 100ms   | 75ms    |
+| Время работы              | 99.5%   | 99.8%   | 99.9%   |
 ```
 
-### 🎤 22.5 Knowledge Sharing & Presentations
+### 🎤 22.5 Обмен знаниями и презентации
 
 ````markdown
-# 📢 Technical Presentations & Knowledge Sharing
+# 📢 Технические презентации и обмен знаниями
 
-## 🎯 Presentation Topics
+## 🎯 Темы презентаций
 
-### Architecture Deep Dive
+### Глубокое погружение в архитектуру
 
-**Duration**: 45 minutes  
-**Audience**: Engineering team
+**Продолжительность**: 45 минут  
+**Аудитория**: Команда инженеров
 
-#### Outline:
+#### План:
 
-1. **System Overview** (10 min)
+1. **Обзор системы** (10 мин)
 
-   - High-level architecture
-   - Key components
-   - Data flow
+   - Высокоуровневая архитектура
+   - Ключевые компоненты
+   - Поток данных
 
-2. **Frontend Architecture** (15 min)
+2. **Frontend архитектура** (15 мин)
 
-   - Nuxt.js structure
-   - State management
-   - Component patterns
-   - PWA implementation
+   - Структура Nuxt.js
+   - Управление состоянием
+   - Паттерны компонентов
+   - Реализация PWA
 
-3. **Backend Services** (15 min)
+3. **Backend сервисы** (15 мин)
 
-   - Microservices design
-   - API architecture
-   - Database design
-   - Caching strategy
+   - Дизайн микросервисов
+   - Архитектура API
+   - Дизайн базы данных
+   - Стратегия кеширования
 
-4. **Q&A Session** (5 min)
+4. **Сессия Q&A** (5 мин)
 
-#### Code Examples:
+#### Примеры кода:
 
 ```typescript
-// Example: Repository Pattern Implementation
+// Пример: Реализация паттерна Repository
 interface CryptoRepository {
   findAll(filters: CryptoFilters): Promise<Crypto[]>;
   findById(id: string): Promise<Crypto | null>;
@@ -797,31 +804,31 @@ export class ApiCryptoRepository implements CryptoRepository {
       });
       return response.data.map(CryptoDto.toDomain);
     } catch (error) {
-      this.logger.error("Failed to fetch cryptos", error);
-      throw new RepositoryError("Unable to fetch crypto data");
+      this.logger.error("Не удалось получить криптовалюты", error);
+      throw new RepositoryError("Невозможно получить данные криптовалют");
     }
   }
 }
 ```
 ````
 
-### Performance Optimization Workshop
+### Воркшоп по оптимизации производительности
 
-**Duration**: 2 hours  
-**Audience**: Frontend developers
+**Продолжительность**: 2 часа  
+**Аудитория**: Frontend разработчики
 
-#### Topics:
+#### Темы:
 
-1. Bundle analysis and optimization
-2. Code splitting strategies
-3. Image optimization
-4. Caching strategies
+1. Анализ и оптимизация bundle
+2. Стратегии разделения кода
+3. Оптимизация изображений
+4. Стратегии кеширования
 5. Core Web Vitals
 
-#### Hands-on Examples:
+#### Практические примеры:
 
 ```javascript
-// Code splitting with dynamic imports
+// Разделение кода с динамическими импортами
 const CryptoTrading = defineAsyncComponent({
   loader: () => import("@/components/CryptoTrading.vue"),
   loadingComponent: LoadingSpinner,
@@ -829,7 +836,7 @@ const CryptoTrading = defineAsyncComponent({
   timeout: 3000,
 });
 
-// Image optimization
+// Оптимизация изображений
 const optimizedImage = computed(() => {
   const baseUrl = "/images/crypto/";
   const format = supportsWebp ? "webp" : "jpg";
@@ -838,22 +845,22 @@ const optimizedImage = computed(() => {
 });
 ```
 
-### Web3 Integration Best Practices
+### Лучшие практики Web3 интеграции
 
-**Duration**: 60 minutes  
-**Audience**: Full-stack developers
+**Продолжительность**: 60 минут  
+**Аудитория**: Full-stack разработчики
 
-#### Demo Application:
+#### Демо приложение:
 
 ```typescript
-// Web3 connection management
+// Управление Web3 подключением
 export class Web3Manager {
   private provider: ethers.providers.Web3Provider | null = null;
   private signer: ethers.Signer | null = null;
 
   async connect(): Promise<void> {
     if (!window.ethereum) {
-      throw new Error("MetaMask not installed");
+      throw new Error("MetaMask не установлен");
     }
 
     try {
@@ -861,19 +868,19 @@ export class Web3Manager {
       this.provider = new ethers.providers.Web3Provider(window.ethereum);
       this.signer = this.provider.getSigner();
 
-      // Listen for account changes
+      // Слушаем изменения аккаунта
       window.ethereum.on(
         "accountsChanged",
         this.handleAccountChange.bind(this)
       );
       window.ethereum.on("chainChanged", this.handleChainChange.bind(this));
     } catch (error) {
-      throw new Error("Failed to connect to wallet");
+      throw new Error("Не удалось подключиться к кошельку");
     }
   }
 
   async getBalance(): Promise<string> {
-    if (!this.signer) throw new Error("Wallet not connected");
+    if (!this.signer) throw new Error("Кошелек не подключен");
 
     const balance = await this.signer.getBalance();
     return ethers.utils.formatEther(balance);
@@ -881,92 +888,92 @@ export class Web3Manager {
 }
 ```
 
-## 📚 Learning Resources
+## 📚 Ресурсы для обучения
 
-### Internal Resources
+### Внутренние ресурсы
 
-- Architecture documentation
-- Code review recordings
-- Technical decision records
-- Performance benchmarks
+- Документация архитектуры
+- Записи code review
+- Записи технических решений
+- Бенчмарки производительности
 
-### External Resources
+### Внешние ресурсы
 
-- Vue.js Advanced Patterns
-- TypeScript Deep Dive
-- Web Performance Optimization
-- Blockchain Development
+- Продвинутые паттерны Vue.js
+- Глубокое погружение в TypeScript
+- Оптимизация веб-производительности
+- Разработка блокчейна
 
-### Recommended Books
+### Рекомендуемые книги
 
-1. "Clean Architecture" by Robert C. Martin
-2. "Designing Data-Intensive Applications" by Martin Kleppmann
-3. "JavaScript: The Good Parts" by Douglas Crockford
-4. "Web Performance in Action" by Jeremy Wagner
+1. "Чистая архитектура" от Роберта Мартина
+2. "Проектирование приложений с интенсивной обработкой данных" от Мартина Клеппманна
+3. "JavaScript: хорошие части" от Дугласа Крокфорда
+4. "Веб-производительность в действии" от Джереми Вагнера
 
-## 🎓 Mentoring Guidelines
+## 🎓 Руководство по менторингу
 
-### Effective Mentoring Strategies
+### Эффективные стратегии менторинга
 
-#### 1. Socratic Method
+#### 1. Сократический метод
 
-Instead of giving direct answers, ask guiding questions:
+Вместо прямых ответов задавайте направляющие вопросы:
 
-- "What do you think might be causing this issue?"
-- "How would you approach solving this problem?"
-- "What are the trade-offs of this solution?"
+- "Как вы думаете, что может вызывать эту проблему?"
+- "Как бы вы подошли к решению этой проблемы?"
+- "Каковы компромиссы этого решения?"
 
-#### 2. Code Review as Teaching Tool
+#### 2. Code Review как инструмент обучения
 
 ```typescript
-// ❌ Instead of: "Change this"
-// ✅ Explain: "Consider extracting this logic into a composable"
+// ❌ Вместо: "Измени это"
+// ✅ Объясни: "Рассмотри извлечение этой логики в composable"
 
-// Example mentoring comment:
+// Пример комментария для менторинга:
 /*
-This component is getting quite large. Consider breaking it down:
+Этот компонент становится довольно большим. Рассмотри его разбиение:
 
-1. Extract form logic into useFormValidation composable
-2. Move API calls to a service layer
-3. Create smaller, focused sub-components
+1. Извлеки логику формы в useFormValidation composable
+2. Перенеси API вызовы в слой сервисов
+3. Создай меньшие, сфокусированные под-компоненты
 
-This will make it easier to test and maintain. Would you like me to 
-show an example of how to refactor this?
+Это сделает код проще для тестирования и поддержки. Хочешь, чтобы я
+показал пример того, как это можно отрефакторить?
 */
 ```
 
-#### 3. Pair Programming Sessions
+#### 3. Сессии парного программирования
 
-- Share screen and code together
-- Let mentee drive, guide with questions
-- Focus on thought process, not just outcome
-- Take breaks to discuss concepts
+- Делись экраном и программируй вместе
+- Позволь стажеру вести, направляй вопросами
+- Фокусируйся на процессе мышления, а не только на результате
+- Делай перерывы для обсуждения концепций
 
-### Creating Learning Opportunities
+### Создание возможностей для обучения
 
-#### 1. Graduated Complexity
+#### 1. Градация сложности
 
-Start with simple tasks and gradually increase difficulty:
+Начинай с простых задач и постепенно увеличивай сложность:
 
-- Week 1: Fix typos, update styles
-- Week 2: Add new component
-- Week 3: Implement feature with API
-- Week 4: Design and implement complex feature
+- Неделя 1: Исправление опечаток, обновление стилей
+- Неделя 2: Добавление нового компонента
+- Неделя 3: Реализация функции с API
+- Неделя 4: Проектирование и реализация сложной функции
 
-#### 2. Cross-functional Exposure
+#### 2. Межфункциональное знакомство
 
-- Frontend developers: Expose to backend concepts
-- Backend developers: Show frontend challenges
-- Everyone: DevOps and deployment processes
+- Frontend разработчики: Знакомство с backend концепциями
+- Backend разработчики: Показ frontend вызовов
+- Все: DevOps и процессы развертывания
 
-#### 3. Technical Discussions
+#### 3. Технические обсуждения
 
-Regular sessions on:
+Регулярные сессии по:
 
-- Design patterns
-- Architecture decisions
-- Industry trends
-- Tool evaluations
+- Паттернам проектирования
+- Архитектурным решениям
+- Тенденциям индустрии
+- Оценке инструментов
 
 ```
 
@@ -974,103 +981,103 @@ Regular sessions on:
 
 ### ⭐ Обязательные требования (100 баллов)
 
-1. **Technical Documentation (25 баллов)**
-   - Comprehensive architecture documentation
-   - API documentation with examples
-   - Setup and deployment guides
-   - Troubleshooting guides
+1. **Техническая документация (25 баллов)**
+   - Всеобъемлющая документация архитектуры
+   - Документация API с примерами
+   - Руководства по настройке и развертыванию
+   - Руководства по устранению неполадок
 
-2. **Team Guidelines & Standards (25 баллов)**
-   - Code review guidelines
-   - Coding standards
-   - Git workflow documentation
-   - Testing strategies
+2. **Руководящие принципы и стандарты команды (25 баллов)**
+   - Руководящие принципы code review
+   - Стандарты кодирования
+   - Документация Git workflow
+   - Стратегии тестирования
 
-3. **Knowledge Sharing (20 баллов)**
-   - Technical presentation
-   - Team training materials
-   - Architecture decision records
-   - Best practices documentation
+3. **Обмен знаниями (20 баллов)**
+   - Техническая презентация
+   - Материалы для обучения команды
+   - Записи архитектурных решений
+   - Документация лучших практик
 
-4. **Mentoring Program (20 баллов)**
-   - Junior developer onboarding plan
-   - Mentoring guidelines
-   - Learning resources
-   - Progress tracking system
+4. **Программа менторинга (20 баллов)**
+   - План адаптации Junior разработчиков
+   - Руководящие принципы менторинга
+   - Ресурсы для обучения
+   - Система отслеживания прогресса
 
-5. **Technical Leadership (10 баллов)**
-   - Technical roadmap
-   - Strategy documentation
-   - Process improvements
-   - Team coordination
+5. **Техническое лидерство (10 баллов)**
+   - Техническая дорожная карта
+   - Документация стратегии
+   - Улучшения процессов
+   - Координация команды
 
 ### 🚀 Дополнительные задания (50 баллов)
 
-1. **Advanced Documentation (15 баллов)**
-   - Interactive documentation
-   - Video tutorials
-   - Technical blog posts
-   - Open source contributions
+1. **Продвинутая документация (15 баллов)**
+   - Интерактивная документация
+   - Видео-уроки
+   - Технические блог-посты
+   - Вклады в open source
 
-2. **Process Innovation (15 баллов)**
-   - Automated quality gates
-   - Improved development workflows
-   - Tool recommendations
-   - Efficiency improvements
+2. **Инновации в процессах (15 баллов)**
+   - Автоматизированные ворота качества
+   - Улучшенные рабочие процессы разработки
+   - Рекомендации инструментов
+   - Улучшения эффективности
 
-3. **External Engagement (10 баллов)**
-   - Conference presentations
-   - Technical blog writing
-   - Community contributions
-   - Industry networking
+3. **Внешнее взаимодействие (10 баллов)**
+   - Презентации на конференциях
+   - Написание технических блогов
+   - Вклады в сообщество
+   - Профессиональные связи
 
-4. **Leadership Impact (10 баллов)**
-   - Team performance improvement
-   - Knowledge transfer effectiveness
-   - Mentoring success stories
-   - Cultural improvements
+4. **Влияние лидерства (10 баллов)**
+   - Улучшение производительности команды
+   - Эффективность передачи знаний
+   - Истории успеха менторинга
+   - Культурные улучшения
 
 ## 📊 Процесс выполнения
 
-### Неделя 1: Documentation & Guidelines
+### Неделя 1: Документация и руководящие принципы
 - Создание технической документации
-- Написание team guidelines
-- Подготовка code review процессов
-- Создание onboarding материалов
+- Написание руководящих принципов команды
+- Подготовка процессов code review
+- Создание материалов для адаптации
 
-### Неделя 2: Knowledge Sharing & Mentoring
+### Неделя 2: Обмен знаниями и менторинг
 - Подготовка технической презентации
-- Проведение knowledge sharing сессий
-- Запуск mentoring программы
-- Создание roadmap и стратегии
+- Проведение сессий обмена знаниями
+- Запуск программы менторинга
+- Создание дорожной карты и стратегии
 
 ## 🔍 Вопросы для изучения
 
-1. **Technical Leadership:**
+1. **Техническое лидерство:**
    - Как балансировать техническое совершенство и бизнес-потребности?
-   - Какие качества делают эффективного tech lead?
+   - Какие качества делают эффективного техлида?
 
-2. **Team Management:**
+2. **Управление командой:**
    - Как мотивировать junior разработчиков?
    - Как проводить эффективные code review?
 
-3. **Knowledge Transfer:**
+3. **Передача знаний:**
    - Как структурировать техническую документацию?
    - Какие форматы обучения наиболее эффективны?
 
-4. **Strategic Thinking:**
-   - Как планировать техническую roadmap?
-   - Как оценивать technical debt и приоритеты?
+4. **Стратегическое мышление:**
+   - Как планировать техническую дорожную карту?
+   - Как оценивать технический долг и приоритеты?
 
 ## 📈 Ожидаемые результаты
 
 По завершении этапа вы получите:
 
-- 📚 **Comprehensive documentation** - полная техническая документация
-- 👥 **Team leadership skills** - навыки технического лидерства
-- 🎓 **Mentoring expertise** - опыт mentoring и обучения
-- 🗺️ **Strategic thinking** - понимание технической стратегии
-- 🤝 **Collaboration excellence** - эффективные процессы командной работы
+- 📚 **Всеобъемлющая документация** - полная техническая документация
+- 👥 **Навыки командного лидерства** - навыки технического лидерства
+- 🎓 **Экспертиза в менторинге** - опыт менторинга и обучения
+- 🗺️ **Стратегическое мышление** - понимание технической стратегии
+- 🤝 **Превосходство в сотрудничестве** - эффективные процессы командной работы
 
 Этот финальный этап подготавливает вас к роли технического лидера и senior разработчика, способного вести команду и принимать архитектурные решения.
 ```
