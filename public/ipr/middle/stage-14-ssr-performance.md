@@ -1038,6 +1038,6 @@ async function fetchCryptoData(symbol: string) {
 
 - ✅ **Production-ready SSR** с оптимизацией
 - ✅ **SEO-оптимизированные страницы** с structured data
-- ✅ **High-performance приложение** с отличными Core Web Vitals
+- ✅ **Высокопроизводительное приложение** с отличными Core Web Vitals
 - ✅ **Эффективное кэширование** на всех уровнях
 - ✅ **Monitoring и аналитика** производительности

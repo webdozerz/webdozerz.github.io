@@ -255,7 +255,7 @@ const juniorStages = ref([
   {
     id: 'stage-6',
     number: 6,
-    title: 'API & HTTP',
+    title: 'API и HTTP',
     duration: '2 недели',
     technologies: ['REST API', 'Repository', 'HTTP'],
     filePath: 'ipr/juniour/stage-6-api-http.md'
@@ -275,7 +275,7 @@ const middleStages = ref([
   {
     id: 'stage-11',
     number: 11,
-    title: 'Advanced TypeScript',
+    title: 'Продвинутый TypeScript',
     duration: '3 недели',
     technologies: ['Generics', 'Utility Types', 'Decorators'],
     filePath: 'ipr/middle/stage-11-advanced-typescript.md'
@@ -283,7 +283,7 @@ const middleStages = ref([
   {
     id: 'stage-12',
     number: 12,
-    title: 'Architecture Setup',
+    title: 'Настройка архитектуры',
     duration: '3 недели',
     technologies: ['Monorepo', 'Vite', 'ESLint'],
     filePath: 'ipr/middle/stage-12-architecture-setup.md'
@@ -291,7 +291,7 @@ const middleStages = ref([
   {
     id: 'stage-13',
     number: 13,
-    title: 'Advanced Frameworks',
+    title: 'Продвинутые фреймворки',
     duration: '4 недели',
     technologies: ['Vue 3 Advanced', 'Pinia', 'Patterns'],
     filePath: 'ipr/middle/stage-13-advanced-frameworks.md'
@@ -299,7 +299,7 @@ const middleStages = ref([
   {
     id: 'stage-14',
     number: 14,
-    title: 'SSR & Performance',
+    title: 'SSR и производительность',
     duration: '3 недели',
     technologies: ['Nuxt SSR', 'Web Vitals', 'Optimization'],
     filePath: 'ipr/middle/stage-14-ssr-performance.md'
@@ -307,7 +307,7 @@ const middleStages = ref([
   {
     id: 'stage-15',
     number: 15,
-    title: 'Blockchain Integration',
+    title: 'Интеграция блокчейна',
     duration: '4 недели',
     technologies: ['Web3', 'Ethers.js', 'MetaMask'],
     filePath: 'ipr/middle/stage-15-blockchain-integration.md'
@@ -315,7 +315,7 @@ const middleStages = ref([
   {
     id: 'stage-16',
     number: 16,
-    title: 'DeFi Protocols',
+    title: 'DeFi протоколы',
     duration: '4 недели',
     technologies: ['Uniswap', 'Compound', 'Staking'],
     filePath: 'ipr/middle/stage-16-defi-protocols.md'
@@ -323,7 +323,7 @@ const middleStages = ref([
   {
     id: 'stage-17',
     number: 17,
-    title: 'Security & Cryptography',
+    title: 'Безопасность и криптография',
     duration: '3 недели',
     technologies: ['JWT', 'OAuth', 'Encryption'],
     filePath: 'ipr/middle/stage-17-security-cryptography.md'
@@ -331,7 +331,7 @@ const middleStages = ref([
   {
     id: 'stage-18',
     number: 18,
-    title: 'Testing & Automation',
+    title: 'Тестирование и автоматизация',
     duration: '3 недели',
     technologies: ['Vitest', 'Playwright', 'CI/CD'],
     filePath: 'ipr/middle/stage-18-testing-automation.md'
@@ -339,7 +339,7 @@ const middleStages = ref([
   {
     id: 'stage-19',
     number: 19,
-    title: 'DevOps & Deployment',
+    title: 'DevOps и деплой',
     duration: '4 недели',
     technologies: ['Docker', 'Kubernetes', 'Deployment'],
     filePath: 'ipr/middle/stage-19-devops-deployment.md'
@@ -347,7 +347,7 @@ const middleStages = ref([
   {
     id: 'stage-20',
     number: 20,
-    title: 'Monitoring & Analytics',
+    title: 'Мониторинг и аналитика',
     duration: '3 недели',
     technologies: ['Sentry', 'Analytics', 'Monitoring'],
     filePath: 'ipr/middle/stage-20-monitoring-analytics.md'
@@ -355,7 +355,7 @@ const middleStages = ref([
   {
     id: 'stage-21',
     number: 21,
-    title: 'PWA & Extensions',
+    title: 'PWA и расширения',
     duration: '3 недели',
     technologies: ['PWA', 'Service Workers', 'Extensions'],
     filePath: 'ipr/middle/stage-21-pwa-extensions.md'
@@ -363,7 +363,7 @@ const middleStages = ref([
   {
     id: 'stage-22',
     number: 22,
-    title: 'Team Leadership',
+    title: 'Командное лидерство',
     duration: '2 недели',
     technologies: ['Code Review', 'Mentoring', 'Leadership'],
     filePath: 'ipr/middle/stage-22-team-leadership.md'
@@ -375,7 +375,7 @@ const seniorStages = ref([
   {
     id: 'stage-23',
     number: 23,
-    title: 'Enterprise Architecture',
+    title: 'Корпоративная архитектура',
     duration: '4 недели',
     technologies: ['Microservices', 'Service Mesh', 'Event Sourcing'],
     filePath: 'ipr/senior/stage-23-enterprise-architecture.md'
@@ -383,7 +383,7 @@ const seniorStages = ref([
   {
     id: 'stage-24',
     number: 24,
-    title: 'Platform Engineering',
+    title: 'Платформенная инженерия',
     duration: '3 недели',
     technologies: ['Backstage', 'CI/CD Platform', 'Developer Tools'],
     filePath: 'ipr/senior/stage-24-platform-engineering.md'
@@ -391,7 +391,7 @@ const seniorStages = ref([
   {
     id: 'stage-25',
     number: 25,
-    title: 'Data Engineering',
+    title: 'Инженерия данных',
     duration: '4 недели',
     technologies: ['Data Lake', 'ClickHouse', 'Apache Airflow'],
     filePath: 'ipr/senior/stage-25-data-engineering.md'
@@ -399,7 +399,7 @@ const seniorStages = ref([
   {
     id: 'stage-26',
     number: 26,
-    title: 'AI/ML Integration',
+    title: 'Интеграция AI/ML',
     duration: '4 недели',
     technologies: ['TensorFlow', 'MLOps', 'Prediction Models'],
     filePath: 'ipr/senior/stage-26-ai-ml-integration.md'
@@ -407,7 +407,7 @@ const seniorStages = ref([
   {
     id: 'stage-27',
     number: 27,
-    title: 'Research & Innovation',
+    title: 'Исследования и инновации',
     duration: '3 недели',
     technologies: ['Web3', 'Edge Computing', 'Emerging Tech'],
     filePath: 'ipr/senior/stage-27-research-innovation.md'
@@ -415,7 +415,7 @@ const seniorStages = ref([
   {
     id: 'stage-28',
     number: 28,
-    title: 'Business Metrics',
+    title: 'Бизнес-метрики',
     duration: '3 недели',
     technologies: ['KPIs', 'A/B Testing', 'Product Analytics'],
     filePath: 'ipr/senior/stage-28-business-metrics.md'
@@ -423,7 +423,7 @@ const seniorStages = ref([
   {
     id: 'stage-29',
     number: 29,
-    title: 'Team Platform',
+    title: 'Командная платформа',
     duration: '3 недели',
     technologies: ['Developer Experience', 'Internal Tools', 'Automation'],
     filePath: 'ipr/senior/stage-29-team-platform.md'
@@ -431,7 +431,7 @@ const seniorStages = ref([
   {
     id: 'stage-30',
     number: 30,
-    title: 'Strategic Planning',
+    title: 'Стратегическое планирование',
     duration: '2 недели',
     technologies: ['Tech Roadmap', 'ADRs', 'Governance'],
     filePath: 'ipr/senior/stage-30-strategic-planning.md'
@@ -439,7 +439,7 @@ const seniorStages = ref([
   {
     id: 'stage-31',
     number: 31,
-    title: 'Industry Impact',
+    title: 'Влияние на индустрию',
     duration: '3 недели',
     technologies: ['Open Source', 'Thought Leadership', 'Community'],
     filePath: 'ipr/senior/stage-31-industry-impact.md'
@@ -447,7 +447,7 @@ const seniorStages = ref([
   {
     id: 'stage-32',
     number: 32,
-    title: 'Thought Leadership',
+    title: 'Лидерство мысли',
     duration: '2 недели',
     technologies: ['Knowledge Platform', 'Mentoring Scale', 'Legacy'],
     filePath: 'ipr/senior/stage-32-thought-leadership.md'
@@ -458,21 +458,21 @@ const seniorStages = ref([
 const generalMaterials = ref([
   {
     id: 'junior-readme',
-    title: 'Junior README',
+    title: 'Руководство Junior',
     description: 'Общая информация о Junior треке',
     icon: '📚',
     filePath: 'ipr/juniour/README.md'
   },
   {
     id: 'middle-readme',
-    title: 'Middle README',
+    title: 'Руководство Middle',
     description: 'Общая информация о Middle треке',
     icon: '💎',
     filePath: 'ipr/middle/README.md'
   },
   {
     id: 'senior-readme',
-    title: 'Senior README',
+    title: 'Руководство Senior',
     description: 'Общая информация о Senior треке',
     icon: '🌟',
     filePath: 'ipr/senior/README.md'

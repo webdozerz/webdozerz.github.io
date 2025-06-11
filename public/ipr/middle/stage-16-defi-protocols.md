@@ -1051,4 +1051,4 @@ export function useYieldFarming(): UseYieldFarmingReturn {
 - ✅ **Automated yield strategies** с rebalancing
 - ✅ **Risk management system** с liquidation protection
 - ✅ **Portfolio optimization** алгоритмы
-- ✅ **Production-ready DeFi features** для enterprise использования
+- ✅ **Production-ready DeFi features** для корпоративного использования

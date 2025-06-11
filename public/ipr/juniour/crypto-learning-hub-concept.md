@@ -170,14 +170,14 @@ crypto-learning-hub/
 **Цель**: Превратить SPA в полноценное SSR приложение
 
 **Технологии**: Nuxt 3, SSR/SSG, File-based routing
-**Новые концепции**: Server-side rendering, Meta tags, Middleware
+**Новые концепции**: SSR рендеринг, Мета теги, Middleware
 
 **Задания**:
 
 1. Мигрировать на Nuxt.js
 2. Создать страницы: главная, портфолио, обучение, новости
 3. Реализовать dynamic routes для криптовалют
-4. Добавить SEO оптимизацию с meta tags
+4. Добавить SEO оптимизацию с мета тегами
 5. Создать middleware для аналитики
 
 **Структура страниц**:
@@ -202,7 +202,7 @@ crypto-learning-hub/
 **Вопросы для самопроверки**:
 
 - В чем разница между SSR и SPA?
-- Как работает file-based routing в Nuxt?
+- Как работает файловый роутинг в Nuxt?
 - Что такое middleware и когда его использовать?
 
 ---
@@ -212,7 +212,7 @@ crypto-learning-hub/
 **Цель**: Создать backend API и real-time функциональность
 
 **Технологии**: Nuxt Server API, WebSocket, HTTP methods
-**Новые концепции**: REST API, Real-time data, Caching
+**Новые концепции**: REST API, Real-time данные, Кэширование
 
 **Задания**:
 
@@ -220,7 +220,7 @@ crypto-learning-hub/
 2. Реализовать CRUD для портфолио
 3. Добавить WebSocket для real-time курсов
 4. Создать систему кэширования
-5. Добавить обработку ошибок и retry logic
+5. Добавить обработку ошибок и логику повторных запросов
 
 **Server API**:
 
@@ -253,7 +253,7 @@ crypto-learning-hub/
 **Цель**: Добавить систему пользователей и авторизации
 
 **Технологии**: JWT, Cookies, LocalStorage, Session management
-**Новые концепции**: Authentication, Authorization, Security
+**Новые концепции**: Аутентификация, Авторизация, Безопасность
 
 **Задания**:
 
@@ -296,7 +296,7 @@ crypto-learning-hub/
 **Цель**: Интегрировать блокчейн функциональность
 
 **Технологии**: Web3.js/Ethers.js, MetaMask, Smart contracts
-**Новые концепции**: Blockchain, Wallets, DeFi, NFT
+**Новые концепции**: Блокчейн, Кошельки, DeFi, NFT
 
 **Задания**:
 
@@ -338,7 +338,7 @@ crypto-learning-hub/
 **Цель**: Добавить тестирование и автоматизацию
 
 **Технологии**: Vitest, Playwright, GitHub Actions, Docker
-**Новые концепции**: Unit testing, E2E testing, CI/CD
+**Новые концепции**: Unit тестирование, E2E тестирование, CI/CD
 
 **Задания**:
 
@@ -378,7 +378,7 @@ crypto-learning-hub/
 **Цель**: Оптимизировать для поисковиков и создать документацию
 
 **Технологии**: SEO optimization, TypeDoc, Storybook
-**Новые концепции**: SEO, Technical documentation, Component library
+**Новые концепции**: SEO, Техническая документация, Компонентная библиотека
 
 **Задания**:
 
@@ -477,7 +477,7 @@ crypto-learning-hub/
 
 - Количество пройденных этапов
 - Покрытие кода тестами
-- Performance metrics (Lighthouse)
+- Метрики производительности (Lighthouse)
 - Количество решенных вопросов
 - Качество кода (ESLint, TypeScript)
 
