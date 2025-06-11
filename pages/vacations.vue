@@ -57,7 +57,7 @@
 <script setup lang="ts">
 import type { VacationInfo } from '~/types/redmine';
 
-// Получаем данные об отпусках
+// Получаем данные об отпусках во время сборки (SSG)
 const { data: allVacations, pending, error, refresh } = await useLazyAsyncData(
   'vacations',
   async () => {
@@ -65,7 +65,8 @@ const { data: allVacations, pending, error, refresh } = await useLazyAsyncData(
     return await getVacations();
   },
   {
-    default: () => [] as VacationInfo[]
+    default: () => [] as VacationInfo[],
+    server: true // Выполняется только на сервере
   }
 );
 
