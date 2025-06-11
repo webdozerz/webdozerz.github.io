@@ -45,6 +45,13 @@ export const useRedmine = () => {
     const redmineConfig = getRedmineConfig();
     const client = createClient(redmineConfig);
 
+    console.log(`🔧 Делаем запрос к: ${redmineConfig.url}/projects/${redmineConfig.projectId}/issues.json`);
+    console.log('🔧 Конфигурация авторизации:', {
+      hasApiKey: !!redmineConfig.apiKey,
+      hasUsername: !!redmineConfig.username,
+      hasPassword: !!redmineConfig.password,
+    });
+
     try {
       const response = await client.get<RedmineResponse<RedmineIssue>>(
         `/projects/${redmineConfig.projectId}/issues.json`,
@@ -56,9 +63,19 @@ export const useRedmine = () => {
         }
       );
 
+      console.log(`✅ Успешный ответ от Redmine, статус: ${response.status}`);
+      console.log(`✅ Количество задач в ответе: ${response.data.issues?.length || 0}`);
+      
       return response.data.issues || [];
     } catch (error) {
-      console.error('Ошибка при получении данных из Redmine:', error);
+      console.error('❌ Детальная ошибка при получении данных из Redmine:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        response: error && typeof error === 'object' && 'response' in error ? {
+          status: (error as { response?: { status?: number } }).response?.status,
+          statusText: (error as { response?: { statusText?: string } }).response?.statusText,
+          data: (error as { response?: { data?: unknown } }).response?.data
+        } : null
+      });
       throw new Error('Не удалось получить данные об отпусках');
     }
   };
@@ -94,11 +111,31 @@ export const useRedmine = () => {
   const getVacations = async (): Promise<VacationInfo[]> => {
     // Проверяем, выполняется ли код на сервере (во время сборки)
     if (import.meta.server) {
-      // На сервере делаем прямой запрос к Redmine API
-      const issues = await getVacationIssues();
-      return deduplicateVacations(issues).map(issue => mapIssueToVacationInfo(issue));
+      console.log('🔧 Начинаем загрузку данных из Redmine...');
+      console.log('🔧 Runtime config:', {
+        redmineUrl: config.public.redmineUrl,
+        projectId: config.public.redmineProjectId,
+        hasApiKey: !!config.redmineApiKey,
+        hasUsername: !!config.redmineUsername,
+        hasPassword: !!config.redminePassword,
+      });
+      
+      try {
+        // На сервере делаем прямой запрос к Redmine API
+        const issues = await getVacationIssues();
+        console.log(`✅ Получено ${issues.length} задач из Redmine`);
+        
+        const vacations = deduplicateVacations(issues).map(issue => mapIssueToVacationInfo(issue));
+        console.log(`✅ Обработано ${vacations.length} отпусков после дедупликации`);
+        
+        return vacations;
+      } catch (error) {
+        console.error('❌ Ошибка при получении данных:', error);
+        throw error;
+      }
     } else {
       // На клиенте возвращаем пустой массив или показываем ошибку
+      console.log('ℹ️ Код выполняется на клиенте, данные должны быть предзагружены');
       throw new Error('Данные доступны только во время сборки');
     }
   };
