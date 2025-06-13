@@ -257,7 +257,7 @@ class CoinGeckoDataSource extends DataSource<CryptoCurrency[]> {
 }
 ```
 
-**Portfolio класс:**
+**Класс Portfolio:**
 
 ```typescript
 // classes/Portfolio.ts
@@ -404,10 +404,10 @@ class PortfolioValidator {
 
 ### ❓ Вопросы для изучения
 
-1. **OOP Principles**: Объясните принципы SOLID и как их применять?
-2. **Inheritance vs Composition**: Когда использовать наследование, а когда композицию?
-3. **Access Modifiers**: Чем отличаются public, private, protected в TypeScript?
-4. **Event System**: Как реализовать систему событий между классами?
+1. **Принципы ООП**: Объясните принципы SOLID и как их применять?
+2. **Наследование vs Композиция**: Когда использовать наследование, а когда композицию?
+3. **Модификаторы доступа**: Чем отличаются public, private, protected в TypeScript?
+4. **Система событий**: Как реализовать систему событий между классами?
 
 ---
 

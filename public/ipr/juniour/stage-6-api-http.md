@@ -678,7 +678,7 @@ container.register(
 
 ### ❓ Вопросы для изучения
 
-1. **Repository Pattern**: Зачем нужен паттерн Repository?
+1. **Repository Pattern**: Зачем нужен паттерн Репозиторий?
 2. **DTO**: Что такое Data Transfer Objects и их преимущества?
 3. **Dependency Injection**: Как работает внедрение зависимостей?
 4. **Data Mapping**: Зачем разделять DTO и доменные объекты?
