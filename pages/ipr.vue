@@ -273,6 +273,14 @@ const juniorStages = ref([
 // Этапы для Middle
 const middleStages = ref([
   {
+    id: 'stage-0',
+    number: 0,
+    title: 'Быстрый старт: Nuxt Starter Kit',
+    duration: '1 неделя',
+    technologies: ['Nuxt 3', 'TypeScript', 'Pinia', 'VueUse', 'SCSS', 'ESLint', 'Prettier', 'Компоненты', 'SSR', 'Роутинг', 'REST API', 'Auth', 'Web3', 'Testing', 'SEO'],
+    filePath: 'ipr/middle/stage-0-nuxt-starter.md'
+  },
+  {
     id: 'stage-11',
     number: 11,
     title: 'Продвинутый TypeScript',
