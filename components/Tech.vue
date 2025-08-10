@@ -22,7 +22,7 @@
             <div class="tech-icon">JS</div>
             <div class="tech-info">
               <div class="tech-name">JavaScript</div>
-              <div class="tech-level expert">Expert</div>
+              <div class="tech-level expert">Эксперт</div>
             </div>
           </div>
           
@@ -30,23 +30,23 @@
             <div class="tech-icon">TS</div>
             <div class="tech-info">
               <div class="tech-name">TypeScript</div>
-              <div class="tech-level expert">Expert</div>
+              <div class="tech-level expert">Эксперт</div>
             </div>
           </div>
           
           <div class="tech-item intermediate">
-            <div class="tech-icon">🐍</div>
+            <div class="tech-icon python">Py</div>
             <div class="tech-info">
               <div class="tech-name">Python</div>
-              <div class="tech-level intermediate">Intermediate</div>
+              <div class="tech-level intermediate">Средний</div>
             </div>
           </div>
           
           <div class="tech-item basic">
-            <div class="tech-icon">C#</div>
+            <div class="tech-icon csharp">C#</div>
             <div class="tech-info">
               <div class="tech-name">C#</div>
-              <div class="tech-level basic">Basic</div>
+              <div class="tech-level basic">Базовый</div>
             </div>
           </div>
         </div>
@@ -65,7 +65,7 @@
             <div class="tech-icon vue">Vue</div>
             <div class="tech-info">
               <div class="tech-name">Vue.js</div>
-              <div class="tech-level expert">Expert</div>
+              <div class="tech-level expert">Эксперт</div>
             </div>
           </div>
           
@@ -73,15 +73,15 @@
             <div class="tech-icon nuxt">Nuxt</div>
             <div class="tech-info">
               <div class="tech-name">Nuxt.js</div>
-              <div class="tech-level expert">Expert</div>
+              <div class="tech-level expert">Эксперт</div>
             </div>
           </div>
           
-          <div class="tech-item intermediate">
+          <div class="tech-item basic">
             <div class="tech-icon react">React</div>
             <div class="tech-info">
               <div class="tech-name">React.js</div>
-              <div class="tech-level intermediate">Intermediate</div>
+              <div class="tech-level basic">Базовый</div>
             </div>
           </div>
         </div>
@@ -100,31 +100,31 @@
             <div class="tech-icon git">Git</div>
             <div class="tech-info">
               <div class="tech-name">Git</div>
-              <div class="tech-level expert">Expert</div>
+              <div class="tech-level expert">Эксперт</div>
             </div>
           </div>
           
           <div class="tech-item intermediate">
-            <div class="tech-icon">🔄</div>
+            <div class="tech-icon cicd">CI</div>
             <div class="tech-info">
               <div class="tech-name">CI/CD</div>
-              <div class="tech-level intermediate">Intermediate</div>
+              <div class="tech-level intermediate">Средний</div>
             </div>
           </div>
           
           <div class="tech-item intermediate">
-            <div class="tech-icon">🚀</div>
+            <div class="tech-icon deploy">Deploy</div>
             <div class="tech-info">
-              <div class="tech-name">Deployment</div>
-              <div class="tech-level intermediate">Intermediate</div>
+              <div class="tech-name">Развертывание</div>
+              <div class="tech-level intermediate">Средний</div>
             </div>
           </div>
           
           <div class="tech-item intermediate">
-            <div class="tech-icon">🔍</div>
+            <div class="tech-icon sentry">Sentry</div>
             <div class="tech-info">
               <div class="tech-name">Sentry</div>
-              <div class="tech-level intermediate">Intermediate</div>
+              <div class="tech-level intermediate">Средний</div>
             </div>
           </div>
         </div>
@@ -141,32 +141,32 @@
         <div class="specialization-grid">
           <div class="specialization-item">
             <div class="spec-icon">🎨</div>
-            <div class="spec-text">UI/UX Design</div>
+            <div class="spec-text">UI/UX Дизайн</div>
           </div>
           
           <div class="specialization-item">
             <div class="spec-icon">⚡</div>
-            <div class="spec-text">Performance Optimization</div>
+            <div class="spec-text">Оптимизация производительности</div>
           </div>
           
           <div class="specialization-item">
             <div class="spec-icon">📱</div>
-            <div class="spec-text">Responsive Design</div>
+            <div class="spec-text">Адаптивный дизайн</div>
           </div>
           
           <div class="specialization-item">
             <div class="spec-icon">🔗</div>
-            <div class="spec-text">Blockchain Integration</div>
+            <div class="spec-text">Блокчейн интеграция</div>
           </div>
           
           <div class="specialization-item">
             <div class="spec-icon">📈</div>
-            <div class="spec-text">Team Leadership</div>
+            <div class="spec-text">Руководство командой</div>
           </div>
           
           <div class="specialization-item">
             <div class="spec-icon">🧪</div>
-            <div class="spec-text">Testing & QA</div>
+            <div class="spec-text">Тестирование и контроль качества</div>
           </div>
         </div>
       </div>
@@ -330,25 +330,68 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.875rem;
   background: var(--black-800);
   color: var(--white-1000);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 
   &.vue {
-    background: linear-gradient(135deg, #4fc08d, #41b883);
+    background: linear-gradient(135deg, #2d7a57, #1e5d42);
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
   }
 
   &.nuxt {
-    background: linear-gradient(135deg, #00dc82, #36e4da);
+    background: linear-gradient(135deg, #00a85f, #008a4f);
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
   }
 
   &.react {
-    background: linear-gradient(135deg, #61dafb, #21759b);
+    background: linear-gradient(135deg, #1e5f7a, #164a5e);
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
   }
 
   &.git {
-    background: linear-gradient(135deg, #f05032, #c73e1d);
+    background: linear-gradient(135deg, #c73e1d, #a0321a);
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  }
+
+  &.csharp {
+    background: linear-gradient(135deg, #5d2d91, #4a2374);
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  }
+
+  &.python {
+    background: linear-gradient(135deg, #2b5b84, #1f4764);
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  }
+
+  &.cicd {
+    background: linear-gradient(135deg, #6b46c1, #553c9a);
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    font-size: 0.75rem;
+  }
+
+  &.deploy {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    font-size: 0.7rem;
+  }
+
+  &.sentry {
+    background: linear-gradient(135deg, #362d59, #2a1f42);
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    font-size: 0.7rem;
   }
 }
 

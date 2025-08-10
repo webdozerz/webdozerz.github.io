@@ -1,27 +1,55 @@
 <template>
   <div class="projects">
-    <h3 class="projects__title">Pet проекты</h3>
-    <section>
-      <div class="projects__list">
-        <div v-for="project in projects" :key="project.name" class="projects__item">
-          <h4 class="projects__item-title">{{ project.name }}</h4>
-          <p class="projects__item-description">{{ project.description }}</p>
-          <div class="projects__item-links">
-            <a v-if="project.source" :href="project.source" target="_blank" class="projects__link">
-              Исходный код
-            </a>
-            <a v-if="project.demo" :href="project.demo" target="_blank" class="projects__link">
-              Демо / Скачать
-            </a>
-          </div>
-          <div class="projects__item-tech">
-            <span v-for="tech in project.technologies" :key="tech" class="projects__tech-tag">
-              {{ tech }}
-            </span>
+    <div class="section-header">
+      <h3 class="section-title">
+        <i class="title-icon">🚀</i>
+        Pet проекты
+      </h3>
+      <div class="section-subtitle">Мои личные разработки и эксперименты</div>
+    </div>
+
+    <div class="projects-grid">
+      <div v-for="(project, index) in projects" :key="project.name" class="project-card" :class="{ featured: index === 0 }">
+        <!-- Индикатор статуса -->
+        <div class="project-status">
+          <div class="status-dot active"/>
+          <span class="status-text">Активный</span>
+        </div>
+
+        <!-- Заголовок проекта -->
+        <div class="project-header">
+          <h4 class="project-title">{{ project.name }}</h4>
+          <div class="project-type">
+            <i class="type-icon">{{ getProjectIcon(project.technologies) }}</i>
           </div>
         </div>
+
+        <!-- Описание -->
+        <p class="project-description">{{ project.description }}</p>
+
+        <!-- Технологии -->
+        <div class="tech-stack">
+          <span v-for="tech in project.technologies" :key="tech" :class="['tech-badge', getTechClass(tech)]">
+            {{ tech }}
+          </span>
+        </div>
+
+        <!-- Действия -->
+        <div class="project-actions">
+          <a v-if="project.source" :href="project.source" target="_blank" class="action-btn source">
+            <i class="btn-icon">⚡</i>
+            <span>Исходный код</span>
+          </a>
+          <a v-if="project.demo" :href="project.demo" target="_blank" class="action-btn demo">
+            <i class="btn-icon">🔗</i>
+            <span>Демо / Скачать</span>
+          </a>
+        </div>
+
+        <!-- Фоновый градиент для featured проекта -->
+        <div v-if="index === 0" class="featured-glow"/>
       </div>
-    </section>
+    </div>
   </div>
 </template>
 
@@ -50,90 +78,367 @@ const projects: Project[] = [
     technologies: ['Chrome Extension', 'JavaScript', 'HTML', 'CSS']
   }
 ]
+
+// Вспомогательные функции
+const getProjectIcon = (technologies: string[]) => {
+  if (technologies.includes('Vue 3') || technologies.includes('Nuxt')) return '⚛️'
+  if (technologies.includes('Chrome Extension')) return '🔌'
+  return '💻'
+}
+
+const getTechClass = (tech: string) => {
+  const techClasses: Record<string, string> = {
+    'Vue 3': 'vue',
+    'Nuxt': 'nuxt',
+    'TypeScript': 'typescript',
+    'SCSS': 'scss',
+    'Chrome Extension': 'extension',
+    'JavaScript': 'javascript',
+    'HTML': 'html',
+    'CSS': 'css'
+  }
+  return techClasses[tech] || 'default'
+}
 </script>
 
 <style lang="scss" scoped>
 .projects {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 2rem;
+}
 
-  &__title {
-    color: var(--white-1000);
-  }
+// Заголовок секции
+.section-header {
+  text-align: center;
+  margin-bottom: 1rem;
 
-  &__list {
-    margin-top: 8px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    grid-gap: 16px;
-  }
-
-  &__item {
-    padding: 16px;
-    border: 1px solid var(--border-color, #333);
-    border-radius: 8px;
-    background: var(--bg-secondary, rgba(255, 255, 255, 0.02));
-    transition: border-color 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-
-    &:hover {
-      border-color: var(--green);
-    }
-  }
-
-  &__item-title {
-    margin: 0 0 8px 0;
-    color: var(--white-1000);
-    font-size: 1.1em;
-    font-weight: 600;
-  }
-
-  &__item-description {
-    margin: 0 0 12px 0;
-    color: var(--text-secondary, #ccc);
-    line-height: 1.5;
-    flex-grow: 1;
-  }
-
-  &__item-links {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 12px;
-    margin-top: auto;
-  }
-
-  &__link {
-    color: var(--green);
-    text-decoration: none;
-    font-weight: 500;
-    padding: 4px 8px;
-    border: 1px solid var(--green);
-    border-radius: 4px;
-    font-size: 0.9em;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: var(--green);
-      color: var(--bg-primary, #000);
-    }
-  }
-
-  &__item-tech {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  &__tech-tag {
-    background: var(--red);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.8em;
-    font-weight: 500;
+  @media (min-width: 768px) {
+    text-align: left;
   }
 }
-</style> 
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 700;
+  color: var(--white-1000);
+  margin: 0 0 0.5rem 0;
+  justify-content: center;
+
+  @media (min-width: 768px) {
+    justify-content: flex-start;
+  }
+
+  .title-icon {
+    font-size: 1.2em;
+  }
+}
+
+.section-subtitle {
+  color: var(--white-700);
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+// Сетка проектов
+.projects-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+}
+
+// Карточка проекта
+.project-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 20px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border-color: rgba(127, 92, 230, 0.4);
+  }
+
+  &.featured {
+    border-color: rgba(92, 230, 115, 0.4);
+    
+    &:hover {
+      border-color: rgba(92, 230, 115, 0.6);
+      box-shadow: 0 20px 40px rgba(92, 230, 115, 0.2);
+    }
+  }
+
+  @media (min-width: 768px) {
+    padding: 2rem;
+  }
+}
+
+// Статус проекта
+.project-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--white-700);
+
+  &.active {
+    background: var(--green);
+    box-shadow: 0 0 10px rgba(92, 230, 115, 0.5);
+    animation: pulse-status 2s infinite;
+  }
+}
+
+@keyframes pulse-status {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.status-text {
+  font-size: 0.75rem;
+  color: var(--white-700);
+  font-weight: 500;
+}
+
+// Заголовок проекта
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.project-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--white-1000);
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+}
+
+.project-type {
+  flex-shrink: 0;
+}
+
+.type-icon {
+  font-size: 1.5rem;
+}
+
+// Описание
+.project-description {
+  color: var(--white-800);
+  line-height: 1.6;
+  margin: 0 0 1.5rem 0;
+  flex-grow: 1;
+  font-size: 0.95rem;
+}
+
+// Технологии
+.tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.tech-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+
+  &.vue {
+    background: rgba(76, 192, 141, 0.2);
+    color: #4fc08d;
+    border-color: rgba(76, 192, 141, 0.3);
+  }
+
+  &.nuxt {
+    background: rgba(0, 220, 130, 0.2);
+    color: #00dc82;
+    border-color: rgba(0, 220, 130, 0.3);
+  }
+
+  &.typescript {
+    background: rgba(56, 118, 184, 0.2);
+    color: #3876b8;
+    border-color: rgba(56, 118, 184, 0.3);
+  }
+
+  &.scss {
+    background: rgba(207, 100, 154, 0.2);
+    color: #cf649a;
+    border-color: rgba(207, 100, 154, 0.3);
+  }
+
+  &.extension {
+    background: rgba(92, 230, 230, 0.2);
+    color: var(--accent-cyan);
+    border-color: rgba(92, 230, 230, 0.3);
+  }
+
+  &.javascript {
+    background: rgba(240, 219, 79, 0.2);
+    color: #f0db4f;
+    border-color: rgba(240, 219, 79, 0.3);
+  }
+
+  &.html {
+    background: rgba(227, 79, 38, 0.2);
+    color: #e34f26;
+    border-color: rgba(227, 79, 38, 0.3);
+  }
+
+  &.css {
+    background: rgba(21, 114, 182, 0.2);
+    color: #1572b6;
+    border-color: rgba(21, 114, 182, 0.3);
+  }
+
+  &.default {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--white-800);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+}
+
+// Действия
+.project-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: auto;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  flex: 1;
+  justify-content: center;
+  min-width: 0;
+
+  @media (min-width: 480px) {
+    flex: none;
+    min-width: auto;
+  }
+
+  .btn-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    @media (min-width: 480px) {
+      white-space: normal;
+      overflow: visible;
+      text-overflow: none;
+    }
+  }
+
+  &.source {
+    background: rgba(92, 230, 115, 0.1);
+    color: var(--green);
+    border-color: rgba(92, 230, 115, 0.3);
+
+    &:hover {
+      background: rgba(92, 230, 115, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(92, 230, 115, 0.3);
+    }
+  }
+
+  &.demo {
+    background: rgba(127, 92, 230, 0.1);
+    color: var(--purple);
+    border-color: rgba(127, 92, 230, 0.3);
+
+    &:hover {
+      background: rgba(127, 92, 230, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(127, 92, 230, 0.3);
+    }
+  }
+}
+
+// Featured проект фон
+.featured-glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(92, 230, 115, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.5;
+}
+
+// Адаптивность
+@media (max-width: 767px) {
+  .project-card {
+    padding: 1.25rem;
+  }
+  
+  .project-title {
+    font-size: 1.1rem;
+  }
+  
+  .project-description {
+    font-size: 0.9rem;
+  }
+  
+  .action-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    
+    span {
+      font-size: 0.8rem;
+    }
+  }
+}
+</style>

@@ -36,15 +36,15 @@
         </a>
         
         <div class="contact-links">
-          <a class="contact-link social" href="#" title="GitHub">
+          <a class="contact-link social" href="https://github.com/webdozerz" title="GitHub" target="_blank">
             <i class="icon">⚡</i>
             <span>GitHub</span>
           </a>
-          <a class="contact-link social" href="#" title="LinkedIn">
+          <a class="contact-link social" href="https://www.linkedin.com/in/web-dev-ill/" title="LinkedIn" target="_blank">
             <i class="icon">💼</i>
             <span>LinkedIn</span>
           </a>
-          <a class="contact-link social" href="#" title="Telegram">
+          <a class="contact-link social" href="https://t.me/web_dev_ill" title="Telegram" target="_blank">
             <i class="icon">📱</i>
             <span>Telegram</span>
           </a>
@@ -58,7 +58,7 @@
           <span class="stat-label">лет опыта</span>
         </div>
         <div class="stat-item">
-          <span class="stat-number">50+</span>
+          <span class="stat-number">10+</span>
           <span class="stat-label">проектов</span>
         </div>
         <div class="stat-item">

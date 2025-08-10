@@ -140,7 +140,9 @@ onUnmounted(() => {
     <!-- Плавающая кнопка наверх -->
     <Transition name="fade">
       <button v-if="showScrollButton" class="scroll-to-top" @click="scrollToTop">
-        <i class="icon">↑</i>
+        <svg class="scroll-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 6L12 18M12 6L7 11M12 6L17 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </button>
     </Transition>
   </div>
@@ -374,15 +376,22 @@ onUnmounted(() => {
   background: linear-gradient(135deg, var(--purple) 0%, var(--blue) 100%);
   border: none;
   color: var(--white-1000);
-  font-size: 1.2rem;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 8px 32px rgba(127, 92, 230, 0.3);
   z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 40px rgba(127, 92, 230, 0.4);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(127, 92, 230, 0.3);
   }
 
   @media (max-width: 768px) {
@@ -390,6 +399,17 @@ onUnmounted(() => {
     height: 45px;
     bottom: 1.5rem;
     right: 1.5rem;
+  }
+}
+
+.scroll-icon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+
+  @media (max-width: 768px) {
+    width: 18px;
+    height: 18px;
   }
 }
 
