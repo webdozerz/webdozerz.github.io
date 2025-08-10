@@ -255,6 +255,14 @@ onUnmounted(() => {
   border: 1px solid rgba(255, 255, 255, 0.1);
   overflow-x: auto;
 
+  // Скрываем скроллбар для всех браузеров
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // Internet Explorer и Edge
+
+  &::-webkit-scrollbar {
+    display: none; // Chrome, Safari, Opera
+  }
+
   @media (max-width: 768px) {
     gap: 0.5rem;
     padding: 0.5rem;
