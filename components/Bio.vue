@@ -31,21 +31,33 @@
       <!-- Контакты -->
       <div class="bio__contacts">
         <a class="contact-link email" href="mailto:webdozerz@gmail.com">
-          <i class="icon">✉</i>
+          <svg class="icon email-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
           <span>webdozerz@gmail.com</span>
         </a>
         
         <div class="contact-links">
           <a class="contact-link social" href="https://github.com/webdozerz" title="GitHub" target="_blank">
-            <i class="icon">⚡</i>
+            <svg class="icon github-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 0.5C5.37 0.5 0 5.87 0 12.5C0 17.92 3.44 22.49 8.2 24.09C8.8 24.2 9 23.83 9 23.51V21.32C5.73 22.05 5.02 19.85 5.02 19.85C4.48 18.5 3.68 18.13 3.68 18.13C2.55 17.37 3.77 17.39 3.77 17.39C5.04 17.48 5.68 18.66 5.68 18.66C6.79 20.58 8.57 20.04 9.05 19.8C9.16 19.01 9.48 18.47 9.84 18.24C7.17 18 4.38 16.93 4.38 12.14C4.38 10.85 4.84 9.8 5.7 8.99C5.57 8.75 5.15 7.49 5.82 5.78C5.82 5.78 6.87 5.45 8.98 6.85C9.98 6.6 11.02 6.47 12.05 6.47C13.08 6.47 14.12 6.6 15.12 6.85C17.23 5.45 18.28 5.78 18.28 5.78C18.95 7.49 18.53 8.75 18.4 8.99C19.26 9.8 19.72 10.85 19.72 12.14C19.72 16.94 16.92 17.99 14.24 18.22C14.69 18.59 15.1 19.32 15.1 20.43V23.51C15.1 23.84 15.3 24.21 15.91 24.08C20.66 22.48 24.1 17.91 24.1 12.5C24.1 5.87 18.73 0.5 12 0.5Z" fill="currentColor"/>
+            </svg>
             <span>GitHub</span>
           </a>
           <a class="contact-link social" href="https://www.linkedin.com/in/web-dev-ill/" title="LinkedIn" target="_blank">
-            <i class="icon">💼</i>
+            <svg class="icon linkedin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 8C18.5 8 20.5 10 20.5 12.5V21H17V12.5C17 11.5 16 10.5 15 10.5C14 10.5 13 11.5 13 12.5V21H9.5V8H13V9.5C13.5 8.5 14.5 8 16 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="2" y="8" width="4" height="13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="2"/>
+            </svg>
             <span>LinkedIn</span>
           </a>
           <a class="contact-link social" href="https://t.me/web_dev_ill" title="Telegram" target="_blank">
-            <i class="icon">📱</i>
+            <svg class="icon telegram-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 3L3 10.5L11 13.5L14 21.5L21 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M11 13.5L16 8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
             <span>Telegram</span>
           </a>
         </div>
@@ -234,6 +246,15 @@
 
   .icon {
     font-size: 1.2rem;
+    
+    &.email-icon,
+    &.github-icon,
+    &.linkedin-icon,
+    &.telegram-icon {
+      width: 1.2rem;
+      height: 1.2rem;
+      flex-shrink: 0;
+    }
   }
 
   &.email {
