@@ -7,14 +7,12 @@
     "activeTab"
   ],
   "host_permissions": [
-    "https://www.kinopoisk.ru/film/*",
-    "https://www.kinopoisk.ru/series/*"
+    "https://www.kinopoisk.ru/*"
   ],
   "content_scripts": [
     {
       "matches": [
-        "https://www.kinopoisk.ru/film/*",
-        "https://www.kinopoisk.ru/series/*"
+        "https://www.kinopoisk.ru/*"
       ],
       "js": ["content.js"],
       "css": ["styles.css"],

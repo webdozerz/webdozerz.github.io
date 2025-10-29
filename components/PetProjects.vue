@@ -74,7 +74,7 @@ const projects: Project[] = [
     name: 'Kinopoisk Finder',
     description: 'Расширение для поиска альтернативных источников просмотра фильмов и сериалов с Kinopoisk',
     source: 'https://github.com/webdozerz/webdozerz.github.io/blob/master/public/source-code/knp',
-    demo: 'https://webdozerz.github.io/knp-ext.zip',
+    demo: 'https://webdozerz.github.io/source-code/knp.zip',
     technologies: ['Chrome Extension', 'JavaScript', 'HTML', 'CSS']
   }
 ]

@@ -81,18 +81,100 @@ function createWatchButton() {
   console.log('✅ Кнопка "Смотреть бесплатно" добавлена');
 }
 
-// Главная функция - запускается сразу
-function init() {
-  console.log('🎬 Kinopoisk Extension: Инициализация');
-  console.log('🌐 URL:', window.location.href);
+// Отслеживание смены URL для SPA навигации
+function watchUrlChanges() {
+  let currentUrl = window.location.href;
+  console.log('🔍 Начинаем отслеживание URL. Текущий:', currentUrl);
   
-  // Если мы на странице фильма или сериала - создаем кнопку
+  // Перехватываем изменения истории браузера
+  const originalPushState = history.pushState;
+  const originalReplaceState = history.replaceState;
+  
+  history.pushState = function(...args) {
+    console.log('📌 history.pushState вызван:', args);
+    originalPushState.apply(history, args);
+    setTimeout(checkUrlChange, 100); // Небольшая задержка для обновления URL
+  };
+  
+  history.replaceState = function(...args) {
+    console.log('📌 history.replaceState вызван:', args);
+    originalReplaceState.apply(history, args);
+    setTimeout(checkUrlChange, 100);
+  };
+  
+  // Слушаем событие popstate (кнопки назад/вперед)
+  window.addEventListener('popstate', (e) => {
+    console.log('📌 popstate событие:', e);
+    setTimeout(checkUrlChange, 100);
+  });
+  
+  // Дополнительное отслеживание через MutationObserver для надежности
+  const observer = new MutationObserver(() => {
+    checkUrlChange();
+  });
+  
+  observer.observe(document, {
+    childList: true,
+    subtree: true
+  });
+  
+  // Периодическая проверка URL (на случай если что-то пропустили)
+  setInterval(() => {
+    if (window.location.href !== currentUrl) {
+      console.log('⏰ URL изменение обнаружено через polling');
+      checkUrlChange();
+    }
+  }, 1000);
+  
+  function checkUrlChange() {
+    const newUrl = window.location.href;
+    if (newUrl !== currentUrl) {
+      console.log('🌐 URL изменился:');
+      console.log('   Старый:', currentUrl);
+      console.log('   Новый:', newUrl);
+      currentUrl = newUrl;
+      
+      // Удаляем старую кнопку если есть
+      const oldButton = document.querySelector('.knp-ext-watch-button');
+      if (oldButton) {
+        oldButton.remove();
+        console.log('🗑️ Старая кнопка удалена');
+      }
+      
+      // Проверяем новую страницу
+      checkAndCreateButton();
+    }
+  }
+}
+
+// Проверяем страницу и создаем кнопку если нужно
+function checkAndCreateButton() {
+  const pathname = window.location.pathname;
+  const fullUrl = window.location.href;
+  
+  console.log('🔍 Проверка страницы:');
+  console.log('   Pathname:', pathname);
+  console.log('   Full URL:', fullUrl);
+  
   if (isMovieOrSeriesPage()) {
     console.log('📺 Страница фильма/сериала обнаружена');
     createWatchButton();
   } else {
     console.log('🚫 Не страница фильма/сериала');
+    console.log('   Ожидаем паттерн: /film/[число] или /series/[число]');
   }
+}
+
+// Главная функция - запускается сразу
+function init() {
+  console.log('🎬 Kinopoisk Extension: Инициализация');
+  console.log('🌐 URL:', window.location.href);
+  
+  // Настраиваем отслеживание URL
+  watchUrlChanges();
+  
+  // Проверяем текущую страницу
+  checkAndCreateButton();
 }
 
 // Запускаем инициализацию
