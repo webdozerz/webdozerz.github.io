@@ -114,15 +114,19 @@
                   <span>{{ item.baseTimePerComponent.toFixed(2) }}ч</span>
                 </div>
                 <div class="breakdown-line">
-                  <span>Коэффициент типа:</span>
-                  <span>{{ item.typeCoeff }}x</span>
+                  <span>Множитель типа:</span>
+                  <span>{{ item.typeMultiplier }}x</span>
                 </div>
-                <div class="breakdown-line">
-                  <span>Время на тип компонента:</span>
-                  <span>{{ item.typeTime.toFixed(2) }}ч</span>
+                <div v-if="item.withoutBase > 0" class="breakdown-line">
+                  <span>Без базы ({{ item.withoutBase }} шт., множитель {{ item.baseMultiplierWithoutBase }}x):</span>
+                  <span>{{ item.timeWithoutBase.toFixed(2) }}ч</span>
                 </div>
                 <div v-if="item.withBase > 0" class="breakdown-line">
-                  <span>С готовой базой ({{ item.withBase }} шт.):</span>
+                  <span>С готовой базой ({{ item.withBase }} шт., множитель {{ item.baseMultiplierWithBase }}x):</span>
+                  <span>{{ item.timeWithBase.toFixed(2) }}ч</span>
+                </div>
+                <div v-if="item.baseSavings > 0" class="breakdown-line">
+                  <span>Экономия от базы:</span>
                   <span>-{{ item.baseSavings.toFixed(2) }}ч</span>
                 </div>
                 <div v-if="item.propsTime > 0" class="breakdown-line">
@@ -182,10 +186,14 @@ interface CalculationDetails {
     label: string
     count: number
     withBase: number
+    withoutBase: number
     newProps: number
     baseTimePerComponent: number
-    typeCoeff: number
-    typeTime: number
+    typeMultiplier: number
+    baseMultiplierWithBase: number
+    baseMultiplierWithoutBase: number
+    timeWithBase: number
+    timeWithoutBase: number
     baseSavings: number
     propsTime: number
     totalTime: number

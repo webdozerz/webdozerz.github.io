@@ -194,57 +194,59 @@ import { useScrollLock } from '~/composables/useScrollLock'
 
 /**
  * БАЗОВЫЕ КОЭФФИЦИЕНТЫ для расчета трудозатрат
- * Каждый коэффициент показывает, сколько дополнительного времени добавляет фактор
+ * Каждый коэффициент показывает, сколько дополнительного времени (в часах) добавляет фактор
+ * к базовому времени компонента (1 час)
  */
 const DEFAULT_BASE_COEFFS = {
-  // Влияние наличия базового компонента на время разработки
-  baseExists: { true: 0.5, false: 1.0 },
+  // Влияние наличия базового компонента на время разработки (множитель экономии)
+  // Применяется как множитель к базовому времени: экономия 30% при наличии базы
+  baseExists: { true: 0.7, false: 1.0 },
   
   // Сложность пользовательского интерфейса
-  uiComplex: { static: 0.3, interactive: 0.8 },
+  uiComplex: { static: 0.2, interactive: 0.5 },
   
   // Управление состоянием компонента
-  stateLayer: { local: 0.3, global: 0.8 },
+  stateLayer: { local: 0.2, global: 0.5 },
   
   // Интеграция с API
-  apiType: { none: 0, simple: 0.5, crud: 1.2 },
+  apiType: { none: 0, simple: 0.3, crud: 0.7 },
   
   // Дополнительные требования (фиксированные коэффициенты)
-  ssr: 0.6,
-  seoAdvanced: 0.3,
+  ssr: 0.4,
+  seoAdvanced: 0.2,
   
   // Интернационализация
-  i18n: { none: 0, simple: 0.2, advanced: 0.5 },
+  i18n: { none: 0, simple: 0.15, advanced: 0.3 },
   
   // Покрытие тестами
-  tests: { unit: 0.3, e2e: 0.8 },
+  tests: { unit: 0.2, e2e: 0.5 },
   
   // Адаптивный дизайн под разные экраны
-  responsive: 0.4,
+  responsive: 0.25,
   
   // Доступность для людей с ограниченными возможностями  
-  accessibility: 0.5,
+  accessibility: 0.3,
   
   // Время на код-ревью и исправления
-  codeReview: 0.2,
+  codeReview: 0.15,
   
   // Документация компонента
-  documentation: 0.15,
+  documentation: 0.1,
 
   // Настройка деплоя и CI/CD
-  deployment: 0.3,
+  deployment: 0.2,
 } as const
 
 /**
- * ВЕСОВЫЕ КОЭФФИЦИЕНТЫ для разных типов компонентов
- * Показывают относительную сложность каждого типа компонента
+ * МНОЖИТЕЛИ СЛОЖНОСТИ для разных типов компонентов
+ * Умножают базовое время в зависимости от сложности типа компонента
  */
 const DEFAULT_COMPONENT_TYPE_COEFFS = {
-  layout: 0.2,    // Макеты и контейнеры (header, footer, sidebar)
-  ui: 0.4,        // Базовые UI элементы (кнопки, инпуты)
-  form: 0.7,      // Формы с валидацией
-  chart: 0.9,     // Графики и визуализация данных
-  complex: 1.2,   // Сложные виджеты (календари, таблицы с фильтрами)
+  layout: 0.8,    // Макеты и контейнеры (header, footer, sidebar) - проще базового
+  ui: 1.0,        // Базовые UI элементы (кнопки, инпуты) - базовый уровень
+  form: 1.3,      // Формы с валидацией - сложнее базового
+  chart: 1.6,     // Графики и визуализация данных - значительно сложнее
+  complex: 2.0,   // Сложные виджеты (календари, таблицы с фильтрами) - максимальная сложность
 } as const
 
 const LABELS = {
@@ -406,13 +408,15 @@ watch(showCoefficientEditor, (isOpen) => {
 
 /**
  * РАСЧЕТ БАЗОВОГО ВРЕМЕНИ НА ОДИН КОМПОНЕНТ
- * Суммирует все коэффициенты для получения времени на компонент
+ * Базовое время (1 час) плюс дополнительные коэффициенты сложности
  * 
  * @param s - состояние формы с параметрами проекта
  * @returns базовое время в часах на один компонент
  */
 function baselinePerComponent(s: FormState): number {
-  const h =
+  const BASE_TIME = 1.0 // Минимальное базовое время на компонент (1 час)
+  
+  const additionalTime =
     // Основные факторы (всегда применяются)
     coefficients.uiComplex[s.uiComplex] +
     coefficients.stateLayer[s.stateLayer] +
@@ -431,14 +435,14 @@ function baselinePerComponent(s: FormState): number {
     (s.documentation ? coefficients.documentation : 0) +
     (s.deployment ? coefficients.deployment : 0)
 
-  return h
+  return BASE_TIME + additionalTime
 }
 
 /**
  * ДЕТАЛИЗАЦИЯ РАСЧЕТОВ
  */
 const calculationDetails = computed(() => {
-  const per = baselinePerComponent(state)
+  const baseTimePerComponent = baselinePerComponent(state)
   
   // Общее количество компонентов всех типов
   const total = componentTypes.reduce((sum, t) => sum + (state.counts[t] || 0), 0)
@@ -450,62 +454,72 @@ const calculationDetails = computed(() => {
     .map(type => {
       const count = state.counts[type] || 0
       const withBase = Math.min(state.countsWithBase[type] || 0, count)
+      const withoutBase = count - withBase
       const newProps = state.countsNewProps[type] || 0
       
-      // Базовое время на компонент
-      const baseTimePerComponent = per
+      // Множитель типа компонента
+      const typeMultiplier = coefficients.componentTypes[type]
       
-      // Время с учетом типа компонента
-      const typeCoeff = coefficients.componentTypes[type]
-      const typeTime = count * typeCoeff
+      // Множители экономии от базовых компонентов
+      const baseMultiplierWithBase = coefficients.baseExists.true
+      const baseMultiplierWithoutBase = coefficients.baseExists.false
       
-      // Экономия от базовых компонентов
-      const withoutBase = count - withBase
-      const baseSavings = withBase * (coefficients.baseExists.false - coefficients.baseExists.true)
+      // Время для компонентов с базой
+      const timeWithBase = baseTimePerComponent * typeMultiplier * baseMultiplierWithBase * withBase
+      
+      // Время для компонентов без базы
+      const timeWithoutBase = baseTimePerComponent * typeMultiplier * baseMultiplierWithoutBase * withoutBase
+      
+      // Экономия от базовых компонентов (в часах)
+      const baseSavings = withBase * baseTimePerComponent * typeMultiplier * (baseMultiplierWithoutBase - baseMultiplierWithBase)
       
       // Время на новые props
       let propsTime = 0
-      if (newProps > 0) {
+      if (newProps > 0 && count > 0) {
         const simpleProps = Math.min(newProps, 2)
         const complexProps = Math.max(newProps - 2, 0)
         const timePerComponent = simpleProps * 0.1 + complexProps * 0.05
         propsTime = count * timePerComponent
       }
       
-      // Общее время с учетом базы и props
-      const baseTime = withBase * coefficients.baseExists.true + withoutBase * coefficients.baseExists.false
-      const totalTime = baseTimePerComponent * baseTime + typeTime + propsTime
+      // Общее время для этого типа компонентов
+      const totalTime = timeWithBase + timeWithoutBase + propsTime
       
       return {
         type,
         label: labels[type],
         count,
         withBase,
+        withoutBase,
         newProps,
         baseTimePerComponent,
-        typeCoeff,
-        typeTime,
+        typeMultiplier,
+        baseMultiplierWithBase,
+        baseMultiplierWithoutBase,
+        timeWithBase,
+        timeWithoutBase,
         baseSavings,
         propsTime,
         totalTime
       }
     })
   
-  // Дополнительное время в зависимости от типов компонентов
-  const additive = componentTypes.reduce(
-    (sum, t) => sum + (state.counts[t] || 0) * coefficients.componentTypes[t],
-    0
-  )
-  
-  // Расчет экономии времени от базовых компонентов
-  const baseEconomy = componentTypes.reduce((sum, t) => {
-    const totalCount = state.counts[t] || 0
-    const withBaseCount = Math.min(state.countsWithBase[t] || 0, totalCount)
-    const withoutBaseCount = totalCount - withBaseCount
+  // Расчет общего времени без учета грейда
+  let totalBaseTime = 0
+  componentTypes.forEach(type => {
+    const count = state.counts[type] || 0
+    if (count === 0) return
     
-    const baseTimeImpact = withBaseCount * coefficients.baseExists.true + withoutBaseCount * coefficients.baseExists.false
-    return sum + baseTimeImpact
-  }, 0)
+    const withBaseCount = Math.min(state.countsWithBase[type] || 0, count)
+    const withoutBaseCount = count - withBaseCount
+    
+    const typeMultiplier = coefficients.componentTypes[type]
+    const baseMultiplierWithBase = coefficients.baseExists.true
+    const baseMultiplierWithoutBase = coefficients.baseExists.false
+    
+    totalBaseTime += baseTimePerComponent * typeMultiplier * baseMultiplierWithBase * withBaseCount
+    totalBaseTime += baseTimePerComponent * typeMultiplier * baseMultiplierWithoutBase * withoutBaseCount
+  })
   
   // Расчет времени на новые props
   const propsTime = componentTypes.reduce((sum, t) => {
@@ -523,7 +537,7 @@ const calculationDetails = computed(() => {
   }, 0)
   
   // Базовое время без учета грейда
-  const baseTime = per * total + additive + baseEconomy + propsTime
+  const baseTime = totalBaseTime + propsTime
   
   // С учетом грейда разработчика
   const withLevelFactor = baseTime * coefficients.levelFactor[state.devLevel]
@@ -539,29 +553,37 @@ const calculationDetails = computed(() => {
 
 /**
  * ОСНОВНОЙ РАСЧЕТ ТРУДОЗАТРАТ
+ * Новая формула: базовое время * множитель типа * множитель базы * количество * уровень + props
  */
 const hours = computed(() => {
-  const per = baselinePerComponent(state)
+  // Базовое время на компонент (уже включает все дополнительные коэффициенты)
+  const baseTimePerComponent = baselinePerComponent(state)
   
-  // Общее количество компонентов всех типов
-  const total = componentTypes.reduce((sum, t) => sum + (state.counts[t] || 0), 0)
+  // Расчет времени по каждому типу компонентов
+  let totalTime = 0
   
-  // Дополнительное время в зависимости от типов компонентов
-  const additive = componentTypes.reduce(
-    (sum, t) => sum + (state.counts[t] || 0) * coefficients.componentTypes[t],
-    0
-  )
-  
-  // Расчет экономии времени от базовых компонентов
-  const baseEconomy = componentTypes.reduce((sum, t) => {
-    const totalCount = state.counts[t] || 0
-    const withBaseCount = Math.min(state.countsWithBase[t] || 0, totalCount)
-    const withoutBaseCount = totalCount - withBaseCount
+  componentTypes.forEach(type => {
+    const count = state.counts[type] || 0
+    if (count === 0) return
     
-    // Компоненты с базой экономят время (коэффициент 0.5), без базы используют полный коэффициент (1.0)
-    const baseTimeImpact = withBaseCount * coefficients.baseExists.true + withoutBaseCount * coefficients.baseExists.false
-    return sum + baseTimeImpact
-  }, 0)
+    const withBaseCount = Math.min(state.countsWithBase[type] || 0, count)
+    const withoutBaseCount = count - withBaseCount
+    
+    // Множитель типа компонента (сложность типа)
+    const typeMultiplier = coefficients.componentTypes[type]
+    
+    // Множитель экономии от базовых компонентов
+    const baseMultiplierWithBase = coefficients.baseExists.true
+    const baseMultiplierWithoutBase = coefficients.baseExists.false
+    
+    // Время для компонентов с базой
+    const timeWithBase = baseTimePerComponent * typeMultiplier * baseMultiplierWithBase * withBaseCount
+    
+    // Время для компонентов без базы
+    const timeWithoutBase = baseTimePerComponent * typeMultiplier * baseMultiplierWithoutBase * withoutBaseCount
+    
+    totalTime += timeWithBase + timeWithoutBase
+  })
   
   // Расчет времени на новые props/emit для каждого типа компонентов
   const propsTime = componentTypes.reduce((sum, t) => {
@@ -580,7 +602,7 @@ const hours = computed(() => {
   }, 0)
   
   // Итоговое время с учетом уровня разработчика
-  const core = (per * total + additive + baseEconomy + propsTime) * coefficients.levelFactor[state.devLevel]
+  const core = (totalTime + propsTime) * coefficients.levelFactor[state.devLevel]
   
   // Возвращаем три варианта оценки с округлением до десятых
   return {
