@@ -2,7 +2,6 @@
   <div class="min-h-screen">
     <div class="container">
       <div class="card space-y-8">
-        <!-- Заголовок -->
         <header class="header">
           <h1>Калькулятор трудозатрат</h1>
           <p>
@@ -10,9 +9,7 @@
           </p>
         </header>
 
-        <!-- ===== Форма ===== -->
         <form class="form" autocomplete="off">
-          <!-- Кол-во компонентов по типам -->
           <fieldset class="fieldset full-width">
             <legend class="legend">Количество компонентов</legend>
             <div class="grid">
@@ -44,7 +41,6 @@
             </div>
           </fieldset>    
 
-          <!-- Сложность UI -->
           <BaseSelect
             v-model="state.uiComplex"
             label="Сложность UI"
@@ -54,7 +50,6 @@
             ]"
           />
 
-          <!-- Слой состояния -->
           <BaseSelect
             v-model="state.stateLayer"
             label="Слой состояния"
@@ -64,7 +59,6 @@
             ]"
           />
 
-          <!-- API -->
           <BaseSelect
             v-model="state.apiType"
             label="Тип API"
@@ -76,13 +70,11 @@
             ]"
           />
 
-          <!-- SSR, SEO, тесты -->
           <BaseToggle v-model="state.ssr" label="SSR (Async Data, Изоморфный код)" />
           <BaseToggle v-model="state.seoAdvanced" label="Расширенный SEO" />
           <BaseToggle v-model="state.testsUnit"      label="Unit-тесты" />
           <BaseToggle v-model="state.testsE2E"       label="E2E-тесты" />
 
-          <!-- === НОВЫЕ ПОЛЯ === -->
           <BaseToggle v-model="state.responsive" label="Адаптивный дизайн (мобильные, планшеты)" />
           <BaseToggle v-model="state.accessibility" label="Доступность (a11y, ARIA)" />
           <BaseToggle v-model="state.codeReview" label="Код-ревью и рефакторинг" />
@@ -91,7 +83,6 @@
 
           <div class="empty-space"/>
 
-          <!-- i18n -->
           <BaseSelect
             v-model="state.i18n"
             label="Интернационализация (i18n)"
@@ -103,7 +94,6 @@
             ]"
           />
 
-          <!-- Грейд разработчика -->
           <BaseSelect
             v-model="state.devLevel"
             class="full-width"
@@ -116,14 +106,12 @@
           />
         </form>
 
-        <!-- ===== Результаты ===== -->
         <section class="results">
           <BaseResultCard title="Оптимистичная"   color="green" :value="hours.optimistic" />
           <BaseResultCard title="Реалистичная"    color="blue"  :value="hours.realistic"  />
           <BaseResultCard title="Пессимистичная"  color="red"   :value="hours.pessimistic"/>
         </section>
 
-        <!-- Сброс -->
         <div class="buttons-container">
           <div class="buttons-group">
             <button 
@@ -170,7 +158,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно редактирования коэффициентов -->
     <CoefficientEditModal
       :is-visible="showCoefficientEditor"
       :coefficients="coefficients"
@@ -179,7 +166,6 @@
       @save="updateCoefficients"
     />
 
-    <!-- Модальное окно с деталями расчета -->
     <CalculationDetailsModal
       :is-visible="showCalculationDetails"
       :calculation-details="calculationDetails"
@@ -190,7 +176,6 @@
       @close="showCalculationDetails = false"
     />
 
-    <!-- Модальное окно интеграции с Jira -->
     <JiraIntegrationModal
       :is-visible="showJiraIntegration"
       :hours="hours"
@@ -213,42 +198,41 @@ import { useScrollLock } from '~/composables/useScrollLock'
  */
 const DEFAULT_BASE_COEFFS = {
   // Влияние наличия базового компонента на время разработки
-  baseExists: { true: 0.5, false: 1.0 }, // Если есть базовый - экономим 50% времени
+  baseExists: { true: 0.5, false: 1.0 },
   
   // Сложность пользовательского интерфейса
-  uiComplex: { static: 0.3, interactive: 0.8 }, // Интерактивный UI значительно сложнее
+  uiComplex: { static: 0.3, interactive: 0.8 },
   
   // Управление состоянием компонента
-  stateLayer: { local: 0.3, global: 0.8 }, // Глобальное состояние требует больше времени
+  stateLayer: { local: 0.3, global: 0.8 },
   
   // Интеграция с API
-  apiType: { none: 0, simple: 0.5, crud: 1.2 }, // CRUD операции существенно сложнее
+  apiType: { none: 0, simple: 0.5, crud: 1.2 },
   
   // Дополнительные требования (фиксированные коэффициенты)
-  ssr: 0.6,           // Server-Side Rendering добавляет сложностей
-  seoAdvanced: 0.3,   // Продвинутая SEO оптимизация
+  ssr: 0.6,
+  seoAdvanced: 0.3,
   
   // Интернационализация
-  i18n: { none: 0, simple: 0.2, advanced: 0.5 }, // RTL и plural формы требуют дополнительного времени
+  i18n: { none: 0, simple: 0.2, advanced: 0.5 },
   
   // Покрытие тестами
-  tests: { unit: 0.3, e2e: 0.8 }, // E2E тесты значительно сложнее unit тестов
+  tests: { unit: 0.3, e2e: 0.8 },
   
-  // === НОВЫЕ ФАКТОРЫ ===
   // Адаптивный дизайн под разные экраны
-  responsive: 0.4,        // Адаптивность добавляет много CSS и тестирования
+  responsive: 0.4,
   
   // Доступность для людей с ограниченными возможностями  
-  accessibility: 0.5,     // ARIA, семантика, навигация с клавиатуры
+  accessibility: 0.5,
   
   // Время на код-ревью и исправления
-  codeReview: 0.2,        // Дополнительное время на ревью и исправления
+  codeReview: 0.2,
   
   // Документация компонента
-  documentation: 0.15,    // README, JSDoc, Storybook
-  
+  documentation: 0.15,
+
   // Настройка деплоя и CI/CD
-  deployment: 0.3,        // Docker, конфиги, пайплайны
+  deployment: 0.3,
 } as const
 
 /**
@@ -263,9 +247,6 @@ const DEFAULT_COMPONENT_TYPE_COEFFS = {
   complex: 1.2,   // Сложные виджеты (календари, таблицы с фильтрами)
 } as const
 
-/**
- * ЧЕЛОВЕКОЧИТАЕМЫЕ НАЗВАНИЯ для типов компонентов
- */
 const LABELS = {
   layout: "Макет/Контейнер",
   ui: "UI-элемент", 
@@ -276,7 +257,6 @@ const LABELS = {
 
 /**
  * МНОЖИТЕЛИ для разных уровней разработчиков
- * Junior тратит больше времени, Senior меньше
  */
 const DEFAULT_LEVEL_FACTOR = { junior: 1.35, middle: 1.15, senior: 0.9 } as const
 
@@ -286,15 +266,12 @@ const DEFAULT_LEVEL_FACTOR = { junior: 1.35, middle: 1.15, senior: 0.9 } as cons
 const OPT = 0.8   // Оптимистичная: -20% от реалистичной
 const PESS = 1.3  // Пессимистичная: +30% от реалистичной
 
-// Типы TypeScript для безопасности
 type ComponentType = keyof typeof DEFAULT_COMPONENT_TYPE_COEFFS
 const componentTypes = Object.keys(DEFAULT_COMPONENT_TYPE_COEFFS) as ComponentType[]
 const labels = LABELS
 
-// Интерфейс для счетчиков компонентов
 interface Counts { [k: string]: number }
 
-// Интерфейс для всех коэффициентов
 interface AllCoefficients {
   baseExists: { true: number; false: number }
   uiComplex: { static: number; interactive: number }
@@ -337,14 +314,13 @@ const defaultCoefficients: AllCoefficients = {
   levelFactor: { ...DEFAULT_LEVEL_FACTOR }
 }
 
-// Реактивные коэффициенты (можно редактировать)
+// Реактивные коэффициенты (изменяемые)
 const coefficients = reactive<AllCoefficients>({
   ...defaultCoefficients
 })
 
 /**
- * ИНТЕРФЕЙС состояния формы
- * Описывает все параметры, влияющие на расчет трудозатрат
+ * Состояния формы
  */
 interface FormState {
   counts: Counts                              // Количество каждого типа компонентов
@@ -386,7 +362,6 @@ const initial: FormState = {
   testsUnit: false,        // Тесты опциональны
   testsE2E: false,         // E2E тесты тоже опциональны
   
-  // === НОВЫЕ ДЕФОЛТЫ ===
   responsive: false,        // Адаптивный дизайн не включен
   accessibility: false,     // Доступность не включена
   codeReview: false,        // Код-ревью не включено
@@ -396,21 +371,15 @@ const initial: FormState = {
   devLevel: "middle",      // Средний уровень разработчика
 }
 
-/**
- * РЕАКТИВНОЕ СОСТОЯНИЕ формы
- * Vue будет автоматически обновлять интерфейс при изменениях
- */
+
 const state = reactive<FormState>({ ...initial })
 
-// Состояние модального окна
 const showCalculationDetails = ref(false)
 const showJiraIntegration = ref(false)
 const showCoefficientEditor = ref(false)
 
-// Управление скроллом
 const { lockScroll, unlockScroll } = useScrollLock()
 
-// Отслеживание открытия/закрытия модальных окон для управления скроллом
 watch(showCalculationDetails, (isOpen) => {
   if (isOpen) {
     lockScroll()
@@ -456,7 +425,6 @@ function baselinePerComponent(s: FormState): number {
     (s.testsUnit ? coefficients.tests.unit : 0) +
     (s.testsE2E ? coefficients.tests.e2e : 0) +
     
-    // === НОВЫЕ ФАКТОРЫ ===
     (s.responsive ? coefficients.responsive : 0) +
     (s.accessibility ? coefficients.accessibility : 0) +
     (s.codeReview ? coefficients.codeReview : 0) +
@@ -468,7 +436,6 @@ function baselinePerComponent(s: FormState): number {
 
 /**
  * ДЕТАЛИЗАЦИЯ РАСЧЕТОВ
- * Computed свойство для отображения подробной информации о расчетах
  */
 const calculationDetails = computed(() => {
   const per = baselinePerComponent(state)
@@ -572,7 +539,6 @@ const calculationDetails = computed(() => {
 
 /**
  * ОСНОВНОЙ РАСЧЕТ ТРУДОЗАТРАТ
- * Computed свойство - автоматически пересчитывается при изменении state
  */
 const hours = computed(() => {
   const per = baselinePerComponent(state)
@@ -626,7 +592,6 @@ const hours = computed(() => {
 
 /**
  * СБРОС ФОРМЫ к начальным значениям
- * Вручную сбрасываем каждое поле для корректной работы с реактивностью Vue
  */
 function reset() {
   // Сбрасываем объекты counts
@@ -658,7 +623,6 @@ function reset() {
 
 // Добавляем функцию экспорта в CSV
 function exportToCsv() {
-  // Получаем текущую дату для названия файла
   const now = new Date()
   const dateStr = now.toLocaleDateString('ru-RU').replace(/\./g, '-')
   const timeStr = now.toLocaleTimeString('ru-RU', { 
@@ -666,13 +630,12 @@ function exportToCsv() {
     minute: '2-digit' 
   }).replace(':', '-')
   
-  // Формируем данные для экспорта
   const csvData = [
     ['Параметр', 'Значение'],
     ['Дата расчета', `${dateStr} ${timeStr}`],
   ]
   
-  // Количество компонентов (только с ненулевыми значениями)
+  // Количество компонентов
   const nonZeroCounts = componentTypes.filter(type => (state.counts[type] || 0) > 0)
   if (nonZeroCounts.length > 0) {
     csvData.push([''])
@@ -682,7 +645,7 @@ function exportToCsv() {
     })
   }
   
-  // Компоненты с готовой базой (только с ненулевыми значениями)
+  // Компоненты с готовой базой
   const componentsWithBase = componentTypes.filter(type => (state.countsWithBase[type] || 0) > 0)
   if (componentsWithBase.length > 0) {
     csvData.push([''])
@@ -692,7 +655,7 @@ function exportToCsv() {
     })
   }
   
-  // Новые props на компонент (только с ненулевыми значениями)
+  // Новые props на компонент
   const componentsWithProps = componentTypes.filter(type => (state.countsNewProps[type] || 0) > 0)
   if (componentsWithProps.length > 0) {
     csvData.push([''])
@@ -702,7 +665,7 @@ function exportToCsv() {
     })
   }
   
-  // Основные параметры (только если отличаются от дефолтных значений)
+  // Основные параметры
   const mainParams = []
   if (state.uiComplex !== 'static') {
     mainParams.push(['Сложность UI', 'Интерактивная'])
@@ -732,7 +695,7 @@ function exportToCsv() {
     csvData.push(...mainParams)
   }
   
-  // Дополнительные опции (только включенные)
+  // Дополнительные опции
   const enabledOptions = []
   if (state.ssr) enabledOptions.push(['SSR (Async Data, Изоморфный код)', 'Да'])
   if (state.seoAdvanced) enabledOptions.push(['Расширенный SEO', 'Да'])
@@ -750,7 +713,7 @@ function exportToCsv() {
     csvData.push(...enabledOptions)
   }
   
-  // Результаты (всегда показываем)
+  // Результаты
   csvData.push([''])
   csvData.push(['=== РЕЗУЛЬТАТЫ (ЧАСЫ) ===', ''])
   csvData.push(['Оптимистичная оценка', String(hours.value.optimistic)])
@@ -762,29 +725,24 @@ function exportToCsv() {
     .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
     .join('\n')
   
-  // Добавляем BOM для корректного отображения русских символов в Excel
   const bom = '\uFEFF'
   const csvWithBom = bom + csvContent
   
-  // Создаем blob и ссылку для скачивания
   const blob = new Blob([csvWithBom], { type: 'text/csv;charset=utf-8' })
   const url = window.URL.createObjectURL(blob)
   
-  // Создаем временную ссылку и кликаем по ней
   const link = document.createElement('a')
   link.href = url
   link.download = `trudozatraty-${dateStr}-${timeStr}.csv`
   document.body.appendChild(link)
   link.click()
   
-  // Очищаем ресурсы
   document.body.removeChild(link)
   window.URL.revokeObjectURL(url)
 }
 
 // Добавляем функцию экспорта в JSON
 function exportToJson() {
-  // Получаем текущую дату для названия файла
   const now = new Date()
   const dateStr = now.toLocaleDateString('ru-RU').replace(/\./g, '-')
   const timeStr = now.toLocaleTimeString('ru-RU', { 
@@ -802,7 +760,7 @@ function exportToJson() {
       description: 'Экспорт данных калькулятора трудозатрат'
     },
     
-    // Исходные данные формы (для возможного импорта - сохраняем все)
+    // Исходные данные формы
     rawData: {
       counts: { ...state.counts },
       countsWithBase: { ...state.countsWithBase },
@@ -823,11 +781,11 @@ function exportToJson() {
       devLevel: state.devLevel
     },
     
-    // Человекочитаемые данные (только непустые)
+    // Человекочитаемые данные
     formattedData: {}
   }
   
-  // Компоненты (только с ненулевыми значениями)
+  // Компоненты
   const nonZeroCounts = componentTypes.filter(type => (state.counts[type] || 0) > 0)
   const componentsWithBase = componentTypes.filter(type => (state.countsWithBase[type] || 0) > 0)
   const componentsWithProps = componentTypes.filter(type => (state.countsNewProps[type] || 0) > 0)
@@ -857,7 +815,7 @@ function exportToJson() {
     }
   }
   
-  // Основные параметры (только если отличаются от дефолтных)
+  // Основные параметры
   const settings: Record<string, string> = {}
   if (state.uiComplex !== 'static') {
     settings.uiComplexity = 'Интерактивная'
@@ -879,7 +837,7 @@ function exportToJson() {
     jsonData.formattedData.settings = settings
   }
   
-  // Дополнительные опции (только включенные)
+  // Дополнительные опции
   const features: Record<string, boolean> = {}
   if (state.ssr) features.ssr = true
   if (state.seoAdvanced) features.advancedSeo = true
@@ -895,7 +853,7 @@ function exportToJson() {
     jsonData.formattedData.features = features
   }
   
-  // Результаты расчетов (всегда показываем)
+  // Результаты расчетов
   jsonData.results = {
     hours: {
       optimistic: hours.value.optimistic,
@@ -915,21 +873,17 @@ function exportToJson() {
     }
   }
   
-  // Преобразуем в JSON с красивым форматированием
   const jsonContent = JSON.stringify(jsonData, null, 2)
   
-  // Создаем blob и ссылку для скачивания
   const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8' })
   const url = window.URL.createObjectURL(blob)
   
-  // Создаем временную ссылку и кликаем по ней
   const link = document.createElement('a')
   link.href = url
   link.download = `trudozatraty-${dateStr}-${timeStr}.json`
   document.body.appendChild(link)
   link.click()
   
-  // Очищаем ресурсы
   document.body.removeChild(link)
   window.URL.revokeObjectURL(url)
 }
@@ -941,13 +895,10 @@ const hasComponents = computed(() => {
 
 // Добавляем функцию обработки успешного экспорта в Jira
 function handleJiraSuccess(result: { key: string; url: string }) {
-  // Закрываем модальное окно интеграции с Jira
   showJiraIntegration.value = false
   
-  // Показываем уведомление об успешном создании задачи
   alert(`Задача успешно создана в Jira!\nКлюч: ${result.key}\nСсылка: ${result.url}`)
   
-  // Опционально: открываем задачу в новой вкладке
   if (confirm('Открыть созданную задачу в Jira?')) {
     window.open(result.url, '_blank')
   }
@@ -1000,7 +951,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
 </script>
 
 <style scoped>
-/* Layout utilities */
 .container {
   width: 100%;
   max-width: 1024px;
@@ -1042,7 +992,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
   margin: 0;
 }
 
-/* Form elements */
 .form {
   display: grid;
   grid-template-columns: 1fr;
@@ -1105,7 +1054,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
   }
 }
 
-/* Component type grouping */
 .component-type-group {
   display: flex;
   flex-direction: column;
@@ -1116,7 +1064,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
   background-color: #f9fafb;
 }
 
-/* Results section */
 .results {
   display: grid;
   grid-template-columns: 1fr;
@@ -1130,7 +1077,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
   }
 }
 
-/* Button styles */
 .btn {
   font-size: 0.875rem;
   font-weight: 500;
@@ -1221,9 +1167,7 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
   gap: 0.75rem;
 }
 
-/* === БАЗОВЫЕ КОМПОНЕНТЫ === */
 
-/* Form Group Styles */
 :deep(.form-group) {
   display: flex;
   flex-direction: column;
@@ -1233,7 +1177,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
   grid-column: 1 / -1;
 }
 
-/* Label Styles */
 :deep(.label) {
   font-size: 0.875rem;
   font-weight: 500;
@@ -1241,7 +1184,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
   color: #111827;
 }
 
-/* Component type group labels */
 .component-type-group :deep(.form-group:first-child .label) {
   font-weight: 600;
   font-size: 0.875rem;
@@ -1254,7 +1196,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
   font-weight: 400;
 }
 
-/* Input and Select Styles */
 :deep(.input),
 :deep(.select) {
   border: 1px solid #d1d5db;
@@ -1352,7 +1293,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
   content: '−';
 }
 
-/* Checkbox/Toggle Styles */
 :deep(.checkbox-wrapper) {
   display: flex;
   align-items: center;
@@ -1435,7 +1375,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
   color: #111827;
 }
 
-/* Modal styles */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1532,7 +1471,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
   scrollbar-color: #cbd5e1 #f1f5f9;
 }
 
-/* Webkit scrollbar styling */
 .modal-body::-webkit-scrollbar {
   width: 8px;
 }
@@ -1557,7 +1495,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
   flex-shrink: 0;
 }
 
-/* Detail sections */
 .detail-section {
   margin-bottom: 2rem;
 }
@@ -1603,7 +1540,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
   color: #111827;
 }
 
-/* Component breakdown */
 .component-breakdown {
   display: flex;
   flex-direction: column;
@@ -1677,7 +1613,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
   color: #111827;
 }
 
-/* Calculation summary */
 .calculation-summary {
   background-color: #f0f9ff;
   border: 1px solid #bae6fd;
@@ -1714,7 +1649,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
   color: #111827;
 }
 
-/* Jira form styles */
 .jira-form {
   display: flex;
   flex-direction: column;
@@ -1838,7 +1772,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
     width: 100%;
   }
   
-  /* На мобильных первые две группы показываем по 2 кнопки в ряд */
   .buttons-group:nth-child(1),
   .buttons-group:nth-child(2) {
     display: grid;
@@ -1846,7 +1779,6 @@ function updateCoefficients(newCoefficients: AllCoefficients) {
     gap: 0.5rem;
   }
   
-  /* Кнопка сброса на всю ширину */
   .buttons-group:nth-child(3) {
     display: flex;
     margin-top: 0.5rem;
