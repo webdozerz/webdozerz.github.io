@@ -4,6 +4,8 @@ useSeoMeta({
   robots: 'noindex, nofollow',
 })
 
+const NuxtLink = resolveComponent('NuxtLink')
+
 const projects = [
   {
     to: '/redesign/foodgood/',
@@ -11,6 +13,14 @@ const projects = [
     text: 'Магазин здоровой еды: ягоды, фермерское мясо, рыба. Каталог, корзина и оформление заказа.',
     source: 'https://foodgoodtomsk.ru',
     tags: ['Nuxt 3', 'Vue', 'e-commerce'],
+  },
+  {
+    to: '/redesign/sttorg70/',
+    title: 'СТ-ТОРГ70',
+    text: 'Продукты оптом и в розницу. Статичные экраны для перекраски WordPress/WooCommerce: главная, каталог, карточка, корзина, доставка.',
+    source: 'https://sttorg70.ru',
+    tags: ['HTML/CSS', 'WooCommerce', 'только визуал'],
+    plain: true,
   },
 ]
 </script>
@@ -25,13 +35,13 @@ const projects = [
 
     <ul class="list">
       <li v-for="p in projects" :key="p.to">
-        <NuxtLink :to="p.to" class="card">
+        <component :is="p.plain ? 'a' : NuxtLink" v-bind="p.plain ? { href: p.to } : { to: p.to }" class="card">
           <h2>{{ p.title }}</h2>
           <p>{{ p.text }}</p>
           <div class="tags">
             <span v-for="t in p.tags" :key="t">{{ t }}</span>
           </div>
-        </NuxtLink>
+        </component>
         <a :href="p.source" target="_blank" rel="noopener" class="source">Оригинал</a>
       </li>
     </ul>
