@@ -4,8 +4,6 @@ useSeoMeta({
   robots: 'noindex, nofollow',
 })
 
-const NuxtLink = resolveComponent('NuxtLink')
-
 const projects = [
   {
     to: '/redesign/foodgood/',
@@ -35,13 +33,23 @@ const projects = [
 
     <ul class="list">
       <li v-for="p in projects" :key="p.to">
-        <component :is="p.plain ? 'a' : NuxtLink" v-bind="p.plain ? { href: p.to } : { to: p.to }" class="card">
+        <!-- Статичные концепты рисуем только в браузере, чтобы краулер Nuxt не пытался их prerender-ить. -->
+        <ClientOnly v-if="p.plain">
+          <a :href="p.to" class="card">
+            <h2>{{ p.title }}</h2>
+            <p>{{ p.text }}</p>
+            <div class="tags">
+              <span v-for="t in p.tags" :key="t">{{ t }}</span>
+            </div>
+          </a>
+        </ClientOnly>
+        <NuxtLink v-else :to="p.to" class="card">
           <h2>{{ p.title }}</h2>
           <p>{{ p.text }}</p>
           <div class="tags">
             <span v-for="t in p.tags" :key="t">{{ t }}</span>
           </div>
-        </component>
+        </NuxtLink>
         <a :href="p.source" target="_blank" rel="noopener" class="source">Оригинал</a>
       </li>
     </ul>
