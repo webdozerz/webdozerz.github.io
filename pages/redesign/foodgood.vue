@@ -45,7 +45,6 @@ watch(
       </span>
       <span class="fg-banner__links">
         <a href="https://foodgoodtomsk.ru" target="_blank" rel="noopener">Оригинал</a>
-        <NuxtLink to="/redesign">Все концепты</NuxtLink>
       </span>
     </div>
 
