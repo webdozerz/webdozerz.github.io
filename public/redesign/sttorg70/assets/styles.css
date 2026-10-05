@@ -269,3 +269,20 @@ p{margin:0}
 .news p{color:var(--muted);margin-bottom:12px}
 .news a{font-weight:700;color:var(--red);border-bottom:2px solid currentColor}
 @media(max-width:900px){.community{grid-template-columns:1fr;padding:24px;text-align:left}.community__qr{align-items:flex-start}}
+
+/* adaptive fixes */
+.grid--3{grid-template-columns:repeat(3,1fr)}
+.pcard{container-type:inline-size}
+.buy .add{white-space:nowrap;padding:0 12px}
+@container (max-width:240px){
+  .buy{grid-template-columns:1fr}
+  .buy .qty{width:100%;grid-template-columns:44px 1fr 44px}
+  .pcard__title{font-size:14px}
+}
+@media(max-width:900px){.grid--3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){
+  .grid,.grid--3,.grid--5{grid-template-columns:repeat(2,1fr);gap:10px}
+  .pcard__body{padding:10px 10px 12px}
+  .price b{font-size:19px}
+  .price s{font-size:13px}
+}
