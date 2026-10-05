@@ -286,3 +286,23 @@ p{margin:0}
   .price b{font-size:19px}
   .price s{font-size:13px}
 }
+
+/* mobile header */
+.hbtn[aria-label="Избранное"]{width:46px;padding:0;justify-content:center;font-size:18px}
+.hbtn--cart svg{flex:none}
+@media(max-width:900px){
+  .header{position:static}
+  .header__row{flex-wrap:wrap;gap:10px 12px;padding:12px 0}
+  .logo{flex:1;min-width:0}
+  .logo img{height:34px}
+  .hactions{margin-left:0;gap:8px;flex:none}
+  .hbtn{height:46px}
+  .search{order:3;flex-basis:100%}
+  .nav{position:sticky;top:0;z-index:30}
+}
+@media(max-width:420px){
+  .hbtn--cart{padding:0 14px;gap:8px}
+  .logo img{height:30px}
+  .concept{font-size:12px}
+  .topbar .container{justify-content:center;text-align:center}
+}
