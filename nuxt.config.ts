@@ -13,6 +13,10 @@ export default defineNuxtConfig({
       { display: "swap", families: { Inter: [400, 700] } },
     ],
   ],
+  nitro: {
+    // Статичные концепты лежат в public/redesign/<name>/, у Nuxt для них нет маршрутов.
+    prerender: { ignore: ['/redesign/sttorg70'] },
+  },
   runtimeConfig: {
     // Приватные переменные (доступны только на сервере)  
     redmineApiKey: process.env.REDMINE_API_KEY,
