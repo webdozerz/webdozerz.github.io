@@ -66,6 +66,7 @@ function greetInConsole() {
 
 onMounted(() => {
   ui.syncTheme()
+  ui.syncPet()
   window.addEventListener('keydown', onKeydown)
   greetInConsole()
 })

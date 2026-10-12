@@ -38,6 +38,13 @@ const commands = computed<Command[]>(() => [
   },
   { id: 'terminal', group: 'Настройки', label: 'Открыть консоль', hint: '~', run: () => (terminalOpen.value = true) },
   { id: 'blueprint', group: 'Настройки', label: 'Режим чертежа', hint: '↑↑↓↓←→←→BA', run: ui.toggleBlueprint },
+  {
+    id: 'pet',
+    group: 'Настройки',
+    label: ui.petVisible.value ? 'Спрятать кота' : 'Позвать кота',
+    hint: 'Пиксель',
+    run: ui.togglePet,
+  },
 ])
 
 const filtered = computed(() => {

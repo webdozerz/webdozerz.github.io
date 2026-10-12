@@ -106,7 +106,10 @@ const commands: Record<string, { help?: string, run: (args: string[]) => void }>
   cat: {
     help: 'показать файл',
     run: ([file]) => {
-      if (file === 'resume.txt') {
+      if (!file) {
+        out('Пиксель мурчит. Он рядом, внизу экрана.')
+      }
+      else if (file === 'resume.txt') {
         commands.whoami.run([])
         out('Полная версия — прокрутите страницу вниз или введите experience.')
       }
@@ -163,6 +166,7 @@ const commands: Record<string, { help?: string, run: (args: string[]) => void }>
     },
   },
   blueprint: { run: () => ui.toggleBlueprint() },
+  pet: { help: 'спрятать или позвать кота', run: () => ui.togglePet() },
   vim: { run: () => out('Не надо. Выйти отсюда проще: exit.') },
   nano: { run: () => commands.vim.run([]) },
   npm: {

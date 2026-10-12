@@ -5,6 +5,7 @@ import { contacts } from '~/data/profile'
 export type HomeTheme = 'light' | 'dark'
 
 const THEME_KEY = 'home-theme'
+const PET_KEY = 'home-pet-hidden'
 
 export function useHomeUi() {
   const theme = useState<HomeTheme>('home-theme', () => 'dark')
@@ -12,6 +13,7 @@ export function useHomeUi() {
   const paletteOpen = useState<boolean>('home-palette', () => false)
   const terminalOpen = useState<boolean>('home-terminal', () => false)
   const blueprint = useState<boolean>('home-blueprint', () => false)
+  const petVisible = useState<boolean>('home-pet', () => true)
 
   let toastTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -33,6 +35,26 @@ export function useHomeUi() {
 
   function toggleTheme() {
     setTheme(theme.value === 'dark' ? 'light' : 'dark')
+  }
+
+  function syncPet() {
+    try {
+      petVisible.value = localStorage.getItem(PET_KEY) !== '1'
+    }
+    catch {
+      petVisible.value = true
+    }
+  }
+
+  function togglePet() {
+    petVisible.value = !petVisible.value
+    try {
+      localStorage.setItem(PET_KEY, petVisible.value ? '0' : '1')
+    }
+    catch {
+      // Без хранилища выбор просто не запомнится.
+    }
+    toast(petVisible.value ? 'Пиксель вернулся' : 'Пиксель ушёл спать за экран')
   }
 
   function toast(text: string) {
@@ -66,7 +88,10 @@ export function useHomeUi() {
     paletteOpen,
     terminalOpen,
     blueprint,
+    petVisible,
     syncTheme,
+    syncPet,
+    togglePet,
     setTheme,
     toggleTheme,
     toast,

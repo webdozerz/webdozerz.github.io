@@ -64,6 +64,12 @@ onBeforeUnmount(() => {
         >{{ item.label }}</a>
       </nav>
 
+      <div class="site-header__track">
+        <ClientOnly>
+          <HomePet />
+        </ClientOnly>
+      </div>
+
       <div class="site-header__actions">
         <button class="cmdk" type="button" aria-label="Открыть палитру команд" @click="paletteOpen = true">
           <span class="cmdk__label">Меню</span>
@@ -109,11 +115,17 @@ onBeforeUnmount(() => {
     height: 64px;
   }
 
+  &__track {
+    position: relative;
+    flex: 1 1 auto;
+    align-self: stretch;
+    min-width: 0;
+  }
+
   &__actions {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-left: auto;
   }
 }
 
