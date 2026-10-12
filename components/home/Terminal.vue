@@ -107,7 +107,7 @@ const commands: Record<string, { help?: string, run: (args: string[]) => void }>
     help: 'показать файл',
     run: ([file]) => {
       if (!file) {
-        out('Пиксель мурчит. Он рядом, внизу экрана.')
+        out('Пиксель мурчит. Он гуляет по шапке сайта.')
       }
       else if (file === 'resume.txt') {
         commands.whoami.run([])

@@ -156,9 +156,7 @@ const PHRASES = [
   'TypeScript strict? Мур, одобряю.',
   'any в коде? Шшш!',
   'Я сплю 16 часов в сутки. Остальное — код-ревью.',
-  'Стакан обновляется по WebSocket. Я проверял лапой.',
   'Прод упал? Не я. Я лежал на клавиатуре.',
-  'Мяу в 4K. Ну, почти в 16×10.',
   'Сначала тесты, потом кормить кота. Или наоборот.',
   'Я тоже Middle+. Middle+ по мурчанию.',
   'Шёл по шапке, нашёл баг. Шучу, его тут нет.',
@@ -168,14 +166,13 @@ const PHRASES = [
   'console.log(\'мяу\')',
   'git push --force? Только через мой труп. Пиксельный.',
   'Мурлычу на частоте 60 fps.',
-  'Илья написал UI-кит из 31 компонента. Я бы сделал 32.',
   'Покорми меня звёздочкой на GitHub.',
   'Vue или React? Мяу. Вопрос закрыт.',
   'Я не ленюсь. Я жду, пока резолвится промис.',
   'Работаю удалённо: с подоконника.',
   'Если долго смотреть в шапку, шапка посмотрит на тебя.',
   'Это не баг, это кот.',
-  'Мой любимый хук — onMounted. Сразу видно, кто пришёл.',
+  'Мой любимый хук — onMeownted.',
   'Зачем мышь, если есть я?',
   'Задача оценена в 3 сторипоинта и 2 вкусняшки.',
   'В консоли есть команда sudo hire-me. Намёк понял?',
@@ -221,6 +218,10 @@ const WALK_FRAMES = ['walk1', 'walk2', 'walk3', 'walk4'] as const
 const frameIndex = ref(0)
 const jumping = ref(false)
 const bubble = ref('')
+const bubbleEl = ref<HTMLElement>()
+const bubbleWidth = ref(0)
+const layerLeft = ref(0)
+const viewportWidth = ref(0)
 const hearts = ref<number[]>([])
 const ready = ref(false)
 const root = ref<HTMLElement>()
@@ -279,10 +280,16 @@ function nextPhrase() {
   return queue.pop()!
 }
 
-function say(text: string, ms = 2600) {
+async function say(text: string, ms = 2600) {
+  // Пока новое облачко не измерено, оно скрыто и прижато к левому краю экрана,
+  // чтобы даже на мгновение не расширить страницу.
+  bubbleWidth.value = 0
   bubble.value = text
   clearTimeout(bubbleTimer)
   bubbleTimer = setTimeout(() => (bubble.value = ''), ms)
+  await nextTick()
+  bubbleWidth.value = bubbleEl.value?.offsetWidth ?? 0
+  measure()
 }
 
 function pickMode(now: number) {
@@ -477,6 +484,8 @@ function onClick() {
 
 function measure() {
   trackWidth.value = root.value?.clientWidth ?? 0
+  layerLeft.value = root.value?.getBoundingClientRect().left ?? 0
+  viewportWidth.value = document.documentElement.clientWidth
   x.value = Math.min(x.value, maxX())
 }
 
@@ -509,7 +518,16 @@ onBeforeUnmount(() => {
   resizeObserver?.disconnect()
 })
 
-const bubbleOnLeft = computed(() => x.value > trackWidth.value / 2)
+// Облачко держится над котом, но никогда не выходит за края экрана (отступ 16px).
+const BUBBLE_GAP = 16
+const bubbleX = computed(() => {
+  if (!bubbleWidth.value)
+    return Math.round(BUBBLE_GAP - layerLeft.value)
+  const desired = x.value + WIDTH / 2 - bubbleWidth.value / 2
+  const min = BUBBLE_GAP - layerLeft.value
+  const max = viewportWidth.value - BUBBLE_GAP - bubbleWidth.value - layerLeft.value
+  return Math.round(Math.max(min, Math.min(desired, max)))
+})
 const fits = computed(() => trackWidth.value >= MIN_TRACK)
 </script>
 
@@ -545,12 +563,19 @@ const fits = computed(() => trackWidth.value >= MIN_TRACK)
       </svg>
     </div>
 
+    <Transition name="bubble">
+      <p
+        v-if="bubble"
+        ref="bubbleEl"
+        class="pet-bubble mono"
+        :style="{ transform: `translateX(${bubbleX}px)`, visibility: bubbleWidth ? undefined : 'hidden' }"
+        role="status"
+      >
+        {{ bubble }}
+      </p>
+    </Transition>
+
     <div class="pet" :style="{ transform: `translateX(${x}px)` }">
-      <Transition name="bubble">
-        <p v-if="bubble" class="pet__bubble mono" :class="{ 'pet__bubble--left': bubbleOnLeft }" role="status">
-          {{ bubble }}
-        </p>
-      </Transition>
 
       <span v-for="h in hearts" :key="h" class="pet__heart" aria-hidden="true">
         <svg viewBox="0 0 7 6" shape-rendering="crispEdges">
@@ -617,6 +642,24 @@ const fits = computed(() => trackWidth.value >= MIN_TRACK)
   }
 }
 
+.pet-bubble {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 1;
+  width: max-content;
+  max-width: min(240px, calc(100vw - 32px));
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--h-line-strong);
+  border-radius: 8px;
+  background: var(--h-raised);
+  box-shadow: var(--h-shadow);
+  color: var(--h-text);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .pet-item {
   position: absolute;
   left: 0;
@@ -653,29 +696,6 @@ const fits = computed(() => trackWidth.value >= MIN_TRACK)
     &:focus-visible {
       outline-offset: 0;
       border-radius: 4px;
-    }
-  }
-
-  &__bubble {
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    z-index: 1;
-    width: max-content;
-    max-width: 240px;
-    margin: 0;
-    padding: 7px 10px;
-    border: 1px solid var(--h-line-strong);
-    border-radius: 8px;
-    background: var(--h-raised);
-    box-shadow: var(--h-shadow);
-    color: var(--h-text);
-    font-size: 12px;
-    line-height: 1.45;
-
-    &--left {
-      left: auto;
-      right: 0;
     }
   }
 
