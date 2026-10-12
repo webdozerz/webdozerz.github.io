@@ -248,6 +248,26 @@ body.home-page {
       }
     }
 
+    // Фирменный цвет Telegram: кнопка сразу узнаётся.
+    &--telegram {
+      gap: 9px;
+      border-color: #2aabee;
+      background: #2aabee;
+      color: #fff;
+
+      &:hover {
+        border-color: #229ed9;
+        background: #229ed9;
+      }
+    }
+
+    &__icon {
+      flex-shrink: 0;
+      width: 19px;
+      height: 19px;
+      fill: currentColor;
+    }
+
     &--ghost {
       border-color: transparent;
       background: none;

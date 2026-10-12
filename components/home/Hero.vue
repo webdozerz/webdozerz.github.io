@@ -78,7 +78,10 @@ onBeforeUnmount(() => clearInterval(timer))
       </p>
 
       <div class="hero__actions">
-        <a :href="contacts.telegram" target="_blank" rel="noopener" class="h-btn h-btn--primary">
+        <a :href="contacts.telegram" target="_blank" rel="noopener" class="h-btn h-btn--telegram">
+          <svg class="h-btn__icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21.6 3.6 2.9 10.8c-1.3.5-1.3 1.2-.2 1.6l4.8 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.4-2.3 4.9 3.6c.9.5 1.6.2 1.8-.8l3.2-15.2c.3-1.3-.5-1.9-1.4-1.5ZM9.4 14.4l-.4 4.1-1.5-4.8 11-6.9c.5-.3.9-.1.5.2l-9.6 7.4Z" />
+          </svg>
           Написать в Telegram
         </a>
         <button type="button" class="h-btn" @click="copyEmail">
