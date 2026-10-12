@@ -14,62 +14,90 @@ type Item = {
   landed: boolean
 }
 
-// Спрайты кота 16×10, смотрит вправо. x — шерсть, e — глаза, n — нос, z — закрытые глаза.
+// Спрайты кота 16×10, смотрит вправо. Срисован с настоящего Пикселя: серый табби с белой грудью и лапками.
+// g — серая шерсть, s — тёмные полоски, w — белая шерсть, p — розовые уши, n — нос, e — глаза, z — закрытые глаза.
 const SPRITES: Record<string, string[]> = {
+  // Цикл шага из 4 кадров. Задние и передние лапы работают в противофазе:
+  // одна пара расходится, другая сходится. Между кадрами двигаются все четыре лапы, хвост качается.
   walk1: [
-    '..........x...x.',
-    '..........xx.xx.',
-    'x.........xxxxx.',
-    'x.........xexex.',
-    '.x........xxnxx.',
-    '.x.xxxxxxxxxxx..',
-    '..xxxxxxxxxxxx..',
-    '..xxxxxxxxxxx...',
-    '..x.x.....x.x...',
-    '..x.x.....x.x...',
+    '..........g...g.',
+    '..........gp.pg.',
+    's.........ggsgg.',
+    'g.........gegeg.',
+    '.s........gwnwg.',
+    '.g.gsggsggswwg..',
+    '..ggsggsggswwg..',
+    '..ggwwwwwwwww...',
+    '..g.g.....w.w...',
+    '..w.w.....w.w...',
   ],
   walk2: [
-    '..........x...x.',
-    '..........xx.xx.',
-    '.x........xxxxx.',
-    'x.........xexex.',
-    'x.........xxnxx.',
-    '.x.xxxxxxxxxxx..',
-    '..xxxxxxxxxxxx..',
-    '..xxxxxxxxxxx...',
-    '...xx.....xx....',
-    '...xx.....xx....',
+    '..........g...g.',
+    '..........gp.pg.',
+    '.s........ggsgg.',
+    'g.........gegeg.',
+    's.........gwnwg.',
+    '.g.gsggsggswwg..',
+    '..ggsggsggswwg..',
+    '..ggwwwwwwwww...',
+    '..g.g.....w.w...',
+    '.w...w.....w....',
+  ],
+  walk3: [
+    '..........g...g.',
+    '..........gp.pg.',
+    's.........ggsgg.',
+    'g.........gegeg.',
+    '.s........gwnwg.',
+    '.g.gsggsggswwg..',
+    '..ggsggsggswwg..',
+    '..ggwwwwwwwww...',
+    '..g.g.....w.w...',
+    '..w.w.....w.w...',
+  ],
+  walk4: [
+    '..........g...g.',
+    '..........gp.pg.',
+    '.s........ggsgg.',
+    'g.........gegeg.',
+    's.........gwnwg.',
+    '.g.gsggsggswwg..',
+    '..ggsggsggswwg..',
+    '..ggwwwwwwwww...',
+    '..g.g.....w.w...',
+    '...w.....w...w..',
   ],
   sit: [
-    '..........x...x.',
-    '..........xx.xx.',
-    '..........xxxxx.',
-    '..........xexex.',
-    '..........xxnxx.',
-    '.........xxxxxx.',
-    '........xxxxxxx.',
-    '.x......xxxxxxx.',
-    '.x.....xxxxxxxx.',
-    '..xxxxxxxxx.xx..',
+    '..........g...g.',
+    '..........gp.pg.',
+    '..........ggsgg.',
+    '..........gegeg.',
+    '..........gwnwg.',
+    '.........gswwwg.',
+    '........gsgwwwg.',
+    '.s......sgswwwg.',
+    '.g.....gsgswwwg.',
+    '..sgsgsgggg.ww..',
   ],
+  // Спит клубком, как на любимом кресле.
   sleep: [
     '................',
     '................',
     '................',
     '................',
     '................',
-    '...........x.x..',
-    '....xxxxxx.xxx..',
-    '..xxxxxxxxxxxxx.',
-    '.xxxxxxxxxxzxzx.',
-    'xxxxxxxxxxxxxxx.',
+    '...........g.g..',
+    '....gsgsgs.gsg..',
+    '..gsgsgsgsggggg.',
+    '.gsgsgsgsggzgzg.',
+    'sgsgwwwwwwwwnww.',
   ],
   box: [
-    '......x...x.....',
-    '......xx.xx.....',
-    '......xxxxx.....',
-    '......xexex.....',
-    '.bb...xxnxx...bb',
+    '......g...g.....',
+    '......gp.pg.....',
+    '......ggsgg.....',
+    '......gegeg.....',
+    '.bb...gwnwg...bb',
     '..bbbbbbbbbbbbb.',
     '..bbbbbbdbbbbbb.',
     '..bbbbbbdbbbbbb.',
@@ -151,6 +179,10 @@ const PHRASES = [
   'Зачем мышь, если есть я?',
   'Задача оценена в 3 сторипоинта и 2 вкусняшки.',
   'В консоли есть команда sudo hire-me. Намёк понял?',
+  'Я срисован с настоящего кота. Его тоже зовут Пиксель.',
+  'Настоящий Пиксель сейчас, скорее всего, спит в кресле.',
+  'Полоски — это не баг, это дизайн-система.',
+  'Белые лапки — чтобы не оставлять следов в коде.',
 ]
 
 const EVENT_LINES: Record<ItemKind, { start: string, done: string[] }> = {
@@ -185,7 +217,8 @@ const EVENT_CHANCE = 0.35
 const x = ref(80)
 const dir = ref<1 | -1>(1)
 const mode = ref<Mode>('walk')
-const frame = ref<'walk1' | 'walk2'>('walk1')
+const WALK_FRAMES = ['walk1', 'walk2', 'walk3', 'walk4'] as const
+const frameIndex = ref(0)
 const jumping = ref(false)
 const bubble = ref('')
 const hearts = ref<number[]>([])
@@ -217,7 +250,7 @@ function toPixels(rows: string[]) {
   return list
 }
 
-const catPixels = computed(() => toPixels(SPRITES[mode.value === 'walk' ? frame.value : mode.value]!))
+const catPixels = computed(() => toPixels(SPRITES[mode.value === 'walk' ? WALK_FRAMES[frameIndex.value]! : mode.value]!))
 
 const itemSprite = computed(() => {
   const current = item.value
@@ -365,8 +398,8 @@ function chase(now: number, dt: number) {
   mode.value = 'walk'
   dir.value = distance > 0 ? 1 : -1
   x.value = Math.min(Math.max(x.value + dir.value * CHASE_SPEED * dt, 0), maxX())
-  if (now - frameTime > 110) {
-    frame.value = frame.value === 'walk1' ? 'walk2' : 'walk1'
+  if (now - frameTime > 85) {
+    frameIndex.value = (frameIndex.value + 1) % WALK_FRAMES.length
     frameTime = now
   }
 }
@@ -396,8 +429,8 @@ function step(now: number) {
         x.value = 0
         dir.value = 1
       }
-      if (now - frameTime > 180) {
-        frame.value = frame.value === 'walk1' ? 'walk2' : 'walk1'
+      if (now - frameTime > 140) {
+        frameIndex.value = (frameIndex.value + 1) % WALK_FRAMES.length
         frameTime = now
       }
     }
@@ -557,7 +590,20 @@ const fits = computed(() => trackWidth.value >= MIN_TRACK)
 </template>
 
 <style lang="scss" scoped>
+// В светлой теме белая шерсть чуть темнее, иначе лапки сливаются с фоном.
+:global(html.home-root[data-theme='light']) .pet-layer {
+  --pet-grey: #8f96a0;
+  --pet-stripe: #4a5059;
+  --pet-white: #cdd2da;
+  --pet-pink: #e8899e;
+}
+
 .pet-layer {
+  --pet-grey: #a3a9b2;
+  --pet-stripe: #575d67;
+  --pet-white: #eceef1;
+  --pet-pink: #f0a3b4;
+
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -659,8 +705,22 @@ const fits = computed(() => trackWidth.value >= MIN_TRACK)
   }
 }
 
-.px-x {
-  fill: var(--h-text-soft);
+.px-g {
+  fill: var(--pet-grey);
+}
+
+.px-s,
+.px-z {
+  fill: var(--pet-stripe);
+}
+
+.px-w {
+  fill: var(--pet-white);
+}
+
+.px-p,
+.px-n {
+  fill: var(--pet-pink);
 }
 
 .px-e,
@@ -668,12 +728,10 @@ const fits = computed(() => trackWidth.value >= MIN_TRACK)
   fill: var(--h-accent);
 }
 
-.px-n,
 .px-r {
   fill: var(--h-down);
 }
 
-.px-z,
 .px-y {
   fill: var(--h-bg);
 }
