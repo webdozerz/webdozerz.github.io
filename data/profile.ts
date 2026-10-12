@@ -93,7 +93,7 @@ export const jobs: Job[] = [
         ],
       },
       {
-        title: 'Сайт международного брокера INFINOX',
+        title: 'Сайт международного брокера',
         period: '07 — 09.2026',
         stack: ['Nuxt 4', 'SSR', 'TypeScript', 'Payload CMS', 'TanStack Query', 'vue-i18n'],
         points: [
