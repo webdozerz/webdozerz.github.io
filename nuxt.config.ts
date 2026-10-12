@@ -10,7 +10,15 @@ export default defineNuxtConfig({
     "@nuxt/eslint",
     [
       "@nuxtjs/google-fonts",
-      { display: "swap", families: { Inter: [400, 700] } },
+      {
+        display: "swap",
+        subsets: ["latin", "cyrillic"],
+        families: {
+          Inter: [400, 700],
+          Onest: [400, 500, 600, 700],
+          "JetBrains Mono": [400, 500],
+        },
+      },
     ],
   ],
   nitro: {

@@ -1,474 +1,337 @@
 <script lang="ts" setup>
-import Bio from '@/components/Bio.vue'
-import Experience from '@/components/Experience.vue'
-import Education from '@/components/Education.vue'
-import Tech from '@/components/Tech.vue'
-import PetProjects from '@/components/PetProjects.vue'
+import { themeBootScript } from '~/composables/useHomeUi'
 
-// Реактивные состояния
-const activeTab = ref('experience')
-const showScrollButton = ref(false)
+const ui = useHomeUi()
+const { toastText, paletteOpen, terminalOpen, blueprint } = ui
 
-// Функция плавного скролла наверх
-const scrollToTop = () => {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  })
+useSeoMeta({
+  title: 'Илья Андрюшов — Frontend-разработчик',
+  description: 'Frontend-разработчик (Middle+) из Томска: Vue 3, Nuxt, TypeScript. Торговые терминалы криптобирж, финансовые админ-панели, SSR-сайты и Telegram Mini Apps.',
+  ogTitle: 'Илья Андрюшов — Frontend-разработчик',
+  ogDescription: 'Vue 3, Nuxt, TypeScript. Торговые терминалы, админ-панели, SSR-сайты и Telegram Mini Apps.',
+  ogType: 'website',
+})
+
+useHead({
+  htmlAttrs: { lang: 'ru', class: 'home-root' },
+  bodyAttrs: { class: computed(() => (blueprint.value ? 'home-page is-blueprint' : 'home-page')) },
+  script: [{ innerHTML: themeBootScript, tagPosition: 'head' }],
+})
+
+// Konami-код включает «режим чертежа».
+const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a']
+let konamiStep = 0
+
+function isTyping(target: EventTarget | null) {
+  const el = target as HTMLElement | null
+  return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)
 }
 
-// Функция скролла к секции
-const scrollToSection = (sectionId: string) => {
-  activeTab.value = sectionId
-  const element = document.getElementById(sectionId)
-  if (element) {
-    element.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    })
+function onKeydown(event: KeyboardEvent) {
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+    event.preventDefault()
+    terminalOpen.value = false
+    paletteOpen.value = !paletteOpen.value
+    return
+  }
+
+  if (isTyping(event.target))
+    return
+
+  if (['`', '~', 'ё', 'Ё'].includes(event.key) || event.code === 'Backquote') {
+    event.preventDefault()
+    paletteOpen.value = false
+    terminalOpen.value = !terminalOpen.value
+    return
+  }
+
+  // B и A берём по физической клавише, чтобы код срабатывал и на русской раскладке.
+  const key = event.code === 'KeyB' ? 'b' : event.code === 'KeyA' ? 'a' : event.key
+  konamiStep = key === KONAMI[konamiStep] ? konamiStep + 1 : key === KONAMI[0] ? 1 : 0
+  if (konamiStep === KONAMI.length) {
+    konamiStep = 0
+    ui.toggleBlueprint()
   }
 }
 
-// Отслеживание скролла
-const handleScroll = () => {
-  showScrollButton.value = window.scrollY > 500
-  
-  // Определение активной секции
-  const sections = ['experience', 'education', 'tech', 'projects']
-  for (const section of sections) {
-    const element = document.getElementById(section)
-    if (element) {
-      const rect = element.getBoundingClientRect()
-      if (rect.top <= 100 && rect.bottom >= 100) {
-        activeTab.value = section
-        break
+function greetInConsole() {
+  const accent = 'color:#6f8cff;font-weight:600'
+  const plain = 'color:inherit'
+  console.log(
+    '%cПривет, коллега.%c\nРаз уж вы здесь: на странице есть консоль (клавиша ~) и палитра команд (⌘K / Ctrl+K).\nА если ищете фронтендера — пишите: https://t.me/web_dev_ill',
+    accent,
+    plain,
+  )
+}
+
+onMounted(() => {
+  ui.syncTheme()
+  window.addEventListener('keydown', onKeydown)
+  greetInConsole()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown)
+  blueprint.value = false
+})
+</script>
+
+<template>
+  <div class="home">
+    <HomeHeader />
+
+    <main>
+      <HomeHero />
+
+      <HomeSection id="experience" index="01" title="Опыт">
+        <HomeExperience />
+      </HomeSection>
+
+      <HomeSection id="projects" index="02" title="Проекты">
+        <HomeProjects />
+      </HomeSection>
+
+      <HomeSection id="skills" index="03" title="Навыки">
+        <HomeSkills />
+      </HomeSection>
+
+      <HomeContact />
+    </main>
+
+    <HomeCommandPalette />
+    <HomeTerminal />
+
+    <div v-if="blueprint" class="blueprint-grid" aria-hidden="true">
+      <div class="shell blueprint-grid__cols">
+        <span v-for="i in 12" :key="i" />
+      </div>
+    </div>
+
+    <Transition name="toast">
+      <p v-if="toastText" class="toast" role="status">
+        {{ toastText }}
+      </p>
+    </Transition>
+  </div>
+</template>
+
+<style lang="scss">
+// Токены главной. Остальные страницы сайта их не используют.
+html.home-root {
+  --h-sans: 'Onest', system-ui, -apple-system, sans-serif;
+  --h-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+
+  --h-bg: #0e0f12;
+  --h-surface: #16181c;
+  --h-raised: #1a1c21;
+  --h-line: #24272d;
+  --h-line-strong: #353942;
+  --h-dot: #2a2d34;
+  --h-text: #eceef1;
+  --h-text-soft: #c4c8cf;
+  --h-muted: #9097a1;
+  --h-faint: #626873;
+  --h-accent: #7d95ff;
+  --h-accent-glow: rgba(125, 149, 255, 0.13);
+  --h-up: #3ecf8e;
+  --h-down: #f0716a;
+  --h-overlay: rgba(6, 7, 9, 0.6);
+  --h-shadow: 0 24px 64px -16px rgba(0, 0, 0, 0.6);
+
+  --h-term-bg: #0a0b0d;
+  --h-term-line: #1f2227;
+  --h-term-text: #d9dde3;
+  --h-term-dim: #6b717c;
+  --h-term-accent: #7d95ff;
+}
+
+html.home-root[data-theme='light'] {
+  --h-bg: #f7f8fa;
+  --h-surface: #eef0f4;
+  --h-raised: #ffffff;
+  --h-line: #e1e4ea;
+  --h-line-strong: #c9ced8;
+  --h-dot: #d5d9e1;
+  --h-text: #0f1217;
+  --h-text-soft: #333944;
+  --h-muted: #5c6370;
+  --h-faint: #8a909b;
+  --h-accent: #2f4fe0;
+  --h-accent-glow: rgba(47, 79, 224, 0.08);
+  --h-up: #128a55;
+  --h-down: #c8382f;
+  --h-overlay: rgba(15, 18, 23, 0.28);
+  --h-shadow: 0 24px 64px -20px rgba(15, 18, 23, 0.28);
+}
+
+html.home-root {
+  background: var(--h-bg);
+  scrollbar-color: var(--h-line-strong) var(--h-bg);
+  transition: background-color 0.25s;
+}
+
+body.home-page {
+  height: auto;
+  min-height: 100%;
+  background: var(--h-bg);
+  color: var(--h-text);
+  font-family: var(--h-sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s, color 0.25s;
+
+  *::-webkit-scrollbar-track,
+  *::-webkit-scrollbar-corner {
+    background: var(--h-bg);
+  }
+
+  *::-webkit-scrollbar-thumb,
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--h-line-strong);
+    border-color: var(--h-bg);
+  }
+
+  ::selection {
+    background: var(--h-accent);
+    color: var(--h-bg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--h-accent);
+    outline-offset: 2px;
+  }
+}
+
+.home {
+  .shell {
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .mono {
+    font-family: var(--h-mono);
+    letter-spacing: 0;
+  }
+
+  .h-btn {
+    display: inline-flex;
+    align-items: center;
+    height: 44px;
+    padding: 0 18px;
+    border: 1px solid var(--h-line-strong);
+    border-radius: 10px;
+    background: var(--h-surface);
+    color: var(--h-text);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+
+    &:hover {
+      border-color: var(--h-muted);
+    }
+
+    &--primary {
+      border-color: var(--h-text);
+      background: var(--h-text);
+      color: var(--h-bg);
+
+      &:hover {
+        border-color: var(--h-accent);
+        background: var(--h-accent);
+        color: #fff;
+      }
+    }
+
+    &--ghost {
+      border-color: transparent;
+      background: none;
+      color: var(--h-muted);
+
+      &:hover {
+        border-color: transparent;
+        color: var(--h-text);
       }
     }
   }
 }
 
-onMounted(() => {
-  // Обработчик скролла
-  window.addEventListener('scroll', handleScroll)
-  
-  // Анимация появления при загрузке
-  setTimeout(() => {
-    const cards = document.querySelectorAll('.section-card')
-    cards.forEach((card, index) => {
-      setTimeout(() => {
-        card.classList.add('animate-in')
-      }, index * 200)
-    })
-  }, 500)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
-})
-</script>
-
-<template>
-  <div class="portfolio">
-    <!-- Hero секция -->
-    <section class="hero">
-      <div class="hero-background">
-        <div class="gradient-orb orb-1"/>
-        <div class="gradient-orb orb-2"/>
-        <div class="gradient-orb orb-3"/>
-      </div>
-      <div class="hero-content">
-        <Bio />
-      </div>
-    </section>
-
-    <!-- Основной контент -->
-    <main class="main-content">
-      <div class="container">
-        <!-- Навигация -->
-        <nav class="nav-tabs">
-          <button 
-            :class="['nav-tab', { active: activeTab === 'experience' }]" 
-            @click="scrollToSection('experience')"
-          >
-            <i class="icon">💼</i>
-            <span>Опыт</span>
-          </button>
-          <button 
-            :class="['nav-tab', { active: activeTab === 'education' }]" 
-            @click="scrollToSection('education')"
-          >
-            <i class="icon">🎓</i>
-            <span>Образование</span>
-          </button>
-          <button 
-            :class="['nav-tab', { active: activeTab === 'tech' }]" 
-            @click="scrollToSection('tech')"
-          >
-            <i class="icon">⚡</i>
-            <span>Технологии</span>
-          </button>
-          <button 
-            :class="['nav-tab', { active: activeTab === 'projects' }]" 
-            @click="scrollToSection('projects')"
-          >
-            <i class="icon">🚀</i>
-            <span>Проекты</span>
-          </button>
-        </nav>
-
-        <!-- Секции контента -->
-        <div class="content-sections">
-          <section id="experience" class="section-card">
-            <Experience />
-          </section>
-
-          <section id="education" class="section-card">
-            <Education />
-          </section>
-
-          <section id="tech" class="section-card">
-            <Tech />
-          </section>
-
-          <section id="projects" class="section-card">
-            <PetProjects />
-          </section>
-        </div>
-      </div>
-    </main>
-
-    <!-- Плавающая кнопка наверх -->
-    <Transition name="fade">
-      <button v-if="showScrollButton" class="scroll-to-top" @click="scrollToTop">
-        <svg class="scroll-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 6L12 18M12 6L7 11M12 6L17 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-    </Transition>
-  </div>
-</template>
-
-<style lang="scss" scoped>
-.portfolio {
-  min-height: 100vh;
-  position: relative;
-}
-
-// Hero секция
-.hero {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background: linear-gradient(135deg, var(--black-1000) 0%, var(--black-900) 50%, var(--black-850) 100%);
-
-  &-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    overflow: hidden;
-  }
-
-  &-content {
-    position: relative;
-    z-index: 2;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-}
-
-// Анимированные градиентные орбы
-.gradient-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.3;
-  animation: float 6s ease-in-out infinite;
-
-  &.orb-1 {
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(circle, var(--purple) 0%, transparent 70%);
-    top: 20%;
-    left: 10%;
-    animation-delay: 0s;
-  }
-
-  &.orb-2 {
-    width: 250px;
-    height: 250px;
-    background: radial-gradient(circle, var(--green) 0%, transparent 70%);
-    top: 60%;
-    right: 15%;
-    animation-delay: 2s;
-  }
-
-  &.orb-3 {
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, var(--blue) 0%, transparent 70%);
-    bottom: 30%;
-    left: 60%;
-    animation-delay: 4s;
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  33% {
-    transform: translateY(-30px) rotate(120deg);
-  }
-  66% {
-    transform: translateY(30px) rotate(240deg);
-  }
-}
-
-// Основной контент
-.main-content {
-  position: relative;
-  background: var(--black-1000);
-  padding-top: 2rem;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-// Навигационные табы
-.nav-tabs {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 3rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  overflow-x: auto;
-
-  // Скрываем скроллбар для всех браузеров
-  scrollbar-width: none; // Firefox
-  -ms-overflow-style: none; // Internet Explorer и Edge
-
-  &::-webkit-scrollbar {
-    display: none; // Chrome, Safari, Opera
-  }
-
-  @media (max-width: 768px) {
-    gap: 0.5rem;
-    padding: 0.5rem;
-  }
-}
-
-.nav-tab {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  background: transparent;
-  color: var(--white-800);
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  position: relative;
-  font-family: inherit;
-  font-size: inherit;
-
-  @media (max-width: 768px) {
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
-  }
-
-  .icon {
-    font-size: 1.2rem;
-    transition: transform 0.3s ease;
-  }
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--white-1000);
-    transform: translateY(-2px);
-
-    .icon {
-      transform: scale(1.1);
-    }
-  }
-
-  &.active {
-    background: linear-gradient(135deg, var(--purple) 0%, var(--blue) 100%);
-    color: var(--white-1000);
-    box-shadow: 0 8px 32px rgba(127, 92, 230, 0.3);
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(127, 92, 230, 0.4);
-    }
-
-    .icon {
-      transform: scale(1.05);
-    }
-  }
-
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(127, 92, 230, 0.3);
-  }
-}
-
-// Секции контента
-.content-sections {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  margin-bottom: 4rem;
-}
-
-.section-card {
-  background: linear-gradient(145deg, var(--black-900) 0%, var(--black-850) 100%);
-  border-radius: 24px;
-  padding: 2.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(30px);
-
-  @media (max-width: 768px) {
-    padding: 1.5rem;
-    border-radius: 16px;
-  }
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent 0%, var(--purple) 50%, transparent 100%);
-  }
-
-  &.animate-in {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    border-color: rgba(127, 92, 230, 0.3);
-  }
-}
-
-// Кнопка наверх
-.scroll-to-top {
+// Режим чертежа: колонки сетки и контуры блоков.
+.blueprint-grid {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--purple) 0%, var(--blue) 100%);
-  border: none;
-  color: var(--white-1000);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 32px rgba(127, 92, 230, 0.3);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(127, 92, 230, 0.4);
-  }
+  &__cols {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 24px;
+    height: 100%;
 
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(127, 92, 230, 0.3);
-  }
-
-  @media (max-width: 768px) {
-    width: 45px;
-    height: 45px;
-    bottom: 1.5rem;
-    right: 1.5rem;
-  }
-}
-
-.scroll-icon {
-  width: 20px;
-  height: 20px;
-  transition: transform 0.3s ease;
-
-  @media (max-width: 768px) {
-    width: 18px;
-    height: 18px;
-  }
-}
-
-// Улучшенная адаптивность
-@media (max-width: 1024px) {
-  .container {
-    padding: 0 1.5rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .hero {
-    min-height: 80vh;
-    padding: 1rem;
-
-    &-content {
-      padding: 1rem;
-    }
-  }
-
-  .main-content {
-    padding-top: 1rem;
-  }
-
-  .gradient-orb {
-    &.orb-1 {
-      width: 200px;
-      height: 200px;
-    }
-
-    &.orb-2 {
-      width: 150px;
-      height: 150px;
-    }
-
-    &.orb-3 {
-      width: 120px;
-      height: 120px;
+    span {
+      background: color-mix(in srgb, var(--h-accent) 7%, transparent);
+      border-inline: 1px solid color-mix(in srgb, var(--h-accent) 22%, transparent);
     }
   }
 }
 
-// Анимации переходов
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.3s ease;
+body.is-blueprint .home main * {
+  outline: 1px dashed color-mix(in srgb, var(--h-accent) 35%, transparent);
+  outline-offset: -1px;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 80;
+  margin: 0;
+  padding: 10px 16px;
+  border: 1px solid var(--h-line-strong);
+  border-radius: 10px;
+  background: var(--h-raised);
+  box-shadow: var(--h-shadow);
+  color: var(--h-text);
+  font-size: 14px;
+  transform: translateX(-50%);
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition: opacity 0.2s;
+}
+
+.toast-enter-from,
+.toast-leave-to {
   opacity: 0;
-  transform: translateY(20px);
+}
+
+@media (max-width: 600px) {
+  .home .shell {
+    padding: 0 16px;
+  }
+
+  .blueprint-grid__cols {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+
+    span:nth-child(n + 5) {
+      display: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home *,
+  body.home-page {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
 }
 </style>
