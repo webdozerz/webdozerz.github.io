@@ -9,6 +9,7 @@ const router = useRouter()
 
 const PROMPT = 'guest@andryushov:~$'
 const pages: Record<string, string> = {
+  resume: '/resume',
   effort: '/effort',
   ipr: '/ipr',
   peas: '/peas',
@@ -98,9 +99,9 @@ const commands: Record<string, { help?: string, run: (args: string[]) => void }>
     help: 'файлы и страницы',
     run: (args) => {
       if (args.includes('-a') || args.includes('-la'))
-        out('.  ..  .secrets  resume.txt  effort/  ipr/  peas/  redesign/')
+        out('.  ..  .secrets  resume.txt  resume/  effort/  ipr/  peas/  redesign/')
       else
-        out('resume.txt  effort/  ipr/  peas/  redesign/')
+        out('resume.txt  resume/  effort/  ipr/  peas/  redesign/')
     },
   },
   cat: {
@@ -111,7 +112,7 @@ const commands: Record<string, { help?: string, run: (args: string[]) => void }>
       }
       else if (file === 'resume.txt') {
         commands.whoami.run([])
-        out('Полная версия — прокрутите страницу вниз или введите experience.')
+        out('Полная версия: open resume, PDF: andryushov.me/resume.pdf')
       }
       else if (file === '.secrets') {
         out('1. Первый коммит в этот репозиторий — сентябрь 2018.')

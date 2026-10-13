@@ -95,7 +95,7 @@ onBeforeUnmount(() => clearInterval(timer))
       <dl class="stats">
         <div v-for="item in stats" :key="item.label" class="stats__item">
           <dt class="stats__value">
-            {{ item.value }}
+            <HomeCountUp :value="item.value" />
           </dt>
           <dd class="stats__label">
             {{ item.label }}

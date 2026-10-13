@@ -7,9 +7,11 @@ const props = withDefaults(defineProps<{
   text: string
   delay?: number // мс между стартами соседних букв
   settle?: number // сколько мс буква перебирает символы
+  trigger?: 'mount' | 'visible' // сразу после загрузки или когда текст появится на экране
 }>(), {
   delay: 38,
   settle: 260,
+  trigger: 'mount',
 })
 
 const GLYPHS = 'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЭЮЯABCDEFGHJKLMNPQRSTUVXYZ0123456789░▒▓<>/_=+*#'
@@ -21,7 +23,9 @@ const words = computed(() => props.text.split(' '))
 const chars = ref<Char[]>(Array.from(props.text, final => ({ final, glyph: null })))
 const ready = ref(false)
 
+const root = ref<HTMLElement>()
 let raf = 0
+let observer: IntersectionObserver | undefined
 let running = false
 let lastRun = 0
 
@@ -89,16 +93,33 @@ function replay() {
 
 onMounted(() => {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
-  if (!reduced)
-    run()
+  // Если скрипт загрузился поздно и CSS уже показал текст, не «рассыпаем» видимое имя.
+  const alreadyShown = !!root.value && getComputedStyle(root.value).visibility === 'visible'
   ready.value = true
+  if (reduced)
+    return
+  if (props.trigger === 'mount' || !root.value) {
+    if (!alreadyShown)
+      run()
+    return
+  }
+  observer = new IntersectionObserver((entries) => {
+    if (entries.some(e => e.isIntersecting)) {
+      observer?.disconnect()
+      run()
+    }
+  }, { rootMargin: '0px 0px -15% 0px' })
+  observer.observe(root.value)
 })
 
-onBeforeUnmount(() => cancelAnimationFrame(raf))
+onBeforeUnmount(() => {
+  cancelAnimationFrame(raf)
+  observer?.disconnect()
+})
 </script>
 
 <template>
-  <span class="scramble" :class="{ 'scramble--ready': ready }" @mouseenter="replay">
+  <span ref="root" class="scramble" :class="{ 'scramble--ready': ready }" @mouseenter="replay">
     <span>
       <template v-for="(word, w) in words" :key="w">
         <span class="scramble__word">
@@ -144,12 +165,15 @@ onBeforeUnmount(() => cancelAnimationFrame(raf))
     letter-spacing: 0;
   }
 }
+</style>
 
-// Пока Vue не запустил анимацию, имя скрыто, чтобы не мелькнуло целиком перед «расшифровкой».
-// Если JS не загрузится, через 2,5 с текст всё равно появится.
-:global(html[data-js]) .scramble:not(.scramble--ready) {
+<style lang="scss">
+// Пока Vue не запустил анимацию, текст скрыт, чтобы не мелькнул целиком перед «расшифровкой».
+// Не дольше 0,5 с: если скрипт опоздал, элемент показывается без анимации.
+// Не scoped: в scoped-стилях Vue обрезает всё после :global(...), и правило скрывало бы всю страницу.
+html[data-js] .scramble:not(.scramble--ready) {
   visibility: hidden;
-  animation: scramble-fallback 0s 2.5s forwards;
+  animation: scramble-fallback 0s 0.5s forwards;
 }
 
 @keyframes scramble-fallback {

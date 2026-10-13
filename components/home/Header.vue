@@ -62,6 +62,7 @@ onBeforeUnmount(() => {
           :class="{ 'nav__link--active': active === item.id }"
           @click.prevent="scrollTo(item.id)"
         >{{ item.label }}</a>
+        <NuxtLink to="/resume" class="nav__link">Резюме</NuxtLink>
       </nav>
 
       <div class="site-header__track">

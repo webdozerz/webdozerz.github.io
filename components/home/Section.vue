@@ -11,8 +11,8 @@ defineProps<{
     <div class="shell section__inner">
       <header class="section__head">
         <span class="section__index mono">{{ index }}</span>
-        <h2 class="section__title">
-          {{ title }}
+        <h2 class="section__title" :aria-label="title">
+          <HomeScrambleText :text="title" trigger="visible" />
         </h2>
       </header>
       <div class="section__body">

@@ -1,5 +1,15 @@
 <script setup lang="ts">
 // Пиксель — кот, который гуляет по шапке между навигацией и кнопками.
+
+const props = withDefaults(defineProps<{
+  intro?: string // фраза, которую кот скажет сразу после появления
+  scale?: number // размер «пикселя» спрайта: 3 — для шапки, больше — для крупного кота
+  bubblePlacement?: 'below' | 'above' // где показывать реплику относительно дорожки
+}>(), {
+  intro: '',
+  scale: 3,
+  bubblePlacement: 'below',
+})
 // На некоторые клики появляется предмет: клубок, баг, рыбка или коробка.
 
 type Mode = 'walk' | 'sit' | 'sleep' | 'box'
@@ -201,13 +211,13 @@ const EVENT_LINES: Record<ItemKind, { start: string, done: string[] }> = {
   },
 }
 
-const { petVisible, toast } = useHomeUi()
+const { petVisible, toast, theme } = useHomeUi()
 
-const SCALE = 3
+const SCALE = props.scale
 const WIDTH = 16 * SCALE
 const HEIGHT = 10 * SCALE
-const SPEED = 32 // px в секунду
-const CHASE_SPEED = 110
+const SPEED = (32 * SCALE) / 3 // px в секунду, крупный кот шагает шире
+const CHASE_SPEED = (110 * SCALE) / 3
 const MIN_TRACK = WIDTH + 24
 const EVENT_CHANCE = 0.35
 
@@ -224,6 +234,7 @@ const layerLeft = ref(0)
 const viewportWidth = ref(0)
 const hearts = ref<number[]>([])
 const ready = ref(false)
+const squint = ref(false)
 const root = ref<HTMLElement>()
 const trackWidth = ref(0)
 const item = ref<Item | null>(null)
@@ -251,7 +262,11 @@ function toPixels(rows: string[]) {
   return list
 }
 
-const catPixels = computed(() => toPixels(SPRITES[mode.value === 'walk' ? WALK_FRAMES[frameIndex.value]! : mode.value]!))
+const catPixels = computed(() => {
+  const rows = SPRITES[mode.value === 'walk' ? WALK_FRAMES[frameIndex.value]! : mode.value]!
+  // Щурится — глаза превращаются в закрытые.
+  return toPixels(squint.value ? rows.map(row => row.replaceAll('e', 'z')) : rows)
+})
 
 const itemSprite = computed(() => {
   const current = item.value
@@ -325,7 +340,7 @@ function startEvent(kind: ItemKind) {
   item.value = {
     kind,
     x: itemX,
-    y: kind === 'fish' ? -44 : 0,
+    y: kind === 'fish' ? (-44 * SCALE) / 3 : 0,
     vx: kind === 'yarn' ? (itemX > catCenter ? 1 : -1) * 45 : kind === 'bug' ? 50 : 0,
     vy: 0,
     landed: kind !== 'fish',
@@ -350,7 +365,7 @@ function updateItem(now: number, dt: number) {
   const limit = Math.max(0, trackWidth.value - itemWidth(current.kind))
 
   if (!current.landed) {
-    current.vy += 900 * dt
+    current.vy += ((900 * SCALE) / 3) * dt
     current.y = Math.min(0, current.y + current.vy * dt)
     if (current.y === 0)
       current.landed = true
@@ -508,9 +523,33 @@ function start() {
   lastTime = performance.now()
   pickMode(lastTime)
   raf = requestAnimationFrame(step)
+  if (props.intro)
+    setTimeout(() => say(props.intro!, 4000), 600)
 }
 
 onMounted(start)
+
+// Кот реагирует на смену темы. При загрузке тема подтягивается из localStorage — эту смену пропускаем.
+const THEME_LINES = {
+  light: ['Ярко! Дайте прищуриться.', 'Кто включил солнце?', 'Светлая тема? Смело.'],
+  dark: ['Вот, другое дело.', 'Глаза отдыхают. Мур.', 'Тёмная тема — моя стихия.'],
+}
+let themeTimer: ReturnType<typeof setTimeout> | undefined
+let themeArmed = false
+onMounted(() => setTimeout(() => (themeArmed = true), 1000))
+watch(theme, (next, prev) => {
+  if (!themeArmed || !prev || mode.value === 'sleep')
+    return
+  say(pick(THEME_LINES[next]), 2400)
+  if (next === 'light') {
+    squint.value = true
+    clearTimeout(themeTimer)
+    themeTimer = setTimeout(() => (squint.value = false), 1800)
+  }
+  else {
+    squint.value = false
+  }
+})
 
 onBeforeUnmount(() => {
   cancelAnimationFrame(raf)
@@ -535,7 +574,8 @@ const fits = computed(() => trackWidth.value >= MIN_TRACK)
   <div
     ref="root"
     class="pet-layer"
-    :class="{ 'pet-layer--hidden': !ready || !petVisible || !fits }"
+    :class="{ 'pet-layer--hidden': !ready || !petVisible || !fits, 'pet-layer--bubble-above': bubblePlacement === 'above' }"
+    :style="{ '--pet-h': `${HEIGHT}px` }"
   >
     <div
       v-if="item && itemSprite"
@@ -615,13 +655,6 @@ const fits = computed(() => trackWidth.value >= MIN_TRACK)
 </template>
 
 <style lang="scss" scoped>
-// В светлой теме белая шерсть чуть темнее, иначе лапки сливаются с фоном.
-:global(html.home-root[data-theme='light']) .pet-layer {
-  --pet-grey: #8f96a0;
-  --pet-stripe: #4a5059;
-  --pet-white: #cdd2da;
-  --pet-pink: #e8899e;
-}
 
 .pet-layer {
   --pet-grey: #a3a9b2;
@@ -647,6 +680,12 @@ const fits = computed(() => trackWidth.value >= MIN_TRACK)
   top: calc(100% + 8px);
   left: 0;
   z-index: 1;
+
+  .pet-layer--bubble-above & {
+    top: auto;
+    bottom: calc(var(--pet-h) + 20px);
+  }
+
   width: max-content;
   max-width: min(240px, calc(100vw - 32px));
   margin: 0;
@@ -702,9 +741,11 @@ const fits = computed(() => trackWidth.value >= MIN_TRACK)
   &__heart {
     position: absolute;
     left: 50%;
-    bottom: 32px;
-    width: 14px;
-    margin-left: -7px;
+    --heart-w: max(14px, calc(var(--pet-h) * 0.3));
+
+    bottom: calc(var(--pet-h) + 2px);
+    width: var(--heart-w);
+    margin-left: calc(var(--heart-w) / -2);
     animation: pet-heart 0.9s ease-out forwards;
     pointer-events: none;
 
@@ -717,9 +758,9 @@ const fits = computed(() => trackWidth.value >= MIN_TRACK)
   &__zzz {
     position: absolute;
     left: 50%;
-    bottom: 20px;
+    bottom: calc(var(--pet-h) * 0.66);
     color: var(--h-muted);
-    font-size: 12px;
+    font-size: max(12px, calc(var(--pet-h) * 0.3));
     animation: pet-zzz 2.4s ease-in-out infinite;
     pointer-events: none;
   }
@@ -779,7 +820,7 @@ const fits = computed(() => trackWidth.value >= MIN_TRACK)
   }
 
   40% {
-    transform: translateY(-12px);
+    transform: translateY(calc(var(--pet-h) * -0.4));
   }
 }
 
@@ -791,7 +832,7 @@ const fits = computed(() => trackWidth.value >= MIN_TRACK)
 
   to {
     opacity: 0;
-    transform: translateY(-22px);
+    transform: translateY(calc(var(--pet-h) * -0.7));
   }
 }
 
@@ -819,5 +860,16 @@ const fits = computed(() => trackWidth.value >= MIN_TRACK)
 .bubble-enter-from,
 .bubble-leave-to {
   opacity: 0;
+}
+</style>
+
+<style lang="scss">
+// В светлой теме белая шерсть чуть темнее, иначе лапки сливаются с фоном.
+// Не scoped: в scoped-стилях Vue обрезает всё после :global(...).
+html.home-root[data-theme='light'] .pet-layer {
+  --pet-grey: #8f96a0;
+  --pet-stripe: #4a5059;
+  --pet-white: #cdd2da;
+  --pet-pink: #e8899e;
 }
 </style>

@@ -27,6 +27,7 @@ const commands = computed<Command[]>(() => [
   { id: 'email', group: 'Связаться', label: 'Скопировать email', hint: contacts.email, run: ui.copyEmail },
   { id: 'tg', group: 'Связаться', label: 'Написать в Telegram', hint: contacts.telegramHandle, run: () => open(contacts.telegram) },
   { id: 'gh', group: 'Связаться', label: 'Открыть GitHub', run: () => open(contacts.github) },
+  { id: 'resume', group: 'Инструменты', label: 'Резюме', hint: 'есть PDF', run: () => router.push('/resume') },
   { id: 'effort', group: 'Инструменты', label: 'Калькулятор трудозатрат', run: () => router.push('/effort') },
   { id: 'ipr', group: 'Инструменты', label: 'План развития фронтендера', run: () => router.push('/ipr') },
   { id: 'peas', group: 'Инструменты', label: '20 горошин', hint: 'техника от тревоги', run: () => router.push('/peas') },

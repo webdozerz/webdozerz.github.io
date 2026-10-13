@@ -1,10 +1,18 @@
 <script setup lang="ts">
 import { petProjects } from '~/data/profile'
+
+// Мягкий блик следует за курсором внутри карточки.
+function onPointerMove(event: PointerEvent) {
+  const el = event.currentTarget as HTMLElement
+  const rect = el.getBoundingClientRect()
+  el.style.setProperty('--gx', `${event.clientX - rect.left}px`)
+  el.style.setProperty('--gy', `${event.clientY - rect.top}px`)
+}
 </script>
 
 <template>
   <ul class="projects-grid">
-    <li v-for="project in petProjects" :key="project.title" class="project">
+    <li v-for="project in petProjects" :key="project.title" class="project" @pointermove="onPointerMove">
       <span class="project__kind mono">{{ project.kind }}</span>
       <h3 class="project__title">
         {{ project.title }}
@@ -45,14 +53,34 @@ import { petProjects } from '~/data/profile'
 }
 
 .project {
+  --gx: 50%;
+  --gy: 50%;
+
+  position: relative;
   display: flex;
   flex-direction: column;
   padding: 26px;
   background: var(--h-bg);
+  isolation: isolate;
   transition: background-color 0.2s;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(320px circle at var(--gx) var(--gy), var(--h-accent-glow), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.25s;
+    pointer-events: none;
+  }
 
   &:hover {
     background: var(--h-surface);
+  }
+
+  &:hover::before {
+    opacity: 1;
   }
 
   &__kind {
