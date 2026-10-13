@@ -64,8 +64,8 @@ onBeforeUnmount(() => clearInterval(timer))
         </ClientOnly>
       </p>
 
-      <h1 class="hero__title">
-        {{ profile.firstName }} {{ profile.lastName }}
+      <h1 class="hero__title" :aria-label="`${profile.firstName} ${profile.lastName}`">
+        <HomeScrambleText :text="`${profile.firstName} ${profile.lastName}`" />
       </h1>
 
       <p class="hero__role">
