@@ -27,6 +27,8 @@ export type PetProject = {
   note?: string
 }
 
+export const siteUrl = 'https://andryushov.me'
+
 export const contacts = {
   email: 'webdozerz@gmail.com',
   telegram: 'https://t.me/web_dev_ill',

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { themeBootScript } from '~/composables/useHomeUi'
+import { siteUrl } from '~/data/profile'
 
 const ui = useHomeUi()
 const { toastText, paletteOpen, terminalOpen, blueprint } = ui
@@ -10,10 +11,12 @@ useSeoMeta({
   ogTitle: 'Илья Андрюшов — Frontend-разработчик',
   ogDescription: 'Vue 3, Nuxt, TypeScript. Торговые терминалы, админ-панели, SSR-сайты и Telegram Mini Apps.',
   ogType: 'website',
+  ogUrl: siteUrl,
 })
 
 useHead({
   htmlAttrs: { lang: 'ru', class: 'home-root' },
+  link: [{ rel: 'canonical', href: siteUrl }],
   bodyAttrs: { class: computed(() => (blueprint.value ? 'home-page is-blueprint' : 'home-page')) },
   script: [{ innerHTML: themeBootScript, tagPosition: 'head' }],
 })

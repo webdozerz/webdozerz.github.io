@@ -3,8 +3,8 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   css: ["~/assets/css/main.scss"],
   app: {
-    baseURL:
-      process.env.NODE_ENV === "production" ? "/webdozerz.github.io/" : "/",
+    // Сайт живёт в корне домена andryushov.me (и webdozerz.github.io).
+    baseURL: "/",
   },
   modules: [
     "@nuxt/eslint",
