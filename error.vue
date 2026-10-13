@@ -63,6 +63,9 @@ const goHome = () => clearError({ redirect: '/' })
         </ClientOnly>
       </div>
     </main>
+    <ClientOnly>
+      <HomeClickSpark />
+    </ClientOnly>
   </div>
 </template>
 

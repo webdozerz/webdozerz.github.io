@@ -3,7 +3,7 @@ import '~/assets/scss/home.scss'
 import { siteUrl } from '~/data/profile'
 
 const ui = useHomeUi()
-const { toastText, paletteOpen, terminalOpen, blueprint } = ui
+const { toastText, paletteOpen, terminalOpen, blueprint, snow } = ui
 
 useSeoMeta({
   title: 'Илья Андрюшов — Frontend-разработчик',
@@ -66,6 +66,7 @@ function greetInConsole() {
 onMounted(() => {
   ui.syncTheme()
   ui.syncPet()
+  ui.syncSnow()
   window.addEventListener('keydown', onKeydown)
   greetInConsole()
 })
@@ -100,6 +101,10 @@ onBeforeUnmount(() => {
 
     <HomeCommandPalette />
     <HomeTerminal />
+    <ClientOnly>
+      <HomeClickSpark />
+      <HomePixelSnow v-if="snow" />
+    </ClientOnly>
 
     <div v-if="blueprint" class="blueprint-grid" aria-hidden="true">
       <div class="shell blueprint-grid__cols">

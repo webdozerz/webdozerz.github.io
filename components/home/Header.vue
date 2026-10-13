@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { theme, toggleTheme, paletteOpen, scrollTo } = useHomeUi()
+const { theme, toggleTheme, paletteOpen, scrollTo, snow, toggleSnow } = useHomeUi()
 
 const nav = [
   { id: 'experience', label: 'Опыт' },
@@ -75,6 +75,19 @@ onBeforeUnmount(() => {
         <button class="cmdk" type="button" aria-label="Открыть палитру команд" @click="paletteOpen = true">
           <span class="cmdk__label">Меню</span>
           <kbd class="cmdk__kbd">{{ isMac ? '⌘' : 'Ctrl' }} K</kbd>
+        </button>
+        <button
+          class="icon-btn"
+          :class="{ 'icon-btn--on': snow }"
+          type="button"
+          :aria-label="snow ? 'Остановить снег' : 'Включить снег'"
+          :aria-pressed="snow"
+          :title="snow ? 'Остановить снег' : 'Включить снег'"
+          @click="toggleSnow"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2.5v19M3.8 7.25l16.4 9.5M3.8 16.75l16.4-9.5M9.5 3.8 12 6.3l2.5-2.5M9.5 20.2 12 17.7l2.5 2.5M3.3 10.1l3.4.9-.9-3.4M20.7 13.9l-3.4-.9.9 3.4M5.8 16.6l.9-3.4-3.4.9M18.2 7.4l-.9 3.4 3.4-.9" />
+          </svg>
         </button>
         <button
           class="icon-btn"
@@ -249,6 +262,15 @@ onBeforeUnmount(() => {
   &:hover {
     border-color: var(--h-line-strong);
     color: var(--h-text);
+  }
+
+  &--on {
+    border-color: color-mix(in srgb, var(--h-accent) 45%, var(--h-line));
+    color: var(--h-accent);
+
+    &:hover {
+      color: var(--h-accent);
+    }
   }
 }
 

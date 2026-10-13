@@ -131,14 +131,32 @@ body.home-page {
 
     // Фирменный цвет Telegram: кнопка сразу узнаётся.
     &--telegram {
+      position: relative;
       gap: 9px;
+      overflow: hidden;
       border-color: #2aabee;
       background: #2aabee;
       color: #fff;
 
+      // Блик пробегает по кнопке при наведении (по мотивам GlareHover из Vue Bits).
+      &::after {
+        content: '';
+        position: absolute;
+        inset: -40% auto -40% 0;
+        width: 45%;
+        background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+        transform: translateX(-160%) skewX(-12deg);
+        pointer-events: none;
+      }
+
       &:hover {
         border-color: #229ed9;
         background: #229ed9;
+      }
+
+      &:hover::after {
+        transform: translateX(320%) skewX(-12deg);
+        transition: transform 0.7s ease;
       }
     }
 
@@ -235,4 +253,14 @@ body.is-blueprint .home main * {
     animation: none !important;
     scroll-behavior: auto !important;
   }
+}
+
+// Текст только для скринридеров и поисковиков.
+.home .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }

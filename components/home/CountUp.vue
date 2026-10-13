@@ -5,8 +5,10 @@
 const props = withDefaults(defineProps<{
   value: string
   duration?: number
+  delay?: number // пауза перед стартом, мс: чтобы цифры не считались одновременно со всем остальным
 }>(), {
   duration: 1400,
+  delay: 0,
 })
 
 const parsed = computed(() => {
@@ -23,6 +25,7 @@ const ready = ref(false)
 const root = ref<HTMLElement>()
 let raf = 0
 let observer: IntersectionObserver | undefined
+let delayTimer: ReturnType<typeof setTimeout> | undefined
 
 const groups = (n: number) => n.toLocaleString('ru-RU').replace(/[\u00A0\u202F]/g, ' ')
 
@@ -67,7 +70,7 @@ onMounted(() => {
   observer = new IntersectionObserver((entries) => {
     if (entries.some(e => e.isIntersecting)) {
       observer?.disconnect()
-      run()
+      delayTimer = setTimeout(run, props.delay)
     }
   }, { threshold: 0.6 })
   observer.observe(root.value)
@@ -75,6 +78,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   cancelAnimationFrame(raf)
+  clearTimeout(delayTimer)
   observer?.disconnect()
 })
 </script>

@@ -40,6 +40,13 @@ const commands = computed<Command[]>(() => [
   { id: 'terminal', group: 'Настройки', label: 'Открыть консоль', hint: '~', run: () => (terminalOpen.value = true) },
   { id: 'blueprint', group: 'Настройки', label: 'Режим чертежа', hint: '↑↑↓↓←→←→BA', run: ui.toggleBlueprint },
   {
+    id: 'snow',
+    group: 'Настройки',
+    label: ui.snow.value ? 'Остановить снег' : 'Включить снег',
+    hint: 'зимой идёт сам',
+    run: ui.toggleSnow,
+  },
+  {
     id: 'pet',
     group: 'Настройки',
     label: ui.petVisible.value ? 'Спрятать кота' : 'Позвать кота',

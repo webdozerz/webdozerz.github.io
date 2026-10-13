@@ -168,6 +168,7 @@ const commands: Record<string, { help?: string, run: (args: string[]) => void }>
   },
   blueprint: { run: () => ui.toggleBlueprint() },
   pet: { help: 'спрятать или позвать кота', run: () => ui.togglePet() },
+  snow: { run: () => ui.toggleSnow() },
   vim: { run: () => out('Не надо. Выйти отсюда проще: exit.') },
   nano: { run: () => commands.vim.run([]) },
   npm: {
@@ -277,6 +278,7 @@ watch(terminalOpen, async (open) => {
   <Transition name="terminal">
     <div v-if="terminalOpen" class="overlay" @click.self="terminalOpen = false">
       <div class="terminal mono" role="dialog" aria-label="Консоль" @click="input?.focus()">
+        <HomeLetterGlitch />
         <div class="terminal__bar">
           <span>andryushov.sh</span>
           <button type="button" class="terminal__close" aria-label="Закрыть консоль" @click.stop="terminalOpen = false">
@@ -318,8 +320,10 @@ watch(terminalOpen, async (open) => {
 }
 
 .terminal {
+  position: relative;
   display: flex;
   flex-direction: column;
+  isolation: isolate;
   height: min(460px, 70vh);
   border-bottom: 1px solid var(--h-line-strong);
   background: var(--h-term-bg);
@@ -328,6 +332,7 @@ watch(terminalOpen, async (open) => {
   box-shadow: var(--h-shadow);
 
   &__bar {
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -352,6 +357,7 @@ watch(terminalOpen, async (open) => {
   }
 
   &__screen {
+    position: relative;
     flex-grow: 1;
     padding: 12px 16px 16px;
     overflow-y: auto;

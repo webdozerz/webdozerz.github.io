@@ -12,7 +12,8 @@ const links = [
 
 <template>
   <section id="contact" class="contact">
-    <div class="shell">
+    <div class="shell contact__grid">
+      <div class="contact__main">
       <span class="contact__index mono">04</span>
       <h2 class="contact__title">
         Есть задача или вакансия?<br>
@@ -38,6 +39,9 @@ const links = [
           <span class="row__hint mono">↗</span>
         </a>
       </div>
+      </div>
+
+      <HomeProfileCard class="contact__card" />
     </div>
 
     <footer class="shell">
@@ -77,6 +81,29 @@ const links = [
   &__list {
     margin-top: 48px;
     border-top: 1px solid var(--h-line);
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    align-items: end;
+    gap: 64px;
+  }
+
+  &__main {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 860px) {
+  .contact__grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .contact__card {
+    width: 100%;
+    max-width: 300px;
   }
 }
 

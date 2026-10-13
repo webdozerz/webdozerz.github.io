@@ -32,6 +32,8 @@ const site = siteUrl.replace('https://', '')
 
     <article class="resume">
       <header class="resume__head">
+        <img src="/photo-320.jpg" :alt="`${profile.firstName} ${profile.lastName}`" class="resume__photo" width="320" height="320">
+        <div class="resume__intro">
         <h1 class="resume__name">
           {{ profile.firstName }} {{ profile.lastName }}
         </h1>
@@ -44,6 +46,7 @@ const site = siteUrl.replace('https://', '')
           <li><a :href="contacts.github">github.com/webdozerz</a></li>
           <li><a :href="siteUrl">{{ site }}</a></li>
         </ul>
+        </div>
       </header>
 
       <section class="resume__section">
@@ -162,8 +165,23 @@ const site = siteUrl.replace('https://', '')
   background: var(--h-raised);
 
   &__head {
+    display: flex;
+    align-items: center;
+    gap: 24px;
     padding-bottom: 24px;
     border-bottom: 1px solid var(--h-line);
+  }
+
+  &__photo {
+    flex-shrink: 0;
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  &__intro {
+    min-width: 0;
   }
 
   &__name {
@@ -312,6 +330,12 @@ const site = siteUrl.replace('https://', '')
     padding: 28px 20px 32px;
     border-radius: 10px;
 
+    &__head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
     &__row {
       flex-direction: column;
       gap: 2px;
@@ -360,7 +384,13 @@ const site = siteUrl.replace('https://', '')
     background: none;
 
     &__head {
+      gap: 18px;
       padding-bottom: 14px;
+    }
+
+    &__photo {
+      width: 76px;
+      height: 76px;
     }
 
     &__name {

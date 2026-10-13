@@ -33,6 +33,7 @@ function tick() {
 }
 
 const hero = ref<HTMLElement>()
+const grid = ref<{ onPointerMove: (e: PointerEvent) => void, onPointerLeave: () => void, onPointerDown: (e: PointerEvent) => void }>()
 
 function onPointerMove(event: PointerEvent) {
   const el = hero.value
@@ -41,6 +42,17 @@ function onPointerMove(event: PointerEvent) {
   const rect = el.getBoundingClientRect()
   el.style.setProperty('--mx', `${event.clientX - rect.left}px`)
   el.style.setProperty('--my', `${event.clientY - rect.top}px`)
+  if (event.pointerType === 'mouse')
+    pointerInside.value = true
+  grid.value?.onPointerMove(event)
+}
+
+// Подсветка видна, только пока мышь над первым экраном: при загрузке пятна по центру нет.
+const pointerInside = ref(false)
+
+function onPointerLeave() {
+  pointerInside.value = false
+  grid.value?.onPointerLeave()
 }
 
 onMounted(() => {
@@ -52,8 +64,19 @@ onBeforeUnmount(() => clearInterval(timer))
 </script>
 
 <template>
-  <section id="top" ref="hero" class="hero" @pointermove="onPointerMove">
-    <div class="hero__grid" aria-hidden="true" />
+  <section
+    id="top"
+    ref="hero"
+    class="hero"
+    :class="{ 'hero--pointer': pointerInside }"
+    @pointermove="onPointerMove"
+    @pointerleave="onPointerLeave"
+    @pointerdown="grid?.onPointerDown($event)"
+  >
+    <div class="hero__glow" aria-hidden="true" />
+    <ClientOnly>
+      <HomeDotGrid ref="grid" />
+    </ClientOnly>
 
     <div class="shell hero__inner">
       <p class="hero__meta mono">
@@ -74,7 +97,11 @@ onBeforeUnmount(() => clearInterval(timer))
       </p>
 
       <p class="hero__lead">
-        {{ profile.lead }}
+        <span class="visually-hidden">{{ profile.lead }}</span>
+        <span aria-hidden="true">
+          {{ profile.leadIntro }}
+          <HomeRotatingText :items="profile.focus" :start-delay="3200" />
+        </span>
       </p>
 
       <div class="hero__actions">
@@ -93,9 +120,9 @@ onBeforeUnmount(() => clearInterval(timer))
       </div>
 
       <dl class="stats">
-        <div v-for="item in stats" :key="item.label" class="stats__item">
+        <div v-for="(item, index) in stats" :key="item.label" class="stats__item">
           <dt class="stats__value">
-            <HomeCountUp :value="item.value" />
+            <HomeCountUp :value="item.value" :delay="1000 + index * 140" />
           </dt>
           <dd class="stats__label">
             {{ item.label }}
@@ -115,20 +142,18 @@ onBeforeUnmount(() => clearInterval(timer))
   padding: 48px 0 72px;
   overflow: hidden;
 
-  &__grid {
+  // Мягкое пятно света под курсором; сама сетка точек рисуется в HomeDotGrid.
+  &__glow {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background-image: radial-gradient(var(--h-dot) 1px, transparent 1px);
-    background-size: 22px 22px;
-    mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, #000 35%, transparent 80%);
+    background: radial-gradient(360px circle at var(--mx) var(--my), var(--h-accent-glow), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
 
-    &::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(360px circle at var(--mx) var(--my), var(--h-accent-glow), transparent 70%);
-    }
+  &--pointer &__glow {
+    opacity: 1;
   }
 
   &__inner {
@@ -256,5 +281,33 @@ onBeforeUnmount(() => clearInterval(timer))
       }
     }
   }
+}
+
+// Первый экран появляется по шагам, а не весь сразу: имя → роль → фраза → кнопки → цифры.
+@keyframes hero-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.hero__meta {
+  animation: hero-step-in 0.5s ease-out 0.05s both;
+}
+
+.hero__role {
+  animation: hero-step-in 0.55s ease-out 0.35s both;
+}
+
+.hero__lead {
+  animation: hero-step-in 0.55s ease-out 0.5s both;
+}
+
+.hero__actions {
+  animation: hero-step-in 0.55s ease-out 0.65s both;
+}
+
+.stats {
+  animation: hero-step-in 0.6s ease-out 0.85s both;
 }
 </style>

@@ -6,6 +6,7 @@ export type HomeTheme = 'light' | 'dark'
 
 const THEME_KEY = 'home-theme'
 const PET_KEY = 'home-pet-hidden'
+const SNOW_KEY = 'home-snow'
 
 export function useHomeUi() {
   const theme = useState<HomeTheme>('home-theme', () => 'dark')
@@ -14,6 +15,7 @@ export function useHomeUi() {
   const terminalOpen = useState<boolean>('home-terminal', () => false)
   const blueprint = useState<boolean>('home-blueprint', () => false)
   const petVisible = useState<boolean>('home-pet', () => true)
+  const snow = useState<boolean>('home-snow', () => false)
 
   let toastTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -57,6 +59,38 @@ export function useHomeUi() {
     toast(petVisible.value ? 'Пиксель вернулся' : 'Пиксель ушёл спать за экран')
   }
 
+  // Снег идёт сам с декабря по февраль (по Томску); выбор посетителя запоминается.
+  function isWinterInTomsk() {
+    const month = Number(new Intl.DateTimeFormat('ru-RU', { timeZone: 'Asia/Tomsk', month: 'numeric' }).format(new Date()))
+    return month === 12 || month <= 2
+  }
+
+  function syncSnow() {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      snow.value = false
+      return
+    }
+    let saved: string | null = null
+    try {
+      saved = localStorage.getItem(SNOW_KEY)
+    }
+    catch {
+      // Без хранилища просто следуем сезону.
+    }
+    snow.value = saved === 'on' ? true : saved === 'off' ? false : isWinterInTomsk()
+  }
+
+  function toggleSnow() {
+    snow.value = !snow.value
+    try {
+      localStorage.setItem(SNOW_KEY, snow.value ? 'on' : 'off')
+    }
+    catch {
+      // Выбор просто не запомнится.
+    }
+    toast(snow.value ? 'Пошёл снег' : 'Снег закончился')
+  }
+
   function toast(text: string) {
     toastText.value = text
     clearTimeout(toastTimer)
@@ -89,6 +123,9 @@ export function useHomeUi() {
     terminalOpen,
     blueprint,
     petVisible,
+    snow,
+    syncSnow,
+    toggleSnow,
     syncTheme,
     syncPet,
     togglePet,

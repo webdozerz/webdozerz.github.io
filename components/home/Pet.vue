@@ -715,6 +715,8 @@ const fits = computed(() => trackWidth.value >= MIN_TRACK)
   left: 0;
   bottom: 0;
   will-change: transform;
+  // Кот появляется последним, когда первый экран уже собрался.
+  animation: pet-appear 0.6s ease-out 1.6s both;
 
   &__body {
     display: block;
@@ -811,6 +813,12 @@ const fits = computed(() => trackWidth.value >= MIN_TRACK)
 
 .px-d {
   fill: #8a6438;
+}
+
+@keyframes pet-appear {
+  from {
+    opacity: 0;
+  }
 }
 
 @keyframes pet-jump {
