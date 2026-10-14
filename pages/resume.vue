@@ -485,6 +485,13 @@ function emphasize(text: string) {
     &__h2 {
       margin-bottom: 8px;
       font-size: 10.5px;
+      break-after: avoid;
+    }
+
+    // Заголовки должностей и проектов не отрываются от своих пунктов.
+    &__row,
+    &__h3 {
+      break-after: avoid;
     }
 
     &__text {

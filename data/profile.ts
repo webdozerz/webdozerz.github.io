@@ -4,6 +4,16 @@ export type Link = { label: string, href: string, internal?: boolean }
 
 export type SketchKind = 'terminal' | 'admin' | 'exchange' | 'cms' | 'kit' | 'tools'
 
+// Подписи под схемами интерфейсов в кейсах.
+export const sketchCaptions: Record<SketchKind, string> = {
+  terminal: 'Pro-терминал: пары, график, стакан, форма ордера',
+  admin: 'Back-office: показатели, динамика, очередь заявок',
+  exchange: 'Обмен с фиксацией курса и статусами заказа',
+  cms: 'Одна CMS — 15 языков, LTR и RTL',
+  kit: 'Базовые компоненты UI-кита',
+  tools: 'ТЗ из Confluence → задачи в Jira',
+}
+
 // Кейс в формате «задача → роль → решение → результат»: считывается за несколько секунд.
 export type CaseStudy = {
   task: string
@@ -65,8 +75,19 @@ export const profile = {
   about: 'В проектах отвечаю за стартовый шаблон, UI-кит, слой API с генерацией типов, realtime на WebSocket, тесты и CI. Выстроил в команде AI-assisted разработку на Claude Code и Cursor. Менторю новых разработчиков и планирую работу на проекте.',
 }
 
+// Стаж считаем от первой коммерческой работы (Astana Prom Design, январь 2020) полными годами,
+// чтобы цифра «N+ лет» не обгоняла реальность и сама росла каждый январь.
+export const careerStart = new Date(2020, 0, 1)
+
+export function yearsOfExperience(now = new Date()) {
+  let years = now.getFullYear() - careerStart.getFullYear()
+  if (now < new Date(now.getFullYear(), careerStart.getMonth(), careerStart.getDate()))
+    years -= 1
+  return years
+}
+
 export const stats = [
-  { value: '7+', label: 'лет в коммерческой разработке' },
+  { value: `${yearsOfExperience()}+`, label: 'лет в коммерческой разработке' },
   { value: '1M+', label: 'пользователей Telegram Mini Apps' },
   { value: '5+', label: 'криптобирж в портфолио' },
   { value: '4', label: 'коммерческих проекта на моём Starter Kit' },
@@ -110,7 +131,7 @@ export const jobs: Job[] = [
         period: '2026',
         stack: ['Vue 3', 'TypeScript', 'TanStack Query', 'ECharts', 'Vitest'],
         highlights: [
-          'Разработал дашборд, модули AML, политик и финансов в панели на **95** разделов',
+          'Разработал дашборд, модули AML, политик и финансов в панели на **95** маршрутов',
           'Разбил прогон **~3 100** автотестов в CI на **3** параллельных потока и добавил проверку типов',
           'Ввёл подтверждение опасных действий администратора через 2FA',
         ],
@@ -119,7 +140,7 @@ export const jobs: Job[] = [
           task: 'Back-office биржи для операционистов, AML и финансов: проверка заявок, риски, комиссии, политики.',
           role: 'Основной разработчик дашборда, модулей AML, политик и финансов; настроил CI.',
           decision: 'Опасные действия администратора подтверждаются через 2FA с указанием причины; таблицы обновляются в реальном времени, но не перерисовываются без изменений и не опрашивают сервер в фоновой вкладке.',
-          result: '95 разделов и около 3 100 автотестов; CI прогоняет их в трёх параллельных потоках и проверяет типы до мержа.',
+          result: '95 маршрутов и около 3 100 автотестов; CI прогоняет их в трёх параллельных потоках и проверяет типы до мержа.',
         },
         points: [
           'Основной разработчик: 68% коммитов в проекте на 95 маршрутов и около 3 100 автотестов.',

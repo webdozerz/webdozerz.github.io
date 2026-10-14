@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CaseStudy } from '~/data/profile'
-import { jobs } from '~/data/profile'
+import { jobs, sketchCaptions } from '~/data/profile'
 
 // Порядок и подписи строк кейса: задача → роль → решение → результат.
 const caseRows: { key: keyof CaseStudy, label: string }[] = [
@@ -72,7 +72,7 @@ const caseRows: { key: keyof CaseStudy, label: string }[] = [
             <figure v-if="project.sketch" class="case__sketch">
               <HomeCaseSketch :kind="project.sketch" />
               <figcaption class="case__caption mono">
-                Схема интерфейса
+                {{ sketchCaptions[project.sketch] }}
               </figcaption>
             </figure>
           </div>
