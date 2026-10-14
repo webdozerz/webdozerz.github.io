@@ -22,11 +22,14 @@ function tick() {
   const weekend = ['сб', 'вс'].includes(get('weekday').toLowerCase())
 
   clock.value = `${get('hour')}:${get('minute')}`
-  if (hour >= 23 || hour < 8)
+  // Сутки по Томску: ночь 23–7, утро 7–9, рабочий день 9–19, вечер 19–23.
+  if (hour >= 23 || hour < 7)
     status.value = 'скорее всего сплю'
   else if (weekend)
     status.value = 'выходной, отвечаю не сразу'
-  else if (hour >= 9 && hour < 19)
+  else if (hour < 9)
+    status.value = 'утро, скоро сяду за код'
+  else if (hour < 19)
     status.value = 'скорее всего пишу код'
   else
     status.value = 'вечер, отвечаю не сразу'
@@ -97,11 +100,11 @@ onBeforeUnmount(() => clearInterval(timer))
       </p>
 
       <p class="hero__lead">
-        <span class="visually-hidden">{{ profile.lead }}</span>
-        <span aria-hidden="true">
-          {{ profile.leadIntro }}
-          <HomeRotatingText :items="profile.focus" :start-delay="3200" />
-        </span>
+        {{ profile.leadIntro }}
+      </p>
+      <p class="hero__focus">
+        <span class="hero__focus-label mono">{{ profile.focusLabel }}</span>{{ ' ' }}
+        <HomeRotatingText :items="profile.focus" :start-delay="3200" />
       </p>
 
       <div class="hero__actions">
@@ -211,6 +214,20 @@ onBeforeUnmount(() => clearInterval(timer))
     line-height: 1.6;
   }
 
+  &__focus {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    margin: 12px 0 0;
+    font-size: 16px;
+  }
+
+  &__focus-label {
+    color: var(--h-faint);
+    font-size: 13px;
+  }
+
   &__actions {
     display: flex;
     flex-wrap: wrap;
@@ -299,7 +316,8 @@ onBeforeUnmount(() => clearInterval(timer))
   animation: hero-step-in 0.55s ease-out 0.35s both;
 }
 
-.hero__lead {
+.hero__lead,
+.hero__focus {
   animation: hero-step-in 0.55s ease-out 0.5s both;
 }
 

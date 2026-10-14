@@ -7,7 +7,7 @@ const { toastText, paletteOpen, terminalOpen, blueprint, snow } = ui
 
 useSeoMeta({
   title: 'Илья Андрюшов — Frontend-разработчик',
-  description: 'Frontend-разработчик (Middle+) из Томска: Vue 3, Nuxt, TypeScript. Торговые терминалы криптобирж, финансовые админ-панели, SSR-сайты и Telegram Mini Apps.',
+  description: 'Frontend-разработчик (Middle+) из Томска, Vue 3, Nuxt, TypeScript. Беру сложный фронтенд целиком: от архитектуры и UI-кита до интеграции с API и realtime-данными. Торговые терминалы, финансовые админ-панели, SSR-сайты, Telegram Mini Apps.',
   ogTitle: 'Илья Андрюшов — Frontend-разработчик',
   ogDescription: 'Vue 3, Nuxt, TypeScript. Торговые терминалы, админ-панели, SSR-сайты и Telegram Mini Apps.',
   ogType: 'website',

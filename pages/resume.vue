@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import '~/assets/scss/home.scss'
-import { contacts, education, jobs, petProjects, profile, siteUrl, skills } from '~/data/profile'
+import { contacts, education, jobs, petProjects, profile, siteUrl, skills, stats } from '~/data/profile'
 
 // Резюме одной страницей. Кнопка скачивает public/resume.pdf — его собирает `npm run resume:pdf` из этой же страницы.
 useHomeHead()
@@ -17,6 +17,13 @@ const ui = useHomeUi()
 onMounted(() => ui.syncTheme())
 
 const site = siteUrl.replace('https://', '')
+
+// «**82%** коммитов» → части текста, где показатели помечены для жирного начертания.
+function emphasize(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/).filter(Boolean).map(part => part.startsWith('**')
+    ? { text: part.slice(2, -2), strong: true }
+    : { text: part, strong: false })
+}
 </script>
 
 <template>
@@ -49,12 +56,19 @@ const site = siteUrl.replace('https://', '')
         </div>
       </header>
 
+      <dl class="resume__stats">
+        <div v-for="item in stats" :key="item.label" class="resume__stat">
+          <dt>{{ item.value }}</dt>
+          <dd>{{ item.label }}</dd>
+        </div>
+      </dl>
+
       <section class="resume__section">
         <h2 class="resume__h2 mono">
           О себе
         </h2>
         <p class="resume__text">
-          {{ profile.lead }} {{ profile.about }}
+          {{ profile.leadIntro }} {{ profile.lead }} {{ profile.about }}
         </p>
       </section>
 
@@ -70,9 +84,14 @@ const site = siteUrl.replace('https://', '')
             <span class="resume__period mono">{{ job.period }} · {{ job.place }}</span>
           </div>
 
-          <ul v-if="job.points" class="resume__list">
-            <li v-for="point in job.points" :key="point">
-              {{ point }}
+          <ul v-if="job.highlights || job.points" class="resume__list">
+            <li v-for="item in job.highlights ?? job.points" :key="item">
+              <template v-for="(part, pi) in emphasize(item)" :key="pi">
+                <b v-if="part.strong">{{ part.text }}</b>
+                <template v-else>
+                  {{ part.text }}
+                </template>
+              </template>
             </li>
           </ul>
 
@@ -86,7 +105,18 @@ const site = siteUrl.replace('https://', '')
             <p class="resume__stack mono">
               {{ project.stack.join(' · ') }}
             </p>
-            <ul class="resume__list">
+            <!-- Короткие пункты с показателями; цифры выделены жирным. -->
+            <ul v-if="project.highlights" class="resume__list">
+              <li v-for="item in project.highlights" :key="item">
+                <template v-for="(part, pi) in emphasize(item)" :key="pi">
+                  <b v-if="part.strong">{{ part.text }}</b>
+                  <template v-else>
+                    {{ part.text }}
+                  </template>
+                </template>
+              </li>
+            </ul>
+            <ul v-else class="resume__list">
               <li v-for="point in project.points" :key="point">
                 {{ point }}
               </li>
@@ -293,9 +323,40 @@ const site = siteUrl.replace('https://', '')
       margin-top: 3px;
     }
 
-    strong {
+    strong,
+    b {
       color: var(--h-text);
       font-weight: 600;
+    }
+  }
+
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--h-line);
+  }
+
+  &__stat {
+    padding-right: 12px;
+
+    & + & {
+      padding-left: 14px;
+      border-left: 1px solid var(--h-line);
+    }
+
+    dt {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    dd {
+      margin: 2px 0 0;
+      color: var(--h-muted);
+      font-size: 12.5px;
+      line-height: 1.35;
     }
   }
 
@@ -344,6 +405,16 @@ const site = siteUrl.replace('https://', '')
     &__skill {
       grid-template-columns: 1fr;
       gap: 2px;
+    }
+
+    &__stats {
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 0;
+    }
+
+    &__stat:nth-child(3) {
+      padding-left: 0;
+      border-left: 0;
     }
   }
 }
@@ -408,7 +479,7 @@ const site = siteUrl.replace('https://', '')
     }
 
     &__section {
-      margin-top: 14px;
+      margin-top: 12px;
     }
 
     &__h2 {
@@ -422,7 +493,7 @@ const site = siteUrl.replace('https://', '')
     }
 
     &__job + &__job {
-      margin-top: 14px;
+      margin-top: 10px;
     }
 
     &__h3 {
@@ -437,10 +508,10 @@ const site = siteUrl.replace('https://', '')
       font-size: 10.5px;
     }
 
-    // Блоки можно разрывать, но заголовок проекта не отрывается от его текста.
+    // Кейс проекта целиком на одной странице.
     &__project {
       margin-top: 10px;
-      break-inside: auto;
+      break-inside: avoid;
     }
 
     &__row,
@@ -464,8 +535,22 @@ const site = siteUrl.replace('https://', '')
 
     &__skill {
       grid-template-columns: 140px minmax(0, 1fr);
-      padding: 2px 0;
-      font-size: 11.5px;
+      padding: 1px 0;
+      font-size: 11px;
+    }
+
+    &__stats {
+      padding: 10px 0;
+    }
+
+    &__stat {
+      dt {
+        font-size: 17px;
+      }
+
+      dd {
+        font-size: 10px;
+      }
     }
   }
 }

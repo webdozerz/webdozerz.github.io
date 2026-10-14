@@ -1,6 +1,8 @@
 <script setup lang="ts">
 // Слова по очереди сменяют друг друга с коротким выездом снизу.
-// По мотивам RotatingText из Vue Bits (David Haz), без motion-v — на Vue Transition.
+// По мотивам RotatingText из Vue Bits (David Haz), без motion-v.
+// Все варианты лежат в DOM по одному разу (видно один): поисковики и скринридеры читают
+// их через запятую, без дублей текста на странице.
 
 const props = withDefaults(defineProps<{
   items: string[]
@@ -12,10 +14,11 @@ const props = withDefaults(defineProps<{
 })
 
 const index = ref(0)
-const reduced = ref(false)
+const live = ref(false)
 let timer: ReturnType<typeof setInterval> | undefined
-
 let startTimer: ReturnType<typeof setTimeout> | undefined
+
+const prevIndex = computed(() => (index.value - 1 + props.items.length) % props.items.length)
 
 function start(delay = 0) {
   stop()
@@ -31,7 +34,7 @@ function stop() {
   clearInterval(timer)
 }
 
-// Во фоновой вкладке не крутим впустую.
+// В фоновой вкладке не крутим впустую.
 function onVisibility() {
   if (document.hidden)
     stop()
@@ -39,9 +42,9 @@ function onVisibility() {
 }
 
 onMounted(() => {
-  reduced.value = matchMedia('(prefers-reduced-motion: reduce)').matches
-  if (reduced.value)
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches)
     return
+  live.value = true
   start(Math.max(0, props.startDelay - props.interval))
   document.addEventListener('visibilitychange', onVisibility)
 })
@@ -53,39 +56,52 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <span v-if="reduced" class="rotating">{{ items.join(', ') }}</span>
-  <span v-else class="rotating rotating--live">
-    <Transition name="rotate" mode="out-in">
-      <span :key="index" class="rotating__item">{{ items[index] }}</span>
-    </Transition>
+  <span class="rotating" :class="{ 'rotating--live': live }">
+    <span
+      v-for="(item, i) in items"
+      :key="item"
+      class="rotating__item"
+      :class="{ 'is-active': i === index, 'is-prev': live && i === prevIndex }"
+    >{{ item }}<span v-if="i < items.length - 1" class="rotating__sep">, </span></span>
   </span>
 </template>
 
 <style lang="scss" scoped>
-// Отдельная строка фиксированной высоты: пока слово меняется, вёрстка под ним не прыгает.
-.rotating--live {
-  display: block;
-  height: 1.6em;
-  overflow: hidden;
-}
-
+// Без анимации (до загрузки скрипта или при «уменьшить движение») — обычный список через запятую.
 .rotating__item {
-  display: inline-block;
   color: var(--h-text);
 }
 
-.rotate-enter-active,
-.rotate-leave-active {
-  transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.32s;
-}
+// С анимацией все варианты лежат друг на друге, видимый — один.
+.rotating--live {
+  display: inline-grid;
+  vertical-align: bottom;
+  overflow: hidden;
 
-.rotate-enter-from {
-  opacity: 0;
-  transform: translateY(70%);
-}
+  .rotating__item {
+    grid-area: 1 / 1;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(70%);
+    transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.32s;
 
-.rotate-leave-to {
-  opacity: 0;
-  transform: translateY(-70%);
+    &.is-active {
+      opacity: 1;
+      transform: none;
+    }
+
+    &.is-prev {
+      transform: translateY(-70%);
+    }
+  }
+
+  // Запятые нужны только скринридерам и поисковикам.
+  .rotating__sep {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
 }
 </style>
