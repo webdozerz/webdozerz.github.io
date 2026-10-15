@@ -49,8 +49,7 @@ onBeforeUnmount(() => {
   <header class="site-header" :class="{ 'site-header--scrolled': scrolled }">
     <div class="site-header__inner shell">
       <a href="#top" class="logo" aria-label="Наверх" @click.prevent="scrollTo('top')">
-        <span class="logo__mark">ИА</span>
-        <span class="logo__name">Андрюшов</span>
+        <span class="logo__path">~/</span>a<span class="logo__rest">ndryushov</span><span class="logo__tail" aria-hidden="true"><span class="logo__tld">.me</span><span class="logo__cursor">_</span></span>
       </a>
 
       <nav class="nav" aria-label="Разделы">
@@ -143,34 +142,66 @@ onBeforeUnmount(() => {
   }
 }
 
+// Словесный знак в виде промпта: ~/andryushov_ с мигающим курсором.
+// При наведении «допечатывается» домен .me. Хвост с доменом и курсором вынесен
+// из потока, чтобы навигация не сдвигалась.
 .logo {
+  position: relative;
   display: inline-flex;
-  align-items: center;
-  gap: 10px;
+  align-items: baseline;
   color: var(--h-text);
+  font-family: var(--h-mono);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
   text-decoration: none;
-  font-weight: 600;
 
-  &__mark {
-    display: grid;
-    place-items: center;
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--h-line-strong);
-    border-radius: 8px;
-    font-family: var(--h-mono);
-    font-size: 12px;
-    letter-spacing: 0.02em;
-    transition: border-color 0.2s, color 0.2s;
-  }
-
-  &:hover &__mark {
-    border-color: var(--h-accent);
+  &__path {
     color: var(--h-accent);
   }
 
-  &__name {
-    font-size: 15px;
+  &__tail {
+    position: absolute;
+    left: 100%;
+    bottom: 0;
+    display: inline-flex;
+    align-items: baseline;
+  }
+
+  &__tld {
+    display: inline-block;
+    overflow: hidden;
+    max-width: 0;
+    color: var(--h-muted);
+    vertical-align: bottom;
+    transition: max-width 0.24s steps(3, end);
+  }
+
+  &:hover &__tld,
+  &:focus-visible &__tld {
+    max-width: 3ch;
+  }
+
+  &__cursor {
+    color: var(--h-accent);
+    animation: logo-blink 1.05s steps(1) infinite;
+  }
+}
+
+@keyframes logo-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo__cursor {
+    animation: none;
+  }
+
+  .logo__tld {
+    transition: none;
   }
 }
 
@@ -276,7 +307,8 @@ onBeforeUnmount(() => {
 
 @media (max-width: 760px) {
   .nav,
-  .logo__name,
+  .logo__rest,
+  .logo__tld,
   .cmdk__kbd {
     display: none;
   }
