@@ -405,10 +405,14 @@ function chase(now: number, dt: number) {
   const catCenter = x.value + WIDTH / 2
   const target = current.x + itemWidth(current.kind) / 2
   const distance = target - catCenter
+  // У края блока кот упирается в границу и до середины предмета не дотягивается:
+  // тогда достаточно, чтобы предмет оказался под ним.
+  const blocked = (distance < 0 && x.value <= 0) || (distance > 0 && x.value >= maxX())
+  const underCat = target >= x.value && target <= x.value + WIDTH
 
-  if (Math.abs(distance) < 8) {
+  if (Math.abs(distance) < 8 || (blocked && underCat)) {
     if (current.kind === 'box') {
-      x.value = current.x + itemWidth('box') / 2 - WIDTH / 2
+      x.value = Math.min(Math.max(current.x + itemWidth('box') / 2 - WIDTH / 2, 0), maxX())
       mode.value = 'box'
       modeUntil = now + 4000
       return
