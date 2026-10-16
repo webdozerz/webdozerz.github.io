@@ -38,7 +38,7 @@ p{margin:0}
 .header__row{display:flex;align-items:center;gap:16px;padding:14px 0}
 .catbtn{flex:none;display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 20px;border-radius:var(--r-sm);background:var(--red);color:#fff;font-weight:700;transition:background-color .15s}
 .catbtn:hover{background:var(--red-dark)}
-.search{flex:1;display:flex;align-items:center;gap:10px;height:48px;padding:0 16px;border-radius:var(--r-sm);background:var(--sand);border:2px solid transparent;color:var(--muted);transition:border-color .15s,background-color .15s}
+.search{flex:1;min-width:0;display:flex;align-items:center;gap:10px;height:48px;padding:0 16px;border-radius:var(--r-sm);background:var(--sand);border:2px solid transparent;color:var(--muted);transition:border-color .15s,background-color .15s}
 .search:focus-within{border-color:var(--red);background:#fff}
 .search input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;color:var(--ink)}
 .search input::placeholder{color:var(--muted)}
@@ -61,7 +61,7 @@ button.hbtn{border:0;background:transparent;text-align:left}
 .nav a.is-sale{color:var(--red);font-weight:600}
 
 /* buttons */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 24px;border-radius:var(--r-sm);border:0;font-weight:700;font-size:15px;transition:background-color .15s,color .15s}
+.btn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 24px;border-radius:var(--r-sm);border:0;font-weight:700;font-size:15px;transition:background-color .15s,color .15s}
 .btn--red{background:var(--red);color:#fff}.btn--red:hover{background:var(--red-dark)}
 .btn--ghost{background:var(--sand);color:var(--ink)}.btn--ghost:hover{background:var(--sand-2)}
 .btn--light{background:#fff;color:var(--ink)}.btn--light:hover{background:var(--sand)}
@@ -159,6 +159,12 @@ button.hbtn{border:0;background:transparent;text-align:left}
   .buy{grid-template-columns:1fr 40px}
   .buy .qty{grid-template-columns:32px 1fr 32px}
   .buy .add{padding:0;font-size:0;gap:0}
+}
+/* совсем узкая карточка (телефоны 320–360px): счётчик сверху, под ним кнопка с текстом */
+@container (max-width:180px){
+  .buy{grid-template-columns:1fr}
+  .buy .qty{grid-template-columns:36px 1fr 36px}
+  .buy .add{padding:0 10px;font-size:14px;gap:6px}
 }
 :root{
   --i-cart:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 4h2.2l2.1 10.2a1.5 1.5 0 0 0 1.5 1.2h7.9a1.5 1.5 0 0 0 1.4-1l1.9-6H6.1'/%3E%3Ccircle cx='9.5' cy='19.5' r='1.3'/%3E%3Ccircle cx='17' cy='19.5' r='1.3'/%3E%3C/svg%3E");
@@ -404,16 +410,7 @@ button.hbtn{border:0;background:transparent;text-align:left}
   .cats{grid-template-columns:repeat(2,1fr)}
   .two{grid-template-columns:1fr}
   .price b{font-size:18px}
-  .pp .buyrow .btn{min-width:0}
 
-  /* строка корзины: фото | название + цена за единицу | удалить, ниже счётчик и сумма */
-  .clist{padding:0 14px}
-  .cline{grid-template-columns:60px auto 1fr 36px;grid-template-areas:'i t t x' 'i q s s';gap:10px 12px;padding:14px 0}
-  .cline img{width:60px;height:60px;grid-area:i;align-self:start}
-  .cline__t{grid-area:t;font-size:14.5px}
-  .cline .x{grid-area:x;align-self:start;margin-top:-6px}
-  .cline .qty{grid-area:q}
-  .cline__sum{grid-area:s}
 }
 
 /* вход */
@@ -477,4 +474,36 @@ button.hbtn{border:0;background:transparent;text-align:left}
   .tabbar .badge:empty,.badge[data-zero]{display:none}
 }
 .pp .add.is-added{background:var(--green)}
-@media(max-width:480px){.pp .buyrow .btn--ghost{flex:1}}
+
+/* страница товара на телефоне: счётчик + «В корзину», ниже «Купить сейчас» + избранное */
+@media(max-width:560px){
+  .pp .buyrow{display:grid;grid-template-columns:auto 1fr 52px;grid-template-areas:'q a a' 'b b f';gap:10px}
+  .pp .buyrow .qty{grid-area:q}
+  .pp .buyrow .add{grid-area:a}
+  .pp .buyrow .btn--ghost{grid-area:b}
+  .pp .buyrow .fav{grid-area:f}
+  .pp .buyrow .btn{min-width:0;max-width:none}
+  .pp .qty{grid-template-columns:44px 44px 44px}
+}
+/* шапка 769–1100: у «Войти» и «Избранного» только иконки, чтобы поместилась сумма корзины */
+@media(max-width:1100px){
+  .hactions .hbtn:not(.hbtn--cart) .hbtn__txt{display:none}
+}
+
+/* строка корзины в две строки, пока колонка списка уже ~600px:
+   фото | название + цена за единицу | удалить, ниже счётчик и сумма */
+.cartgrid > *,.reviews > *{min-width:0}
+.cline__t{overflow-wrap:anywhere}
+.field input,.field textarea{min-width:0;width:100%}
+@media(max-width:1024px){
+  .clist{padding:0 14px}
+  .cline{grid-template-columns:60px auto 1fr 36px;grid-template-areas:'i t t x' 'i q s s';gap:10px 12px;padding:14px 0}
+  .cline img{width:60px;height:60px;grid-area:i;align-self:start}
+  .cline__t{grid-area:t;font-size:14.5px}
+  .cline .x{grid-area:x;align-self:start;margin-top:-6px}
+  .cline .qty{grid-area:q}
+  .cline__sum{grid-area:s}
+}
+@media(max-width:560px){
+  .two{grid-template-columns:1fr}
+}
