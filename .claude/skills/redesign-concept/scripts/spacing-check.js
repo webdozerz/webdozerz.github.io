@@ -5,7 +5,8 @@
 // Запуск как у responsive-audit-nuxt.js: файл в public/__gap.js, затем
 //   eval(await (await fetch('/__gap.js', {cache: 'reload'})).text())
 //   window.__gaps('/redesign/<slug>/', ['', 'catalog', …], [390, 1280]).then(r => window.__GAP = r)
-// Возвращает 'ok' или { 'heading-tight <страница>': [...], 'box-touch <страница>': [...] }.
+// Ещё ищет блоки уже своей flex-колонки (narrow-block).
+// Возвращает 'ok' или { 'heading-tight <страница>': [...], 'box-touch …', 'narrow-block …' }.
 // Ищет внутри .sn-main — замени на main своего концепта.
 window.__gaps = async (base, pages, widths) => {
   const out = {}
@@ -23,6 +24,21 @@ window.__gaps = async (base, pages, widths) => {
       await new Promise(r => setTimeout(r, 150))
       const d = f.contentDocument
       const boxy = (e) => { const cs = getComputedStyle(e); return cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== 'rgb(255, 255, 255)' || cs.boxShadow !== 'none' || parseFloat(cs.borderTopWidth) > 0 }
+      // блоки уже родителя-колонки: grid/flex с align-items:start, перестроенный во flex-колонку
+      // на телефоне, сжимает строки до содержимого (корзина sanych на 390 px)
+      d.querySelectorAll('.sn-main *').forEach(parent => {
+        const cs = getComputedStyle(parent)
+        const column = cs.display.includes('flex') && cs.flexDirection === 'column'
+        if (!column || !parent.offsetParent || getComputedStyle(parent).display === 'contents') return
+        const inner = parent.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
+        // дети обёртки с display:contents раскладываются в этой же колонке
+        const flat = (el) => [...el.children].flatMap(c => getComputedStyle(c).display === 'contents' ? flat(c) : [c])
+        for (const k of flat(parent)) {
+          if (!k.offsetParent || !/^(DIV|UL|OL|FORM|SECTION|ASIDE|P|TABLE|DL)$/.test(k.tagName)) continue
+          const kw = k.getBoundingClientRect().width
+          if (kw < inner - 8 && getComputedStyle(k).alignSelf !== 'center') add('narrow-block ' + p, `${w}: ${name(k)} ${Math.round(kw)} из ${Math.round(inner)}px`)
+        }
+      })
       d.querySelectorAll('.sn-main *').forEach(parent => {
         if (parent.closest('button, a, .sn-qty, .sn-seg, select, label > span')) return
         const kids = [...parent.children].filter(k => k.offsetParent && k.getBoundingClientRect().height > 0)
@@ -33,7 +49,8 @@ window.__gaps = async (base, pages, widths) => {
           const gap = Math.round(b.top - a.bottom)
           const A = kids[i - 1], B = kids[i]
           const isHead = /^H[1-3]$/.test(A.tagName)
-          if (isHead && gap < 10) add('heading-tight ' + p, `${w}: ${name(A)} "${A.textContent.trim().slice(0, 20)}" → ${name(B)} = ${gap}px`)
+          // подзаголовок-абзац сразу под заголовком секции может стоять ближе (от 6 px)
+          if (isHead && gap < (B.tagName === 'P' ? 6 : 10)) add('heading-tight ' + p, `${w}: ${name(A)} "${A.textContent.trim().slice(0, 20)}" → ${name(B)} = ${gap}px`)
           else if ((boxy(A) || boxy(B)) && gap < 8 && !(boxy(A) && boxy(B) && gap >= 4)) add('box-touch ' + p, `${w}: ${name(A)} → ${name(B)} = ${gap}px`)
         }
       })

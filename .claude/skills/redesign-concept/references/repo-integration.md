@@ -112,6 +112,11 @@ composables/use<Slug>Cart.ts              useState + localStorage, persist() в 
   В шапке `utils/<slug>.ts` укажи, почему картинки лежат в репозитории.
 - Генерацию товаров из снятого каталога делай скриптом (Python → TS-массив), а описания
   чисти руками: SEO-вода оригинала («Ищете идеальное мясо?») в концепт не идёт.
+- Перестраивая сетку во flex-колонку на телефоне (`display: flex; flex-direction:
+  column`, `display: contents` у обёртки, чтобы поменять порядок), сбрасывай
+  `align-items: start` от десктопной сетки на `stretch`. Иначе строки корзины сжимаются
+  до содержимого и не доходят до правого края (sanych, 390 px). Ловит `spacing-check.js`
+  (`narrow-block`).
 - Колонка grid с `auto` растягивается до min-content содержимого: у блока с
   сегментными кнопками в узкой карточке ставь `grid-template-columns: minmax(0, 1fr)`.
 - Проверка: `npm run dev` (или preview_start), затем `npm run generate` — той же командой

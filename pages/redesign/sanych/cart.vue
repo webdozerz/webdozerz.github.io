@@ -584,9 +584,11 @@ useSeoMeta({ title: 'Корзина | Мясная лавка «Саныч», к
     order: -1;
   }
 
+  // align-items: start от десктопной сетки во flex-колонке сжимает строки до содержимого.
   .sn .snk-layout {
     display: flex;
     flex-direction: column;
+    align-items: stretch;
   }
 
   .sn .snk-main {
