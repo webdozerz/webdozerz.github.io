@@ -30,7 +30,7 @@ export default defineNuxtConfig({
   ],
   nitro: {
     // Статичные концепты лежат в public/redesign/<name>/, у Nuxt для них нет маршрутов.
-    prerender: { ignore: ['/redesign/sttorg70', '/redesign/prodagro'] },
+    prerender: { ignore: ['/redesign/sttorg70', '/redesign/prodagro', '/redesign/sibprod'] },
   },
   vite: {
     css: {

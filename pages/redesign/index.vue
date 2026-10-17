@@ -28,6 +28,14 @@ const projects = [
     tags: ['HTML/CSS', 'Simpla CMS', 'только визуал'],
     plain: true,
   },
+  {
+    to: '/redesign/sibprod/',
+    title: 'Сибирский продукт',
+    text: 'Доставка продуктов по Новосибирску: каталог с выпадающим меню, ближайший интервал доставки, своя марка «Сливкин Дом», корзина с выбором дня и времени.',
+    source: 'https://sibprod.info',
+    tags: ['HTML/CSS', '1С-Битрикс', 'только визуал'],
+    plain: true,
+  },
 ]
 </script>
 
