@@ -90,6 +90,15 @@ composables/use<Slug>Cart.ts              useState + localStorage, persist() в 
 
 - Все классы с префиксом проекта (`fg-…`), глобальные стили оболочки в `<style lang="scss">`
   без scoped, но под корневым классом — иначе стили концепта протекут на остальной сайт.
+- Сброс элементов концепта (`p`, `h1–h3`, `a`, `img`, `button`) пиши через
+  `:where(.<prefix>) p {…}`, а не `.<prefix> p {…}`: у второго специфичность (0,1,1)
+  выше, чем у класса блока, и он обнулит все `margin-top` у абзацев (на tomich так
+  слиплась линия под кнопками первого экрана). По той же причине глобальный
+  `ul[class] { margin: 0 }` портфолио перебивает `.block__list { margin }` — пиши
+  `& &__list` или `ul.block__list`.
+- `<img width height>` с CSS `aspect-ratio` обязательно с `height: auto`: атрибут `height`
+  работает как CSS-высота, и картинка вырастает до натуральной (фото фасада на tomich
+  вышло на полэкрана).
 - `useSeoMeta({ robots: 'noindex, nofollow' })`, шрифты концепта через `useHead`.
 - Данные в комментарии шапки `utils/<slug>.ts`: источник и месяц съёмки.
 - Проверка: `npm run dev` (или preview_start), затем `npm run generate` — той же командой
