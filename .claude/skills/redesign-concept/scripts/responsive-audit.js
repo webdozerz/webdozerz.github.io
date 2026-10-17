@@ -64,6 +64,59 @@ async () => {
         }
       })
 
+      // горизонтальные ленты (кружки категорий, чипы): overflow-x:auto обрезает и по вертикали,
+      // поэтому сдвинутый отрицательным margin или тенью элемент срезается сверху/снизу
+      d.querySelectorAll('body *').forEach(s => {
+        const cs = getComputedStyle(s)
+        if (!/auto|scroll/.test(cs.overflowX) || !s.offsetParent || s.tagName === 'DIALOG') return
+        const sr = s.getBoundingClientRect()
+        for (const e of s.querySelectorAll('*')) {
+          if (!e.offsetParent) continue
+          const er = e.getBoundingClientRect()
+          if (er.height && (er.top < sr.top - 0.5 || er.bottom > sr.bottom + 0.5)) { add('clipped-in-scroller ' + p, w + ':' + (s.className || s.tagName) + ' > ' + (e.className || e.tagName)); break }
+        }
+      })
+
+      // абсолютные кнопки (стрелки слайдера, «в избранное») не должны лежать на тексте
+      const texts = [...d.querySelectorAll('h1,h2,h3,h4,p')].filter(t => t.offsetParent && t.textContent.trim())
+      d.querySelectorAll('button, a').forEach(b => {
+        if (!b.offsetParent || getComputedStyle(b).position !== 'absolute') return
+        const br = b.getBoundingClientRect()
+        for (const t of texts) {
+          if (t.contains(b) || b.contains(t)) continue
+          const r = d.createRange(); r.selectNodeContents(t)
+          const hit = [...r.getClientRects()].some(x => x.width > 1 && x.left < br.right - 1 && x.right > br.left + 1 && x.top < br.bottom - 1 && x.bottom > br.top + 1)
+          if (hit) { add('overlaps-text ' + p, w + ':' + (b.getAttribute('aria-label') || b.className) + ' / ' + t.textContent.trim().slice(0, 16)); break }
+        }
+      })
+
+      // иконки: контур вылезает за viewBox и срезается (проверяем один раз, на первой ширине)
+      if (w === from) {
+        const icon = (svg, name) => {
+          const vb = svg.viewBox && svg.viewBox.baseVal
+          if (!vb || !vb.width) return
+          const half = parseFloat(svg.getAttribute('stroke-width') || 0) / 2
+          for (const el of svg.querySelectorAll('path,circle,rect,line,polyline,polygon,ellipse')) {
+            const b = el.getBBox(), h = parseFloat(el.getAttribute('stroke-width') || 0) / 2 || half
+            if (b.x - h < vb.x - 0.2 || b.y - h < vb.y - 0.2 || b.x + b.width + h > vb.x + vb.width + 0.2 || b.y + b.height + h > vb.y + vb.height + 0.2) { add('icon-clipped ' + p, name); break }
+          }
+        }
+        // скрытые (таббар, модалки) клонируем в видимый контейнер, иначе getBBox вернёт нули
+        const box = d.createElement('div'); box.style.cssText = 'position:absolute;left:0;top:0;width:24px'; d.body.appendChild(box)
+        d.querySelectorAll('svg').forEach((s, i) => { box.replaceChildren(s.cloneNode(true)); icon(box.firstChild, 'svg#' + i + ' ' + (s.parentElement.className || s.parentElement.tagName)) })
+        // иконки-маски из CSS-переменных: --i-name:url("data:image/svg+xml,...")
+        for (const sh of d.styleSheets) {
+          let rules = []; try { rules = [...sh.cssRules] } catch (e) {}
+          for (const rule of rules) {
+            for (const m of (rule.cssText || '').matchAll(/(--[\w-]+):\s*url\("data:image\/svg\+xml,([^"]+)"\)/g)) {
+              box.innerHTML = decodeURIComponent(m[2].replace(/\\"/g, '"'))
+              if (box.firstChild) icon(box.firstChild, m[1])
+            }
+          }
+        }
+        box.remove()
+      }
+
       const hdr = d.querySelector('.header__row')
       if (hdr && hdr.offsetParent) {
         const hr = hdr.getBoundingClientRect()
