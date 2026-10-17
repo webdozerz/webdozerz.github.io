@@ -9,7 +9,9 @@
 // Возвращает 'ok' или объект { 'проблема страница': [ширины или детали] }.
 async () => {
   const base = location.pathname.replace(/[^/]*$/, '')        // папка текущей страницы
-  const pages = ['index.html', 'catalog.html', 'product.html', 'cart.html', 'delivery.html']
+  // страницы концепта: все относительные ссылки на .html с текущей страницы (шапка, подвал, таббар)
+  const found = [...document.querySelectorAll('a[href$=".html"]')].map(a => a.getAttribute('href')).filter(h => !/^(https?:|\/)/.test(h))
+  const pages = [...new Set([location.pathname.split('/').pop() || 'index.html', ...found])]
   const from = 320, to = 1440, step = 8
 
   // свежие файлы, а не кеш http.server

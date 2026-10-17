@@ -20,6 +20,14 @@ const projects = [
     tags: ['HTML/CSS', 'WooCommerce', 'только визуал'],
     plain: true,
   },
+  {
+    to: '/redesign/prodagro/',
+    title: 'ПродАгро',
+    text: 'Продукты оптом и в розницу в Иркутске: цены за штуку и упаковку, корзина с доставкой от 3 000 ₽, страница для бизнеса.',
+    source: 'https://prodmak38.ru',
+    tags: ['HTML/CSS', 'Simpla CMS', 'только визуал'],
+    plain: true,
+  },
 ]
 </script>
 
