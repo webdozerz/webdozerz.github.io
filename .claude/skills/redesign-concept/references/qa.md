@@ -71,6 +71,19 @@ PNG с прозрачностью или SVG.
 
 ## Ловушки инструментов
 
+- **chrome-devtools занят другой сессией** («The browser is already running»): проверяй во
+  встроенном браузере — `resize_window` с нужной шириной, прокрутка через
+  `computer scroll` (программный `scrollTo` панель часто не показывает). og-картинку
+  тогда снимай headless Chrome из терминала:
+  `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new
+  --hide-scrollbars --user-data-dir=<scratchpad>/chr --window-size=1200,630
+  --virtual-time-budget=6000 --screenshot=<scratchpad>/og.png <url>` и `sips` в jpeg.
+- **Аудит Nuxt-концепта** — `scripts/responsive-audit-nuxt.js`: старый скрипт грузит
+  iframe на каждую ширину и на Nuxt dev идёт десятки минут.
+- **Переполнение без виновника**: если `scrollWidth` страницы больше ширины, а элементов
+  с `right > ширины` нет, ищи элементы с `scrollWidth > clientWidth` — у sanych так
+  нашлась сумма корзины в колонке 40 px.
+
 - **Кеш `python -m http.server`**: браузер показывает старые CSS/HTML. Перед проверкой
   `await fetch(url, {cache:'reload'})` для изменённых файлов и `location.reload()`.
 - **Панель встроенного браузера** иногда «залипает» и показывает старый кадр после

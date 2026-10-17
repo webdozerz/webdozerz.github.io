@@ -24,7 +24,7 @@
 `plain: true` нужен потому, что у статичного концепта нет Nuxt-маршрута: NuxtLink
 и краулер prerender пытались бы его отрендерить.
 
-## 2а. Статичный HTML
+## 2а. Статичный HTML (только по просьбе пользователя)
 
 ```
 public/redesign/<slug>/
@@ -85,7 +85,7 @@ utils/<slug>.ts                           типы, массив товаров,
 composables/use<Slug>Cart.ts              useState + localStorage, persist() в оболочке
 ```
 
-Образец — `foodgood`: `pages/redesign/foodgood.vue`, `utils/foodgood.ts`
+Образцы — `sanych` (оболочка, компоненты `SnBuy`/`SnQty`, корзина с разделкой и весом) и `foodgood`: `pages/redesign/foodgood.vue`, `utils/foodgood.ts`
 (`fgProducts`, `fgPath()`, `fgImages`), `composables/useFoodgoodCart.ts`.
 
 - Все классы с префиксом проекта (`fg-…`), глобальные стили оболочки в `<style lang="scss">`
@@ -101,6 +101,19 @@ composables/use<Slug>Cart.ts              useState + localStorage, persist() в 
   вышло на полэкрана).
 - `useSeoMeta({ robots: 'noindex, nofollow' })`, шрифты концепта через `useHead`.
 - Данные в комментарии шапки `utils/<slug>.ts`: источник и месяц съёмки.
+- **CSS дочерней страницы грузится только вместе с ней.** Стиль, который нужен двум
+  страницам, клади в оболочку или в компонент, иначе на второй странице он пропадёт
+  (sanych: отступы секций «Опта» и «Контактов» жили в `delivery.vue`). Мобильные правила
+  компонента — в самом компоненте, не в странице, где он впервые встретился.
+- **Картинки оригинала по http** (у конструкторов вроде setup.ru поддомен `i.<домен>`
+  без https) на https-странице концепта не загрузятся. Тогда копируй их в
+  `public/redesign/<slug>/img/` с латинскими именами и ужимай:
+  `sips -Z 720 -s format jpeg -s formatOptions normal in --out out.jpg` (~50 КБ на фото).
+  В шапке `utils/<slug>.ts` укажи, почему картинки лежат в репозитории.
+- Генерацию товаров из снятого каталога делай скриптом (Python → TS-массив), а описания
+  чисти руками: SEO-вода оригинала («Ищете идеальное мясо?») в концепт не идёт.
+- Колонка grid с `auto` растягивается до min-content содержимого: у блока с
+  сегментными кнопками в узкой карточке ставь `grid-template-columns: minmax(0, 1fr)`.
 - Проверка: `npm run dev` (или preview_start), затем `npm run generate` — той же командой
   собирает GitHub Actions; она не должна падать на новых маршрутах.
 
