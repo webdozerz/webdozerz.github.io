@@ -57,7 +57,7 @@ useSeoMeta({
       <aside class="snc-side" aria-label="Разделы каталога">
         <NuxtLink :to="snPath('/catalog')" class="snc-side__link" :class="{ 'is-active': !category }">
           <span class="snc-side__all" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" /></svg>
+            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M5.5 3.5h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2zM15.5 3.5h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2zM5.5 13.5h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2zM14 17h7M17.5 13.5v7" /></svg>
           </span>
           <span>Все товары</span>
           <small>{{ snProducts.length }}</small>

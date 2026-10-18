@@ -228,7 +228,7 @@ onBeforeUnmount(() => {
       </NuxtLink>
       <NuxtLink :to="snPath('/catalog')" class="sn-tabbar__item" :class="{ 'is-active': onCatalog }">
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-          <path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" />
+          <path d="M5.5 3.5h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2zM15.5 3.5h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2zM5.5 13.5h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2zM14 17h7M17.5 13.5v7" />
         </svg>
         Каталог
       </NuxtLink>
