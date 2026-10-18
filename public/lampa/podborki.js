@@ -291,12 +291,16 @@
         }
 
         function finish() {
-            var out = { updated: new Date().toISOString().slice(0, 10), lists: {}, map: map };
+            var now = new Date();
+            var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+            var stamp = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+            var ok = keys.length - errors.length;
+            var out = { updated: stamp, status: 'списков обновлено: ' + ok + ' из ' + keys.length, lists: {}, map: map };
             Object.keys(data.lists || {}).forEach(function (k) { out.lists[k] = data.lists[k]; });
             keys.forEach(function (k) {
                 if (lists[k]) out.lists[k] = lists[k].map(function (s) { return map[s]; }).filter(Boolean);
             });
-            saveData(out);
+            if (ok) saveData(out);
             updating = false;
 
             if (errors.length === keys.length) Lampa.Noty.show('Подборки: не удалось обновить — ' + errors[0]);
@@ -357,18 +361,24 @@
     function openSection(section) {
         Lampa.Activity.push({
             url: section.id,
-            title: 'Подборки · ' + section.title,
+            title: section.title,
             component: 'main',
             source: SRC,
             page: 1
         });
     }
 
+    function updateInfo() {
+        if (updating) return 'Идёт обновление…';
+        if (!data.updated) return 'Ещё не обновлялись';
+        return 'Последнее обновление: ' + data.updated + (data.status ? ', ' + data.status : ' (стартовый снимок)');
+    }
+
     function openMenu() {
         var items = SECTIONS.map(function (s) { return { title: s.title, section: s }; });
         items.push({
             title: 'Обновить топы',
-            subtitle: data.updated ? 'Последнее обновление: ' + data.updated : 'Ещё не обновлялись',
+            subtitle: updateInfo(),
             update: true
         });
 
@@ -408,7 +418,7 @@
                 description: 'Скачать свежие списки Letterboxd и IMDb'
             },
             onRender: function (item) {
-                item.find('.settings-param__descr').text('Скачать свежие списки Letterboxd и IMDb. Последнее обновление: ' + (data.updated || '—'));
+                item.find('.settings-param__descr').text('Скачать свежие списки Letterboxd и IMDb. ' + updateInfo());
             },
             onChange: updateTops
         });
