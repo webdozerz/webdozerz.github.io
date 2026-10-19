@@ -60,22 +60,50 @@ const itemStyle = (i: number) => {
   }
 }
 
+// Товар = база (автопрокрутка, точки, свайп) + шаги прокрутки страницы: пока блок на экране,
+// каждые ~120 px прокрутки карусель сдвигается на один товар. Блок при этом не закрепляется.
+const stage = ref<HTMLElement | null>(null)
+const base = ref(0)
+const steps = ref(0)
+const setActive = (value: number) => {
+  const nextValue = ((value % N) + N) % N
+  if (nextValue === active.value) return
+  forward.value = nextValue === (active.value + 1) % N
+  active.value = nextValue
+}
 let timer: ReturnType<typeof setInterval> | undefined
 const paused = ref(false)
 const reduced = ref(false)
 const next = () => {
-  if (paused.value || document.hidden) return
-  forward.value = true
-  active.value = (active.value + 1) % N
+  // автопрокрутка только пока страница наверху — дальше товары листает сама прокрутка
+  if (paused.value || document.hidden || steps.value > 0) return
+  base.value += 1
+  setActive(base.value + steps.value)
 }
 const start = () => {
   clearInterval(timer)
   if (!reduced.value) timer = setInterval(next, 3200)
 }
 const go = (i: number) => {
-  forward.value = i > active.value
-  active.value = i
+  base.value = i - steps.value
+  setActive(i)
   start()
+}
+
+let raf = 0
+const measure = () => {
+  raf = 0
+  const el = stage.value
+  if (!el) return
+  const head = document.querySelector<HTMLElement>('.sb-header')?.offsetHeight ?? 120
+  const passed = head - el.getBoundingClientRect().top
+  const span = Math.max(1, el.offsetHeight - 160)
+  const step = span / N
+  steps.value = Math.max(0, Math.min(Math.floor(Math.max(0, passed) / step), N * 3))
+  setActive(base.value + steps.value)
+}
+const onScroll = () => {
+  if (!reduced.value && !raf) raf = requestAnimationFrame(measure)
 }
 // свайп по товарам на телефоне
 let touchX = 0
@@ -90,8 +118,14 @@ const onTouchEnd = (e: TouchEvent) => {
 onMounted(() => {
   reduced.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   start()
+  measure()
+  window.addEventListener('scroll', onScroll, { passive: true })
 })
-onBeforeUnmount(() => clearInterval(timer))
+onBeforeUnmount(() => {
+  clearInterval(timer)
+  window.removeEventListener('scroll', onScroll)
+  if (raf) cancelAnimationFrame(raf)
+})
 
 // ---------- разделы и полки ----------
 const tiles = sbSections.map((s) => ({ ...s, count: sbCount(s.id), from: sbFrom(sbOf(s.id)) }))
@@ -121,6 +155,7 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
   <div class="sb-home">
     <!-- 1. сцена с прокруткой -->
     <section
+      ref="stage"
       class="sb-stage"
       :class="{ 'is-hot': hot }"
       aria-label="СибирьТрейд — крупный опт продуктов"
