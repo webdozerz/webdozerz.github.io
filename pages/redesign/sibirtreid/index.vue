@@ -424,11 +424,11 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
 
     &__sticky {
       position: sticky;
-      // на высоком экране панель не растягивается выше 820 px, а встаёт по центру —
-      // иначе под ней оставалась пустота до следующего блока
-      top: calc(var(--head) + max(0px, (100vh - var(--head) - 852px) / 2));
-      height: min(calc(100vh - var(--head)), 852px);
-      height: min(calc(100svh - var(--head)), 852px);
+      // панель занимает весь экран под шапкой: с потолком по высоте на высоком мониторе
+      // оставалась пустота под ней, а с центрированием — поля сверху и снизу
+      top: var(--head);
+      height: calc(100vh - var(--head));
+      height: calc(100svh - var(--head));
       padding: 16px 0;
     }
 
@@ -442,7 +442,6 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
       grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
       height: 100%;
       min-height: 520px;
-      max-height: 820px;
       border-radius: 36px;
       overflow: hidden;
       color: var(--sb-ink);
@@ -461,11 +460,11 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
       padding: clamp(24px, 4vh, 56px) clamp(28px, 4vw, 56px);
 
       h1 {
-        font-size: clamp(30px, min(4.2vw, 6.2vh), 60px);
+        font-size: clamp(30px, min(4.2vw, 6.2vh), 68px);
         line-height: 1.02;
         letter-spacing: -0.035em;
         color: inherit;
-        max-width: 620px;
+        max-width: 700px;
       }
     }
 
@@ -573,7 +572,7 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
       position: absolute;
       left: 50%;
       top: 46%;
-      width: calc(min(30vw, 420px) * var(--w));
+      width: calc(min(30vw, 52vh, 560px) * var(--w));
       will-change: transform;
 
       img {
