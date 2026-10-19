@@ -16,20 +16,17 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
 })
 
-// ---------- сцена: товары едут каруселью, пока страница прокручивается ----------
-const stage = ref<HTMLElement | null>(null)
-const p = ref(0)
-const head = ref(120)
+// ---------- сцена: товары оригинала едут каруселью, фон и факты меняются вместе с ними ----------
 const stageItems = sbStage.map((s) => {
   const item = 'item' in s.to ? sbFind(s.to.item) : undefined
-  const to =
-    'item' in s.to ? sbPath(`/item/${s.to.item}`) : sbCatalogPath(s.to.sec, s.to.sub)
+  const to = 'item' in s.to ? sbPath(`/item/${s.to.item}`) : sbCatalogPath(s.to.sec, s.to.sub)
   return { ...s, item, href: to }
 })
 const N = stageItems.length
-const pos = computed(() => p.value * (N - 1))
-const active = computed(() => Math.min(N - 1, Math.max(0, Math.round(pos.value))))
-const fact = computed(() => Math.min(sbFacts.length - 1, Math.floor(p.value * sbFacts.length * 0.999)))
+const active = ref(0)
+const forward = ref(true)
+const p = computed(() => active.value / (N - 1))
+const fact = computed(() => Math.min(sbFacts.length - 1, Math.floor((active.value * sbFacts.length) / N)))
 
 const stops = [
   [232, 244, 236],
@@ -46,56 +43,55 @@ const bg = computed(() => {
 })
 const hot = computed(() => p.value > 0.8)
 
+// Карусель по кругу: видны центральный товар и по одному с боков, остальные спрятаны.
+const offset = (i: number) => ((i - active.value + N + Math.floor(N / 2)) % N) - Math.floor(N / 2)
 const itemStyle = (i: number) => {
-  const t = i - pos.value
+  const t = offset(i)
   const a = Math.abs(t)
-  const scale = Math.max(0.4, 1 - Math.min(a, 2.2) * 0.27)
+  const scale = Math.max(0.4, 1 - Math.min(a, 2) * 0.27)
+  // товар, который перескочил с левого края на правый, не должен лететь через сцену
+  const jumped = forward.value && t === N - 1 - Math.floor(N / 2)
   return {
     transform: `translate(-50%, -50%) translateX(${t * 34}%) translateY(${a * a * 7}%) rotate(${t * 9}deg) scale(${scale})`,
-    opacity: a > 2.4 ? 0 : 1 - Math.max(0, a - 1.4) * 0.6,
-    zIndex: String(10 - Math.round(a * 2)),
-    '--w': s(i),
+    opacity: a >= 1.9 ? 0 : 1 - Math.max(0, a - 1) * 0.5,
+    zIndex: String(10 - a * 2),
+    transition: jumped ? 'none' : undefined,
+    '--w': String(stageItems[i].w),
   }
 }
-const s = (i: number) => String(stageItems[i].w)
 
-let raf = 0
-const measure = () => {
-  raf = 0
-  const el = stage.value
-  if (!el) return
-  const h = document.querySelector<HTMLElement>('.sb-header')?.offsetHeight ?? 120
-  head.value = h
-  const sticky = el.querySelector<HTMLElement>('.sb-stage__sticky')
-  const top = sticky ? parseFloat(getComputedStyle(sticky).top) || h : h
-  const run = el.offsetHeight - (sticky?.offsetHeight ?? window.innerHeight - h)
-  const done = Math.min(1, Math.max(0, (top - el.getBoundingClientRect().top) / Math.max(1, run)))
-  p.value = done
-}
-const onScroll = () => {
-  if (!raf) raf = requestAnimationFrame(measure)
-}
+let timer: ReturnType<typeof setInterval> | undefined
+const paused = ref(false)
 const reduced = ref(false)
+const next = () => {
+  if (paused.value || document.hidden) return
+  forward.value = true
+  active.value = (active.value + 1) % N
+}
+const start = () => {
+  clearInterval(timer)
+  if (!reduced.value) timer = setInterval(next, 3200)
+}
+const go = (i: number) => {
+  forward.value = i > active.value
+  active.value = i
+  start()
+}
+// свайп по товарам на телефоне
+let touchX = 0
+const onTouchStart = (e: TouchEvent) => {
+  touchX = e.touches[0].clientX
+}
+const onTouchEnd = (e: TouchEvent) => {
+  const dx = e.changedTouches[0].clientX - touchX
+  if (Math.abs(dx) < 40) return
+  go(dx < 0 ? (active.value + 1) % N : (active.value - 1 + N) % N)
+}
 onMounted(() => {
   reduced.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  measure()
-  window.addEventListener('scroll', onScroll, { passive: true })
-  window.addEventListener('resize', onScroll)
+  start()
 })
-onBeforeUnmount(() => {
-  window.removeEventListener('scroll', onScroll)
-  window.removeEventListener('resize', onScroll)
-  if (raf) cancelAnimationFrame(raf)
-})
-const jump = (i: number) => {
-  const el = stage.value
-  if (!el) return
-  const sticky = el.querySelector<HTMLElement>('.sb-stage__sticky')
-  const stickTop = sticky ? parseFloat(getComputedStyle(sticky).top) || head.value : head.value
-  const run = el.offsetHeight - (sticky?.offsetHeight ?? window.innerHeight - head.value)
-  const top = el.getBoundingClientRect().top + window.scrollY - stickTop
-  window.scrollTo({ top: top + (run * i) / (N - 1), behavior: reduced.value ? 'auto' : 'smooth' })
-}
+onBeforeUnmount(() => clearInterval(timer))
 
 // ---------- разделы и полки ----------
 const tiles = sbSections.map((s) => ({ ...s, count: sbCount(s.id), from: sbFrom(sbOf(s.id)) }))
@@ -125,15 +121,20 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
   <div class="sb-home">
     <!-- 1. сцена с прокруткой -->
     <section
-      ref="stage"
       class="sb-stage"
-      :class="{ 'is-hot': hot, 'is-static': reduced }"
-      :style="{ '--head': `${head}px` }"
+      :class="{ 'is-hot': hot }"
       aria-label="СибирьТрейд — крупный опт продуктов"
     >
       <div class="sb-stage__sticky">
         <div class="sb-wrap sb-stage__frame">
-          <div class="sb-stage__panel" :style="{ background: bg }">
+          <div
+            class="sb-stage__panel"
+            :style="{ background: bg }"
+            @mouseenter="paused = true"
+            @mouseleave="paused = false"
+            @focusin="paused = true"
+            @focusout="paused = false"
+          >
             <div class="sb-stage__copy">
               <span class="sb-stage__tag">Оптовый поставщик продуктов · с 2012 года</span>
               <h1>Крупный опт продуктов и слабого алкоголя от Урала до Сахалина</h1>
@@ -154,7 +155,7 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
                   :aria-selected="i === fact"
                   :aria-label="f.big"
                   :class="{ 'is-on': i <= fact }"
-                  @click="jump(Math.round((i / (sbFacts.length - 1)) * (N - 1)))"
+                  @click="go(Math.ceil((i * N) / sbFacts.length))"
                 />
               </div>
               <div class="sb-stage__actions">
@@ -167,7 +168,7 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
               <p class="sb-stage__min">Заказ от 100 000 ₽ · договор, ЭДО, полный пакет сертификатов</p>
             </div>
 
-            <div class="sb-stage__belt">
+            <div class="sb-stage__belt" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
               <NuxtLink
                 v-for="(it, i) in stageItems"
                 :key="it.img"
@@ -187,13 +188,18 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
               </NuxtLink>
             </div>
 
-            <div class="sb-stage__dots" aria-hidden="true">
-              <span v-for="(it, i) in stageItems" :key="it.img" :class="{ 'is-on': i === active }" />
+            <div class="sb-stage__dots" role="tablist" aria-label="Товары">
+              <button
+                v-for="(it, i) in stageItems"
+                :key="it.img"
+                type="button"
+                role="tab"
+                :aria-selected="i === active"
+                :aria-label="it.label"
+                :class="{ 'is-on': i === active }"
+                @click="go(i)"
+              />
             </div>
-            <span class="sb-stage__hint" :class="{ 'is-gone': p > 0.06 }" aria-hidden="true">
-              Листайте — товары поедут
-              <SbIcon name="down" :size="16" />
-            </span>
           </div>
         </div>
       </div>
@@ -420,32 +426,24 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
   // ---------- сцена ----------
   .sb-stage {
     position: relative;
-    height: 320vh;
 
     &__sticky {
-      position: sticky;
-      // панель занимает весь экран под шапкой: с потолком по высоте на высоком мониторе
-      // оставалась пустота под ней, а с центрированием — поля сверху и снизу
-      top: var(--head);
-      height: calc(100vh - var(--head));
-      height: calc(100svh - var(--head));
-      padding: 16px 0;
+      padding: 16px 0 0;
     }
 
     &__frame {
-      height: 100%;
+      height: auto;
     }
 
     &__panel {
       position: relative;
       display: grid;
       grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-      height: 100%;
-      min-height: 520px;
+      height: clamp(560px, 72vh, 720px);
       border-radius: 36px;
+      transition: color 0.3s, background-color 0.8s;
       overflow: hidden;
       color: var(--sb-ink);
-      transition: color 0.3s;
     }
 
 
@@ -456,15 +454,15 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: clamp(10px, 2.2vh, 18px);
-      padding: clamp(24px, 4vh, 56px) clamp(28px, 4vw, 56px);
+      gap: 16px;
+      padding: 40px clamp(28px, 4vw, 56px);
 
       h1 {
-        font-size: clamp(30px, min(4.2vw, 6.2vh), 68px);
+        font-size: clamp(30px, 3.7vw, 56px);
         line-height: 1.02;
         letter-spacing: -0.035em;
         color: inherit;
-        max-width: 700px;
+        max-width: 620px;
       }
     }
 
@@ -479,7 +477,7 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
     }
 
     &__fact {
-      min-height: clamp(48px, 7vh, 66px);
+      min-height: 66px;
 
       p {
         display: flex;
@@ -572,7 +570,10 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
       position: absolute;
       left: 50%;
       top: 46%;
-      width: calc(min(30vw, 52vh, 560px) * var(--w));
+      width: calc(min(30vw, 440px) * var(--w));
+      transition:
+        transform 0.9s cubic-bezier(0.22, 0.8, 0.3, 1),
+        opacity 0.5s;
       will-change: transform;
 
       img {
@@ -617,37 +618,30 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
       gap: 8px;
       transform: translateY(-50%);
 
-      span {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: currentColor;
-        opacity: 0.25;
-        transition: opacity 0.2s, transform 0.2s;
+      button {
+        display: grid;
+        place-items: center;
+        width: 20px;
+        height: 20px;
 
-        &.is-on {
+        &::before {
+          content: '';
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: currentColor;
+          opacity: 0.25;
+          transition: opacity 0.2s, transform 0.2s;
+        }
+
+        &:hover::before {
+          opacity: 0.6;
+        }
+
+        &.is-on::before {
           opacity: 0.9;
           transform: scale(1.4);
         }
-      }
-    }
-
-    &__hint {
-      position: absolute;
-      left: 50%;
-      bottom: 18px;
-      z-index: 20;
-      transform: translateX(-50%);
-      display: none;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      opacity: 0.7;
-      transition: opacity 0.3s;
-
-      &.is-gone {
-        opacity: 0;
       }
     }
 
@@ -664,33 +658,15 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
       }
     }
 
-    // без анимаций — статичная витрина
-    &.is-static {
-      height: auto;
-    }
-
-    &.is-static .sb-stage__sticky {
-      position: static;
-      height: auto;
-    }
-
-    &.is-static .sb-stage__panel {
-      min-height: 560px;
-    }
-
     @media (max-width: 860px) {
-      height: 260vh;
-
       &__sticky {
-        top: var(--head);
-        height: calc(100svh - var(--head) - 76px);
-        padding: 8px 0;
+        padding: 8px 0 0;
       }
 
       &__panel {
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: auto minmax(0, 1fr);
-        min-height: 0;
+        height: clamp(560px, calc(100svh - 170px), 660px);
         border-radius: 28px;
       }
 
@@ -763,10 +739,6 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
       }
 
       &__dots {
-        display: none;
-      }
-
-      &__hint {
         display: none;
       }
     }
