@@ -189,7 +189,7 @@ onBeforeUnmount(() => {
 
         <button type="button" class="sb-btn sb-btn--orange sb-header__price" @click="req.askPrice()">Запросить прайс</button>
 
-        <button type="button" class="sb-iconbtn sb-header__icon" aria-label="Поиск" @click="openSearch()">
+        <button type="button" class="sb-iconbtn sb-header__icon sb-header__find" aria-label="Поиск" @click="openSearch()">
           <SbIcon name="search" :size="22" />
         </button>
         <button
@@ -1265,7 +1265,7 @@ body.sb-body {
       display: grid;
     }
 
-    .sb-header__icon:first-of-type {
+    .sb-header__find {
       margin-left: auto;
     }
 

@@ -66,9 +66,10 @@ const measure = () => {
   if (!el) return
   const h = document.querySelector<HTMLElement>('.sb-header')?.offsetHeight ?? 120
   head.value = h
-  const rect = el.getBoundingClientRect()
-  const run = el.offsetHeight - (window.innerHeight - h)
-  const done = Math.min(1, Math.max(0, (h - rect.top) / Math.max(1, run)))
+  const sticky = el.querySelector<HTMLElement>('.sb-stage__sticky')
+  const top = sticky ? parseFloat(getComputedStyle(sticky).top) || h : h
+  const run = el.offsetHeight - (sticky?.offsetHeight ?? window.innerHeight - h)
+  const done = Math.min(1, Math.max(0, (top - el.getBoundingClientRect().top) / Math.max(1, run)))
   p.value = done
 }
 const onScroll = () => {
@@ -89,8 +90,10 @@ onBeforeUnmount(() => {
 const jump = (i: number) => {
   const el = stage.value
   if (!el) return
-  const run = el.offsetHeight - (window.innerHeight - head.value)
-  const top = el.getBoundingClientRect().top + window.scrollY - head.value
+  const sticky = el.querySelector<HTMLElement>('.sb-stage__sticky')
+  const stickTop = sticky ? parseFloat(getComputedStyle(sticky).top) || head.value : head.value
+  const run = el.offsetHeight - (sticky?.offsetHeight ?? window.innerHeight - head.value)
+  const top = el.getBoundingClientRect().top + window.scrollY - stickTop
   window.scrollTo({ top: top + (run * i) / (N - 1), behavior: reduced.value ? 'auto' : 'smooth' })
 }
 
@@ -238,7 +241,7 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
           </button>
         </div>
       </div>
-      <div ref="track" class="sb-popular__track" @scroll.passive="onTrack">
+      <div ref="track" class="sb-wrap sb-popular__track" :class="{ 'is-start': trackP <= 0.01, 'is-end': trackP >= 0.99 }" @scroll.passive="onTrack">
         <NuxtLink v-for="c in popular" :key="c.sub" :to="sbCatalogPath(c.sec, c.sub)" class="sb-pop" :class="`sb-tone--${c.tone}`">
           <span class="sb-pop__img"><img :src="c.img" :alt="c.label" loading="lazy" /></span>
           <span class="sb-pop__label">{{ c.label }}</span>
@@ -373,7 +376,7 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
       <div class="sb-wrap sb-head">
         <h2>Наши партнёры</h2>
       </div>
-      <div class="sb-marquee">
+      <div class="sb-wrap sb-marquee">
         <div class="sb-marquee__row">
           <span v-for="(src, i) in [...sbPartners, ...sbPartners]" :key="i" class="sb-marquee__logo" :aria-hidden="i >= sbPartners.length">
             <img :src="src" alt="" loading="lazy" />
@@ -421,9 +424,11 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
 
     &__sticky {
       position: sticky;
-      top: var(--head);
-      height: calc(100vh - var(--head));
-      height: calc(100svh - var(--head));
+      // на высоком экране панель не растягивается выше 820 px, а встаёт по центру —
+      // иначе под ней оставалась пустота до следующего блока
+      top: calc(var(--head) + max(0px, (100vh - var(--head) - 852px) / 2));
+      height: min(calc(100vh - var(--head)), 852px);
+      height: min(calc(100svh - var(--head)), 852px);
       padding: 16px 0;
     }
 
@@ -678,6 +683,7 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
       height: 260vh;
 
       &__sticky {
+        top: var(--head);
         height: calc(100svh - var(--head) - 76px);
         padding: 8px 0;
       }
@@ -944,11 +950,24 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
       grid-auto-flow: column;
       grid-auto-columns: 240px;
       gap: 14px;
-      padding: 4px max(16px, calc((100% - 1280px) / 2)) 8px;
+      padding: 4px 0 8px;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
-      scroll-padding-inline: max(16px, calc((100% - 1280px) / 2));
       scrollbar-width: none;
+      // край карусели затухает, пока есть что листать
+      mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent);
+
+      &.is-start {
+        mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent);
+      }
+
+      &.is-end {
+        mask-image: linear-gradient(90deg, transparent, #000 48px);
+      }
+
+      &.is-start.is-end {
+        mask-image: none;
+      }
 
       &::-webkit-scrollbar {
         display: none;
