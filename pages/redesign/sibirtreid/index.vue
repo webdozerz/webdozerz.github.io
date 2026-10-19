@@ -16,17 +16,25 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
 })
 
-// ---------- сцена: товары оригинала едут каруселью, фон и факты меняются вместе с ними ----------
+// ---------- сцена: страница останавливается на блоке, пока товары не проедут ----------
+// Блок обычной высоты и не закрепляется. Когда панель доезжает до шапки, колесо и свайп двигают
+// карусель (по товару за шаг), фон идёт от мятного к оранжевому; после последнего товара
+// прокрутка отпускается. Обратно — так же. Наверху страницы карусель листается сама.
 const stageItems = sbStage.map((s) => {
   const item = 'item' in s.to ? sbFind(s.to.item) : undefined
   const to = 'item' in s.to ? sbPath(`/item/${s.to.item}`) : sbCatalogPath(s.to.sec, s.to.sub)
   return { ...s, item, href: to }
 })
 const N = stageItems.length
-const active = ref(0)
+const base = ref(0) // сдвиг от автопрокрутки, точек и свайпа
+const c = ref(0) // сколько товаров проехало за остановку: 0…N-1
+const active = computed(() => (((base.value + c.value) % N) + N) % N)
 const forward = ref(true)
-const p = computed(() => active.value / (N - 1))
-const fact = computed(() => Math.min(sbFacts.length - 1, Math.floor((active.value * sbFacts.length) / N)))
+watch(active, (now, before) => {
+  forward.value = now === (before + 1) % N
+})
+const p = computed(() => c.value / (N - 1))
+const fact = computed(() => Math.min(sbFacts.length - 1, Math.floor((c.value * sbFacts.length) / N)))
 
 const stops = [
   [232, 244, 236],
@@ -38,8 +46,8 @@ const bg = computed(() => {
   const t = p.value * (stops.length - 1)
   const i = Math.min(stops.length - 2, Math.floor(t))
   const f = t - i
-  const c = stops[i].map((v, k) => Math.round(v + (stops[i + 1][k] - v) * f))
-  return `rgb(${c.join(',')})`
+  const col = stops[i].map((v, k) => Math.round(v + (stops[i + 1][k] - v) * f))
+  return `rgb(${col.join(',')})`
 })
 const hot = computed(() => p.value > 0.8)
 
@@ -60,52 +68,91 @@ const itemStyle = (i: number) => {
   }
 }
 
-// Товар = база (автопрокрутка, точки, свайп) + шаги прокрутки страницы: пока блок на экране,
-// каждые ~120 px прокрутки карусель сдвигается на один товар. Блок при этом не закрепляется.
-const stage = ref<HTMLElement | null>(null)
-const base = ref(0)
-const steps = ref(0)
-const setActive = (value: number) => {
-  const nextValue = ((value % N) + N) % N
-  if (nextValue === active.value) return
-  forward.value = nextValue === (active.value + 1) % N
-  active.value = nextValue
-}
 let timer: ReturnType<typeof setInterval> | undefined
 const paused = ref(false)
 const reduced = ref(false)
 const next = () => {
-  // автопрокрутка только пока страница наверху — дальше товары листает сама прокрутка
-  if (paused.value || document.hidden || steps.value > 0) return
+  if (paused.value || document.hidden || c.value > 0) return
   base.value += 1
-  setActive(base.value + steps.value)
 }
 const start = () => {
   clearInterval(timer)
   if (!reduced.value) timer = setInterval(next, 3200)
 }
 const go = (i: number) => {
-  base.value = i - steps.value
-  setActive(i)
+  base.value = i - c.value
   start()
 }
 
-let raf = 0
-const measure = () => {
-  raf = 0
-  const el = stage.value
-  if (!el) return
+// ---------- остановка прокрутки на блоке ----------
+const stage = ref<HTMLElement | null>(null)
+const GAP = 16
+const dist = () => {
+  const panel = stage.value?.querySelector<HTMLElement>('.sb-stage__panel')
+  // высота закреплённой шапки, а не её текущий низ: плашка концепта и объявление над ней
+  // должны уехать, иначе на телефоне сцена встанет, когда панель ещё не помещается на экран
   const head = document.querySelector<HTMLElement>('.sb-header')?.offsetHeight ?? 120
-  const passed = head - el.getBoundingClientRect().top
-  const span = Math.max(1, el.offsetHeight - 160)
-  const step = span / N
-  steps.value = Math.max(0, Math.min(Math.floor(Math.max(0, passed) / step), N * 3))
-  setActive(base.value + steps.value)
+  const gap = window.innerWidth <= 860 ? 8 : GAP
+  return panel ? panel.getBoundingClientRect().top - head - gap : Infinity
 }
+let acc = 0
+let lastStep = 0
+const COOLDOWN = 380
+// Возвращает true, если жест съеден сценой (страница не прокручивается).
+const consume = (delta: number, threshold: number) => {
+  const d = dist()
+  const now = performance.now()
+  const down = delta > 0
+  const finished = down ? c.value >= N - 1 : c.value <= 0
+  if (finished) {
+    // хвост инерции тачпада после последнего товара не должен сразу утащить страницу
+    return Math.abs(d) < 2 && now - lastStep < 450
+  }
+  // подъезжаем к блоку: доводим панель ровно под шапку и встаём
+  if (down ? d > 2 : d < -2) {
+    if (Math.abs(delta) >= Math.abs(d)) {
+      // мгновенно: у сайта глобально scroll-behavior: smooth, плавная доводка спорила бы с колесом
+      window.scrollBy({ top: d, behavior: 'instant' })
+      acc = 0
+      lastStep = now
+      return true
+    }
+    return false
+  }
+  // блок уже проехали в эту сторону (полоса прокрутки, якорь) — не держим
+  if (down ? d < -2 : d > 2) return false
+  acc += delta
+  if (now - lastStep > COOLDOWN && Math.abs(acc) >= threshold) {
+    c.value += down ? 1 : -1
+    lastStep = now
+    acc = 0
+  }
+  return true
+}
+const onWheel = (e: WheelEvent) => {
+  if (reduced.value || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return
+  const delta = e.deltaMode === 1 ? e.deltaY * 40 : e.deltaY
+  if (consume(delta, 30)) e.preventDefault()
+}
+let touchY = 0
+const onPageTouchStart = (e: TouchEvent) => {
+  touchY = e.touches[0].clientY
+}
+const onPageTouchMove = (e: TouchEvent) => {
+  if (reduced.value) return
+  const y = e.touches[0].clientY
+  const delta = touchY - y
+  touchY = y
+  if (delta && consume(delta, 24)) e.preventDefault()
+}
+// прокрутили мимо без колеса (полоса, клавиши, якорь) — состояние сцены по положению страницы
 const onScroll = () => {
-  if (!reduced.value && !raf) raf = requestAnimationFrame(measure)
+  const d = dist()
+  if (d < -40) c.value = N - 1
+  else if (d > 40) c.value = 0
 }
-// свайп по товарам на телефоне
+
+// свайп по товарам вбок
 let touchX = 0
 const onTouchStart = (e: TouchEvent) => {
   touchX = e.touches[0].clientX
@@ -113,18 +160,23 @@ const onTouchStart = (e: TouchEvent) => {
 const onTouchEnd = (e: TouchEvent) => {
   const dx = e.changedTouches[0].clientX - touchX
   if (Math.abs(dx) < 40) return
-  go(dx < 0 ? (active.value + 1) % N : (active.value - 1 + N) % N)
+  go(dx < 0 ? active.value + 1 : active.value - 1)
 }
 onMounted(() => {
   reduced.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   start()
-  measure()
+  onScroll()
+  window.addEventListener('wheel', onWheel, { passive: false })
+  window.addEventListener('touchstart', onPageTouchStart, { passive: true })
+  window.addEventListener('touchmove', onPageTouchMove, { passive: false })
   window.addEventListener('scroll', onScroll, { passive: true })
 })
 onBeforeUnmount(() => {
   clearInterval(timer)
+  window.removeEventListener('wheel', onWheel)
+  window.removeEventListener('touchstart', onPageTouchStart)
+  window.removeEventListener('touchmove', onPageTouchMove)
   window.removeEventListener('scroll', onScroll)
-  if (raf) cancelAnimationFrame(raf)
 })
 
 // ---------- разделы и полки ----------
@@ -190,7 +242,7 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
                   :aria-selected="i === fact"
                   :aria-label="f.big"
                   :class="{ 'is-on': i <= fact }"
-                  @click="go(Math.ceil((i * N) / sbFacts.length))"
+                  @click="c = Math.min(N - 1, Math.ceil((i * N) / sbFacts.length))"
                 />
               </div>
               <div class="sb-stage__actions">
@@ -701,7 +753,9 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
       &__panel {
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: auto minmax(0, 1fr);
-        height: clamp(560px, calc(100svh - 170px), 660px);
+        // между шапкой (64 px + 8) и нижней панелью (~84 px с отступом), чтобы кнопки не уходили под неё
+        height: clamp(400px, calc(100vh - 64px - 8px - 92px), 660px);
+        height: clamp(400px, calc(100svh - 64px - 8px - 92px), 660px);
         border-radius: 28px;
       }
 
@@ -763,7 +817,7 @@ const progress = computed(() => Math.min(1, req.total.value / SB_MIN_ORDER))
       }
 
       &__item {
-        top: 42%;
+        top: 47%;
         width: calc(min(74vw, 340px) * var(--w));
       }
 
