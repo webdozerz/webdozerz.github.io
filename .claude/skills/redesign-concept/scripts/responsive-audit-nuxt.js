@@ -1,18 +1,24 @@
 // Аудит адаптива Nuxt-концепта: тот же набор проверок, что в responsive-audit.js, но
 // одна страница грузится в iframe один раз, а ширина меняется без перезагрузки. На Nuxt dev
-// это в десятки раз быстрее (sanych: 10 страниц × 320–1440 за пару минут).
+// это в десятки раз быстрее. Все страницы грузятся параллельно, ширин по умолчанию 9 —
+// аудит концепта на 10 страниц укладывается в несколько секунд.
 //
 // Запуск (встроенный браузер или chrome-devtools, на любой странице того же origin):
 //   1. скопируй файл в public/__aud.js (после проверки удали);
-//   2. eval(await (await fetch('/__aud.js', {cache: 'reload'})).text())
-//      window.__AUD = { base: '/redesign/<slug>/', pages: ['', 'catalog', 'cart', …], step: 8 }
-//      window.__audit().then(r => window.__RES = r)          // в фоне: долго для одного вызова
-//   3. отдельным вызовом забери JSON.stringify(window.__RES)
+//   2. одним вызовом (укладывается в таймаут 45 с):
+//      eval(await (await fetch('/__aud.js', {cache: 'reload'})).text())
+//      window.__AUD = { base: '/redesign/<slug>/', pages: ['', 'catalog', 'cart', …] }
+//      JSON.stringify(await window.__audit())
+//      ширины по умолчанию — края шкалы брейкпоинтов (см. qa.md); свои: widths: [...],
+//      сплошной проход: from: 320, to: 1440, step: 8 (долгий — тогда в фоне через window.__RES)
 // Селекторы кнопок, строки покупки и шапки — с префиксом концепта: поправь под свой префикс.
 // Ложное срабатывание: text-overflow у кнопки корзины с абсолютным бейджем-счётчиком.
 window.__audit = async () => {
   const base = window.__AUD.base, pages = window.__AUD.pages
-  const from = window.__AUD.from || 320, to = window.__AUD.to || 1440, step = window.__AUD.step || 8
+  const A = window.__AUD, widths = A.widths || (A.step
+    ? Array.from({ length: Math.floor(((A.to || 1440) - (A.from || 320)) / A.step) + 1 }, (_, i) => (A.from || 320) + i * A.step)
+    : [320, 376, 577, 769, 990, 1200, 1401, 1521, 1920])
+  const from = widths[0]
 
   // свежие файлы, а не кеш http.server
 
@@ -20,15 +26,19 @@ window.__audit = async () => {
   const add = (k, v) => { (out[k] = out[k] || new Set()).add(v) }
   const buttons = '.sn-btn, .sn-catbtn, .sn-cartbtn, .sn-seg button, .sn-qty, .snc-side__link, .sn-tabbar__item'
 
-  for (const p of pages) {
+  // все страницы грузятся параллельно: загрузка — самая долгая часть, сами проверки быстрые
+  const frames = await Promise.all(pages.map(p => {
     const f = document.createElement('iframe')
     f.style.cssText = `position:fixed;left:-9999px;top:0;width:${from}px;height:800px;border:0`
     f.src = base + p
     document.body.appendChild(f)
-    const loaded = await new Promise(r => { f.onload = () => r(true); setTimeout(() => r(false), 15000) })
+    return new Promise(r => { f.onload = () => r([p, f, true]); setTimeout(() => r([p, f, false]), 15000) })
+  }))
+  await new Promise(r => setTimeout(r, 1500))                   // гидрация Nuxt
+
+  for (const [p, f, loaded] of frames) {
     if (!loaded) { add('not-loaded ' + p, 0); f.remove(); continue }
-    await new Promise(r => setTimeout(r, 1500))
-    for (let w = from; w <= to; w += step) {
+    for (const w of widths) {
       f.style.width = w + 'px'
       await new Promise(r => setTimeout(r, 60))
       const d = f.contentDocument

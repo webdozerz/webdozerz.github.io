@@ -5,14 +5,15 @@
 // Запуск: chrome-devtools evaluate_script на любой странице того же origin
 // (например http://localhost:4173/<slug>/index.html или https://andryushov.me/redesign/<slug>/).
 // Передай содержимое файла как `function` (или через sourcePath, если путь разрешён).
-// Параметры правь в начале: base, pages, from/to/step.
+// Параметры правь в начале: base, pages, widths.
 // Возвращает 'ok' или объект { 'проблема страница': [ширины или детали] }.
 async () => {
   const base = location.pathname.replace(/[^/]*$/, '')        // папка текущей страницы
   // страницы концепта: все относительные ссылки на .html с текущей страницы (шапка, подвал, таббар)
   const found = [...document.querySelectorAll('a[href$=".html"]')].map(a => a.getAttribute('href')).filter(h => !/^(https?:|\/)/.test(h))
   const pages = [...new Set([location.pathname.split('/').pop() || 'index.html', ...found])]
-  const from = 320, to = 1440, step = 8
+  // края шкалы брейкпоинтов (max-width 375/576/768/989/1199/1400/1520) + 1920, см. qa.md
+  const widths = [320, 376, 577, 769, 990, 1200, 1401, 1521, 1920], from = widths[0]
 
   // свежие файлы, а не кеш http.server
   for (const p of [...pages, 'assets/styles.css', 'assets/app.js']) {
@@ -23,7 +24,7 @@ async () => {
   const add = (k, v) => { (out[k] = out[k] || new Set()).add(v) }
   const buttons = '.btn, .add, .catbtn, .hbtn, .fchip, .subcat, .qty, button'
 
-  for (let w = from; w <= to; w += step) {
+  for (const w of widths) {
     for (const p of pages) {
       const f = document.createElement('iframe')
       f.style.cssText = `position:fixed;left:-9999px;top:0;width:${w}px;height:800px;border:0`
