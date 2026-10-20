@@ -95,25 +95,36 @@ const dist = () => {
   const gap = window.innerWidth <= 860 ? 8 : GAP
   return panel ? panel.getBoundingClientRect().top - head - gap : Infinity
 }
+// Один жест — один товар. Трекпад шлёт поток событий с инерцией, колесо — щелчки подряд:
+// жестом считается серия событий без пауз длиннее GESTURE_GAP (или одно касание пальцем).
+// Внутри жеста карусель сдвигается один раз, остаток жеста гасится; после последнего товара
+// страница отпускается только следующим жестом.
+const GESTURE_GAP = 220
 let acc = 0
 let lastStep = 0
-const COOLDOWN = 380
-// Возвращает true, если жест съеден сценой (страница не прокручивается).
+let lastEvent = 0
+let usedGesture = false
 const consume = (delta: number, threshold: number) => {
-  const d = dist()
   const now = performance.now()
+  if (now - lastEvent > GESTURE_GAP) {
+    usedGesture = false
+    acc = 0
+  }
+  lastEvent = now
+  const d = dist()
   const down = delta > 0
+  const atStop = Math.abs(d) < 2
   const finished = down ? c.value >= N - 1 : c.value <= 0
   if (finished) {
-    // хвост инерции тачпада после последнего товара не должен сразу утащить страницу
-    return Math.abs(d) < 2 && now - lastStep < 450
+    // этот же жест только что довёл карусель до конца — гасим его хвост, отпустит следующий
+    return atStop && usedGesture
   }
   // подъезжаем к блоку: доводим панель ровно под шапку и встаём
   if (down ? d > 2 : d < -2) {
     if (Math.abs(delta) >= Math.abs(d)) {
       // мгновенно: у сайта глобально scroll-behavior: smooth, плавная доводка спорила бы с колесом
       window.scrollBy({ top: d, behavior: 'instant' })
-      acc = 0
+      usedGesture = true
       lastStep = now
       return true
     }
@@ -121,11 +132,13 @@ const consume = (delta: number, threshold: number) => {
   }
   // блок уже проехали в эту сторону (полоса прокрутки, якорь) — не держим
   if (down ? d < -2 : d > 2) return false
-  acc += delta
-  if (now - lastStep > COOLDOWN && Math.abs(acc) >= threshold) {
-    c.value += down ? 1 : -1
-    lastStep = now
-    acc = 0
+  if (!usedGesture) {
+    acc += delta
+    if (Math.abs(acc) >= threshold) {
+      c.value += down ? 1 : -1
+      usedGesture = true
+      lastStep = now
+    }
   }
   return true
 }
@@ -137,17 +150,46 @@ const onWheel = (e: WheelEvent) => {
 let touchY = 0
 const onPageTouchStart = (e: TouchEvent) => {
   touchY = e.touches[0].clientY
+  lastTouch = performance.now()
+  lastEvent = 0 // новое касание — новый жест
 }
 const onPageTouchMove = (e: TouchEvent) => {
   if (reduced.value) return
   const y = e.touches[0].clientY
+  lastTouch = performance.now()
   const delta = touchY - y
   touchY = y
   if (delta && consume(delta, 24)) e.preventDefault()
 }
 // прокрутили мимо без колеса (полоса, клавиши, якорь) — состояние сцены по положению страницы
+// На телефоне после смахивания страница летит по инерции без touchmove и проскакивает блок.
+// Если недавно было касание и прокрутка перескочила точку остановки, а карусель не досмотрена,
+// гасим инерцию и ставим панель обратно под шапку.
+let prevD = Infinity
+let lastTouch = 0
+const stopAt = (d: number) => {
+  const html = document.documentElement
+  html.style.overflow = 'hidden'
+  window.scrollBy({ top: d, behavior: 'instant' })
+  acc = 0
+  lastStep = performance.now()
+  requestAnimationFrame(() => {
+    html.style.overflow = ''
+  })
+}
 const onScroll = () => {
   const d = dist()
+  if (!reduced.value && performance.now() - lastTouch < 2000) {
+    // «было не ниже точки остановки, стало ниже» — в том числе когда уже стояли на ней
+    const crossedDown = prevD > -2 && d < -2 && c.value < N - 1
+    const crossedUp = prevD < 2 && d > 2 && c.value > 0
+    if (crossedDown || crossedUp) {
+      stopAt(d)
+      prevD = 0
+      return
+    }
+  }
+  prevD = d
   if (d < -40) c.value = N - 1
   else if (d > 40) c.value = 0
 }

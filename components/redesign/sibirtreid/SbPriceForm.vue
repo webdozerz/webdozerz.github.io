@@ -66,9 +66,12 @@ const again = () => {
       <defs>
         <path :id="`${uid}-c`" d="M60 60m-44 0a44 44 0 1 1 88 0a44 44 0 1 1-88 0" />
       </defs>
-      <text>
-        <textPath :href="`#${uid}-c`" textLength="272">PRICE LIST · ПРАЙС-ЛИСТ · PRICE LIST ·</textPath>
-      </text>
+      <!-- крутится только кольцо с надписью, листик в центре стоит -->
+      <g class="sb-pform__stamp-ring">
+        <text>
+          <textPath :href="`#${uid}-c`" textLength="272">PRICE LIST · ПРАЙС-ЛИСТ · PRICE LIST ·</textPath>
+        </text>
+      </g>
       <path class="sb-pform__stamp-leaf" d="M60 70V56m0 4c-4 0-9-2-10-8 5 0 9 3 10 8zm0-3c.5-6 4.5-10 10-11 .5 6-3.5 10.5-10 11z" />
     </svg>
     <span class="sb-pform__blob sb-pform__blob--a" aria-hidden="true" />
@@ -256,7 +259,12 @@ const again = () => {
     right: clamp(16px, 3vw, 36px);
     width: clamp(92px, 11vw, 132px);
     height: auto;
-    animation: sb-spin 18s linear infinite;
+
+    &-ring {
+      transform-box: view-box;
+      transform-origin: 60px 60px;
+      animation: sb-spin 18s linear infinite;
+    }
 
     text {
       fill: var(--sb-lime);
@@ -357,7 +365,7 @@ const again = () => {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    &__stamp {
+    &__stamp-ring {
       animation: none;
     }
   }
