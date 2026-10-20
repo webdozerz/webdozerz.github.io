@@ -22,3 +22,9 @@ logs
 .env
 .env.*
 !.env.example
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
+
+# Redesign concept working materials (recon brief, scraped data)
+/.redesign/
