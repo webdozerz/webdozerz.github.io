@@ -1,739 +1,790 @@
 <script lang="ts" setup>
-import ProductCard from '~/components/redesign/foodgood/ProductCard.vue'
-import SectionHead from '~/components/redesign/foodgood/SectionHead.vue'
-import Messengers from '~/components/redesign/foodgood/Messengers.vue'
-import AddToCart from '~/components/redesign/foodgood/AddToCart.vue'
+import FgCard from '~/components/redesign/foodgood/FgCard.vue'
+import FgSearch from '~/components/redesign/foodgood/FgSearch.vue'
+import FgMessengers from '~/components/redesign/foodgood/FgMessengers.vue'
+import FgShelf from '~/components/redesign/foodgood/FgShelf.vue'
 
-useSeoMeta({ title: 'FoodGood Tomsk | Магазин здоровой еды' })
+const cart = useFoodgoodCart()
 
-const featured = fgProducts.filter((p) => p.collection === 'in-stock').slice(0, 8)
-const honey = fgProducts.find((p) => p.collection === 'sale')!
-const gifts = fgProducts.filter((p) => p.collection === 'gift')
+useSeoMeta({
+  title: 'FoodGood Tomsk | Магазин здоровой еды · концепт редизайна',
+  ogTitle: 'FoodGood Tomsk — концепт редизайна',
+  ogDescription:
+    'Магазин здоровой еды в Томске: ягоды и фрукты прямыми поставками, рыба, дичь, домашние полуфабрикаты. Каталог, поиск, корзина и заказ в мессенджер.',
+  ogImage: '/redesign/foodgood/og.jpg',
+})
 
-const perks = ['Фермерская продукция', 'Лучшее качество', 'Доставка по Томску и Северску']
+const season = fgSeason.map((id) => fgFindProduct(id)!)
+const fish = fgOf('fish').slice(0, 10)
+const ready = fgOf('ready').slice(0, 10)
+const honey = fgSale()[0]!
+const gifts = fgOf('gift')
 
-const tiles = [
-  {
-    to: fgPath('/schedule'),
-    title: 'График работы',
-    text: 'Ежедневно с 11:00 до 20:00',
-    tone: 'leaf',
-    icon: 'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
-  },
-  {
-    to: fgPath('/reviews'),
-    title: 'Фото-отзывы',
-    text: 'Скидка 10% за ваш отзыв',
-    tone: 'berry',
-    icon: 'M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z',
-  },
-  {
-    to: fgPath('/contacts'),
-    title: 'Контакты',
-    text: 'Герцена 78/1, Томск',
-    tone: 'honey',
-    icon: 'M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
-  },
+const facts = [
+  { title: 'Доставка сегодня', text: 'если заказать до 18:00' },
+  { title: 'Бесплатно от\u00a05\u00a0000\u00a0₽', text: 'по Томску, иначе 300 ₽' },
+  { title: 'Самовывоз', text: 'Герцена 78/1, 11:00–20:00' },
 ]
 </script>
 
 <template>
   <div>
-    <!-- Hero -->
-    <section class="hero">
-      <div class="fg-container hero__grid">
-        <div class="hero__copy">
-          <ul class="hero__perks">
-            <li v-for="perk in perks" :key="perk">{{ perk }}</li>
-          </ul>
-          <h1 class="hero__title">
-            Магазин здоровой еды <em>с доставкой</em> на дом
-          </h1>
-          <p class="hero__lead">
-            Прямые поставки клубники, других ягод и фруктов из Кыргызстана, Казахстана, Белоруссии,
-            Крыма и Кубани. Фермерское мясо, рыба и икра.
-          </p>
-          <div class="hero__cta">
-            <NuxtLink :to="fgPath('/catalog')" class="btn btn--primary">Оформить заказ</NuxtLink>
-            <NuxtLink :to="fgPath('/catalog/sale')" class="btn btn--ghost">Скидки до 50%</NuxtLink>
-          </div>
-        </div>
-
-        <div class="hero__media">
-          <div class="hero__photo">
-            <img :src="fgImages.hero" alt="Свежая клубника в миске" />
-          </div>
-          <div class="hero__float">
-            <strong>Заказ на сегодня</strong>
-            <span>принимаем до 18:00</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Условия -->
-    <section class="facts fg-container">
-      <div class="fact">
-        <div class="fact__title">Доставка в день заказа</div>
-        <p>Заказы на доставку на текущий день принимаются до 18:00.</p>
-      </div>
-      <div class="fact">
-        <div class="fact__title">Самовывоз</div>
-        <p>Томск, ул. Герцена 78/1, ежедневно с 11:00 до 20:00.</p>
-      </div>
-      <div class="fact">
-        <div class="fact__title">Доставка по Томску</div>
-        <p>300 ₽, а на заказы от 5 000 ₽ бесплатно.</p>
-      </div>
-    </section>
-
-    <!-- В наличии -->
-    <section class="block fg-container">
-      <SectionHead
-        eyebrow="Продукция в наличии"
-        title="Что сейчас на витрине"
-        :to="fgPath('/catalog/in-stock')"
-        link-label="Весь каталог"
-      />
-      <div class="grid">
-        <ProductCard v-for="p in featured" :key="p.id" :product="p" />
-      </div>
-    </section>
-
-    <!-- Скидки -->
-    <section class="block fg-container">
-      <SectionHead eyebrow="Акции" title="Скидки до 50%" :to="fgPath('/discounts')" link-label="Все условия" />
-      <div class="promo">
-        <article class="promo__honey">
-          <img :src="honey.image" :alt="honey.name" loading="lazy" />
-          <div class="promo__honey-body">
-            <span class="promo__tag">−40%</span>
-            <h3>{{ honey.name }}</h3>
-            <div class="promo__prices">
-              <span>{{ fgFormatPrice(honey.price) }}</span>
-              <s>{{ fgFormatPrice(honey.oldPrice!) }}</s>
-            </div>
-            <AddToCart :product-id="honey.id" />
-          </div>
-        </article>
-        <article class="promo__card promo__card--leaf">
-          <div class="promo__big">3% и 5%</div>
-          <h3>Система лояльности</h3>
-          <p>
-            Скидка 3% после 25 000 ₽ покупок и 5% после 35 000 ₽. Просто назовите телефон на кассе.
-          </p>
-        </article>
-        <article class="promo__card promo__card--berry">
-          <div class="promo__big">−10%</div>
-          <h3>За фото-отзыв</h3>
-          <p>Оставьте фото-отзыв на любой площадке и получите скидку 10% на следующий заказ.</p>
-        </article>
-      </div>
-    </section>
-
-    <!-- Сертификаты -->
-    <section class="gift">
-      <div class="fg-container gift__inner">
-        <div class="gift__copy">
-          <div class="gift__eyebrow">Подарочные сертификаты</div>
-          <h2>Подарок, который выберут сами</h2>
-          <p>
-            Сертификат на 3 000 или 5 000 ₽ с тематической открыткой. Бесплатная доставка, если
-            нужно привезти.
-          </p>
-          <NuxtLink :to="fgPath('/catalog/gift')" class="btn btn--light">Выбрать сертификат</NuxtLink>
-        </div>
-        <div class="gift__cards">
+    <section class="fg-wrap hero">
+      <div class="hero__panel">
+        <h1>Магазин здоровой еды в&nbsp;Томске</h1>
+        <p class="hero__lead">
+          Прямые поставки ягод и фруктов из Кыргызстана, Казахстана, Белоруссии, Крыма и Кубани.
+          Фермерское мясо, рыба, дичь и домашние полуфабрикаты.
+        </p>
+        <FgSearch big class="hero__search" />
+        <p class="hero__popular">
+          Часто ищут:
           <NuxtLink
-            v-for="g in gifts"
-            :key="g.id"
-            :to="fgPath(`/product/${g.id}`)"
-            class="gift__card"
-          >
-            <img :src="g.image" :alt="g.name" loading="lazy" />
-            <span>{{ fgFormatPrice(g.price) }}</span>
-          </NuxtLink>
+            v-for="q in fgPopularQueries"
+            :key="q"
+            :to="{ path: fgPath('/catalog'), query: { q } }"
+          >{{ q }}</NuxtLink>
+        </p>
+        <ul class="hero__facts">
+          <li v-for="f in facts" :key="f.title">
+            <strong>{{ f.title }}</strong>
+            <span>{{ f.text }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="season">
+        <div class="season__head">
+          <h2>Сейчас в сезоне</h2>
+          <NuxtLink :to="fgPath('/catalog/fruit')" class="fg-link">Все фрукты</NuxtLink>
+        </div>
+        <div class="season__grid">
+          <article v-for="p in season" :key="p.id" class="season__tile">
+            <NuxtLink :to="fgPath(`/product/${p.id}`)" class="season__photo" tabindex="-1" aria-hidden="true">
+              <img :src="p.image" alt="" />
+            </NuxtLink>
+            <div class="season__plate">
+              <NuxtLink :to="fgPath(`/product/${p.id}`)" class="season__name">{{ p.name }}</NuxtLink>
+              <div class="season__row">
+                <span>
+                  <strong class="fg-price">{{ fgFormatPrice(p.price) }}</strong>
+                  <small>{{ p.pack }}</small>
+                </span>
+                <button
+                  type="button"
+                  class="season__add"
+                  :class="{ 'is-in': cart.qtyOf(p.id) }"
+                  :aria-label="`В корзину: ${p.name}`"
+                  @click="cart.add(p.id)"
+                >
+                  <span v-if="cart.qtyOf(p.id)">{{ cart.qtyOf(p.id) }}</span>
+                  <svg v-else viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                    <path d="M12 6v12M6 12h12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </article>
         </div>
       </div>
     </section>
 
-    <!-- Доставка -->
-    <section class="block fg-container">
-      <SectionHead eyebrow="Стоимость доставки" title="Куда и сколько" />
-      <div class="zones">
-        <article v-for="z in fgDelivery" :key="z.id" class="zone">
-          <div class="zone__price">{{ z.price ? fgFormatPrice(z.price) : 'Бесплатно' }}</div>
-          <h3>{{ z.title }}</h3>
-          <p>{{ z.hint }}</p>
-        </article>
+    <section class="fg-wrap fg-section">
+      <div class="fg-head">
+        <h2>Каталог</h2>
+        <NuxtLink :to="fgPath('/catalog')" class="fg-link">Все {{ fgProducts.length }} товаров</NuxtLink>
       </div>
-    </section>
-
-    <!-- Плитки -->
-    <section class="block fg-container">
-      <div class="tiles">
-        <NuxtLink
-          v-for="t in tiles"
-          :key="t.to"
-          :to="t.to"
-          class="tile"
-          :class="`tile--${t.tone}`"
-        >
-          <span class="tile__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path :d="t.icon" />
-            </svg>
+      <div class="cats">
+        <NuxtLink v-for="c in fgCategories" :key="c.id" :to="fgPath(`/catalog/${c.id}`)" class="cats__item">
+          <span class="cats__text">
+            <strong>{{ c.title }}</strong>
+            <small>{{ fgGoods(fgOf(c.id).length) }}</small>
           </span>
-          <span class="tile__text">
-            <strong>{{ t.title }}</strong>
-            <span>{{ t.text }}</span>
-          </span>
-          <span class="tile__arrow" aria-hidden="true">→</span>
+          <img :src="c.cover" alt="" loading="lazy" />
         </NuxtLink>
       </div>
     </section>
 
-    <!-- Мессенджеры -->
-    <section class="block fg-container">
-      <div class="contact-cta">
-        <div>
-          <h2>Напишите нам</h2>
-          <p>Ответим в мессенджере и поможем собрать заказ.</p>
-        </div>
-        <Messengers />
+    <FgShelf title="Рыба и морепродукты" :to="fgPath('/catalog/fish')">
+      <FgCard v-for="p in fish" :key="p.id" :product="p" />
+    </FgShelf>
+
+    <section class="fg-wrap fg-section">
+      <div class="fg-head">
+        <h2>Скидки до 50%</h2>
+        <NuxtLink :to="fgPath('/discounts')" class="fg-link">Все условия</NuxtLink>
+      </div>
+      <div class="deals">
+        <NuxtLink :to="fgPath(`/product/${honey.id}`)" class="deals__honey">
+          <img :src="honey.image" :alt="honey.name" loading="lazy" />
+          <span class="deals__body">
+            <span class="deals__tag">−{{ fgDiscount(honey) }}%</span>
+            <strong>{{ honey.name }}</strong>
+            <span class="deals__prices">
+              <b class="fg-price">{{ fgFormatPrice(honey.price) }}</b>
+              <s class="fg-price">{{ fgFormatPrice(honey.oldPrice!) }}</s>
+              <small>{{ honey.pack }}</small>
+            </span>
+          </span>
+        </NuxtLink>
+        <NuxtLink :to="fgPath('/discounts')" class="deals__card">
+          <span class="deals__big">3% → 5%</span>
+          <strong>Накопительная скидка</strong>
+          <span>3% после покупок на 25 000 ₽, 5% — после 35 000 ₽. Назовите телефон на кассе.</span>
+        </NuxtLink>
+        <NuxtLink :to="fgPath('/reviews')" class="deals__card">
+          <span class="deals__big">−10%</span>
+          <strong>За фото-отзыв</strong>
+          <span>Оставьте отзыв с фото в 2ГИС, ВКонтакте или Instagram — скидка на следующий заказ.</span>
+        </NuxtLink>
+      </div>
+    </section>
+
+    <FgShelf title="Домашние полуфабрикаты" :to="fgPath('/catalog/ready')">
+      <FgCard v-for="p in ready" :key="p.id" :product="p" />
+    </FgShelf>
+
+    <section class="fg-wrap fg-section order">
+      <div class="order__photo">
+        <img :src="fgImages.store" alt="Магазин FoodGood на Герцена" loading="lazy" />
+      </div>
+      <div class="order__body">
+        <h2>Удобнее в мессенджере? Пишите</h2>
+        <p>
+          Соберём заказ по списку, подскажем, что пришло в свежей поставке, и добавим в группу
+          для заказа в WhatsApp. Корзина на сайте тоже умеет отправить заказ сообщением.
+        </p>
+        <FgMessengers />
+        <dl class="order__info">
+          <div>
+            <dt>Магазин</dt>
+            <dd>{{ fgContacts.address }}, {{ fgContacts.addressNote }}</dd>
+          </div>
+          <div>
+            <dt>Ежедневно</dt>
+            <dd>11:00–20:00</dd>
+          </div>
+          <div>
+            <dt>Телефон</dt>
+            <dd><a :href="fgContacts.phoneHref">{{ fgContacts.phone }}</a></dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="fg-wrap fg-section gift">
+      <div class="gift__text">
+        <h2>Подарочный сертификат</h2>
+        <p>
+          На 3 000 или 5 000 ₽ с тематической открыткой. Действует 6 месяцев на любую продукцию из
+          наличия. Доставим бесплатно, если нужно.
+        </p>
+      </div>
+      <div class="gift__list">
+        <NuxtLink v-for="g in gifts" :key="g.id" :to="fgPath(`/product/${g.id}`)" class="gift__item">
+          <img :src="g.image" :alt="g.name" loading="lazy" />
+          <strong class="fg-price">{{ fgFormatPrice(g.price) }}</strong>
+        </NuxtLink>
       </div>
     </section>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 52px;
-  padding: 0 28px;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 16px;
-  transition: transform 0.15s, background 0.15s;
-
-  &:hover {
-    transform: translateY(-2px);
-  }
-
-  &--primary {
-    background: var(--fg-leaf);
-    color: #fff;
-
-    &:hover {
-      background: #4a8b2d;
-    }
-  }
-
-  &--ghost {
-    border: 2px solid var(--fg-forest);
-    color: var(--fg-forest);
-  }
-
-  &--light {
-    background: #fff;
-    color: var(--fg-forest);
-  }
-}
-
-.block {
-  margin-top: 88px;
-}
-
-// ---------- hero ----------
 .hero {
-  padding: 48px 0 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 20px;
 
-  &__grid {
-    display: grid;
-    grid-template-columns: 1.05fr 1fr;
-    align-items: center;
-    gap: 48px;
-  }
-
-  &__perks {
+  &__panel {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 0 0 22px;
-    padding: 0;
-    list-style: none;
+    flex-direction: column;
+    padding: clamp(24px, 4vw, 48px);
+    border-radius: 28px;
+    background: var(--fg-sage);
 
-    li {
-      padding: 6px 14px;
-      border-radius: 999px;
-      background: var(--fg-leaf-soft);
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--fg-forest);
-    }
-  }
-
-  &__title {
-    font-size: clamp(38px, 6vw, 68px);
-
-    em {
-      font-style: italic;
-      color: var(--fg-leaf);
+    h1 {
+      max-width: 560px;
+      font-size: clamp(36px, 5vw, 60px);
+      line-height: 1.02;
+      letter-spacing: -0.03em;
     }
   }
 
   &__lead {
     max-width: 520px;
-    margin-top: 20px;
-    font-size: 18px;
+    margin-top: 16px;
     color: var(--fg-muted);
+    font-size: 18px;
   }
 
-  &__cta {
+  &__search {
+    margin-top: 28px;
+  }
+
+  &__popular {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 32px;
-  }
-
-  &__media {
-    position: relative;
-
-  }
-
-  // На исходном фото внизу есть красная надпись, поэтому приближаем кадр от верхнего края
-  // и обрезаем нижнюю часть.
-  &__photo {
-    overflow: hidden;
-    aspect-ratio: 4 / 4.4;
-    border-radius: 200px 200px 28px 28px;
-    box-shadow: var(--fg-shadow);
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: 50% 0;
-      transform: scale(1.3);
-      transform-origin: 50% 0;
-    }
-  }
-
-  &__float {
-    position: absolute;
-    left: -20px;
-    bottom: 28px;
-    display: flex;
-    flex-direction: column;
-    padding: 14px 20px;
-    border-radius: 16px;
-    background: var(--fg-paper);
-    box-shadow: var(--fg-shadow);
-    font-size: 14px;
-
-    strong {
-      color: var(--fg-forest);
-    }
-    span {
-      color: var(--fg-muted);
-    }
-  }
-}
-
-// ---------- факты ----------
-.facts {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-top: 40px;
-}
-
-.fact {
-  padding: 22px 24px;
-  border-radius: var(--fg-radius);
-  background: var(--fg-paper);
-  border: 1px solid var(--fg-line);
-
-  &__title {
-    margin-bottom: 6px;
-    font-weight: 800;
-    color: var(--fg-forest);
-  }
-
-  p {
-    font-size: 14px;
+    gap: 4px 12px;
+    margin-top: 12px;
     color: var(--fg-muted);
-  }
-}
+    font-size: 15px;
 
-// ---------- сетка товаров ----------
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-}
+    a {
+      color: var(--fg-ink);
+      text-decoration: underline;
+      text-decoration-color: #b9c8b5;
+      text-underline-offset: 4px;
 
-// ---------- акции ----------
-.promo {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr 1fr;
-  gap: 20px;
-
-  &__honey {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    overflow: hidden;
-    border-radius: var(--fg-radius);
-    background: var(--fg-paper);
-    border: 1px solid var(--fg-line);
-
-    img {
-      width: 100%;
-      height: 100%;
-      min-height: 260px;
-      object-fit: cover;
-    }
-  }
-
-  &__honey-body {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 14px;
-    padding: 24px;
-
-    h3 {
-      font-size: 22px;
-    }
-  }
-
-  &__tag {
-    align-self: flex-start;
-    padding: 4px 12px;
-    border-radius: 999px;
-    background: var(--fg-berry);
-    color: #fff;
-    font-weight: 800;
-    font-size: 13px;
-  }
-
-  &__prices {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-
-    span {
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--fg-forest);
-    }
-    s {
-      color: var(--fg-muted);
-    }
-  }
-
-  &__card {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 28px;
-    border-radius: var(--fg-radius);
-
-    h3 {
-      font-size: 24px;
-    }
-    p {
-      font-size: 15px;
-    }
-
-    &--leaf {
-      background: var(--fg-leaf-soft);
-    }
-    &--berry {
-      background: var(--fg-berry-soft);
-
-      .promo__big {
-        color: var(--fg-berry);
+      &:hover {
+        color: var(--fg-leaf);
       }
     }
   }
 
-  &__big {
-    font-family: var(--fg-serif);
-    font-size: 52px;
-    font-weight: 700;
-    line-height: 1;
-    color: var(--fg-leaf);
+  &__facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: auto;
+    padding-top: 32px;
+
+    li {
+      display: grid;
+      gap: 2px;
+      padding-top: 14px;
+      border-top: 1px solid var(--fg-sage-2);
+      line-height: 1.3;
+    }
+
+    strong {
+      font-weight: 600;
+    }
+
+    span {
+      color: var(--fg-muted);
+      font-size: 14px;
+    }
   }
 }
 
-// ---------- сертификаты ----------
-.gift {
-  margin-top: 88px;
-  padding: 64px 0;
-  background: var(--fg-forest);
-  color: #cfe0c2;
+.season {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 
-  &__inner {
+  &__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 4px 0;
+
+    h2 {
+      font-size: 22px;
+    }
+  }
+
+  &__grid {
+    flex: 1;
     display: grid;
-    grid-template-columns: 1.1fr 1fr;
-    align-items: center;
-    gap: 48px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
 
-  &__eyebrow {
-    margin-bottom: 10px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--fg-honey);
-  }
-
-  h2 {
-    color: #fff;
-    font-size: clamp(30px, 4vw, 44px);
-  }
-
-  p {
-    max-width: 440px;
-    margin: 16px 0 28px;
-    font-size: 17px;
-  }
-
-  &__cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  &__card {
+  &__tile {
     position: relative;
-    display: block;
+    min-height: 250px;
     overflow: hidden;
-    border-radius: var(--fg-radius);
-    aspect-ratio: 1;
-    transition: transform 0.2s;
+    border-radius: 22px;
+    background: var(--fg-sage);
+  }
 
-    &:nth-child(2) {
-      transform: translateY(24px);
-    }
-    &:hover {
-      transform: translateY(-4px);
-    }
-    &:nth-child(2):hover {
-      transform: translateY(20px);
-    }
+  &__photo {
+    position: absolute;
+    inset: 0;
 
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transition: transform 0.3s;
     }
+
+    &:hover img {
+      transform: scale(1.04);
+    }
+  }
+
+  &__plate {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    padding: 10px 10px 10px 12px;
+    border-radius: 14px;
+    background: #fff;
+  }
+
+  &__name {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    font-size: 15px;
+    line-height: 1.3;
+
+    &:hover {
+      color: var(--fg-leaf);
+    }
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 4px;
 
     span {
-      position: absolute;
-      left: 12px;
-      bottom: 12px;
-      padding: 6px 14px;
-      border-radius: 999px;
-      background: #fff;
-      color: var(--fg-forest);
-      font-weight: 800;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0 6px;
+      min-width: 0;
+    }
+
+    strong {
+      font-size: 19px;
+      font-weight: 600;
+    }
+
+    small {
+      color: var(--fg-muted);
+      font-size: 13px;
+    }
+  }
+
+  &__add {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--fg-leaf-soft);
+    font-weight: 600;
+    transition:
+      background-color 0.15s,
+      color 0.15s;
+
+    &:hover,
+    &.is-in {
+      background: var(--fg-leaf);
+      color: #fff;
     }
   }
 }
 
-// ---------- доставка ----------
-.zones {
+.cats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 
-.zone {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 24px;
-  border-radius: var(--fg-radius);
-  background: var(--fg-paper);
-  border: 1px solid var(--fg-line);
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 112px;
+    padding: 12px 12px 12px 20px;
+    border-radius: 20px;
+    background: var(--fg-sage);
+    transition: background-color 0.15s;
 
-  &__price {
-    font-family: var(--fg-serif);
-    font-size: 30px;
-    font-weight: 700;
-    color: var(--fg-leaf);
-  }
+    &:hover {
+      background: var(--fg-sage-2);
 
-  h3 {
-    font-size: 19px;
-  }
+      img {
+        transform: scale(1.04);
+      }
+    }
 
-  p {
-    font-size: 14px;
-    color: var(--fg-muted);
-  }
-}
-
-// ---------- плитки ----------
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-.tile {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 28px;
-  border-radius: var(--fg-radius);
-  transition: transform 0.2s, box-shadow 0.2s;
-
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--fg-shadow);
-  }
-
-  &--leaf {
-    background: var(--fg-leaf-soft);
-    --accent: var(--fg-leaf);
-  }
-  &--berry {
-    background: var(--fg-berry-soft);
-    --accent: var(--fg-berry);
-  }
-  &--honey {
-    background: #faefd5;
-    --accent: #c98a14;
-  }
-
-  &__icon {
-    display: grid;
-    flex-shrink: 0;
-    place-items: center;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: #fff;
-    color: var(--accent);
-
-    svg {
-      width: 28px;
-      height: 28px;
+    img {
+      width: 88px;
+      height: 88px;
+      flex-shrink: 0;
+      border-radius: 14px;
+      object-fit: cover;
+      transition: transform 0.3s;
     }
   }
 
   &__text {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
+    display: grid;
     gap: 2px;
     min-width: 0;
 
     strong {
-      font-family: var(--fg-serif);
-      font-size: 22px;
-      color: var(--fg-forest);
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.2;
     }
-    span {
+
+    small {
+      color: var(--fg-muted);
       font-size: 14px;
+    }
+  }
+}
+
+
+.deals {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 12px;
+
+  &__honey {
+    display: flex;
+    gap: 20px;
+    padding: 12px;
+    border-radius: 22px;
+    background: var(--fg-sale-soft);
+
+    img {
+      width: 46%;
+      aspect-ratio: 1;
+      border-radius: 16px;
+      object-fit: cover;
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 8px 8px 0;
+
+    strong {
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+  }
+
+  &__tag {
+    padding: 2px 10px;
+    border-radius: 8px;
+    background: var(--fg-sale);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  &__prices {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    margin-top: auto;
+
+    b {
+      color: var(--fg-sale-d);
+      font-size: 26px;
+      font-weight: 600;
+    }
+
+    s,
+    small {
+      color: var(--fg-muted);
+    }
+
+    small {
+      width: 100%;
+      font-size: 14px;
+    }
+  }
+
+  &__card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 24px;
+    border-radius: 22px;
+    background: var(--fg-sage);
+    transition: background-color 0.15s;
+
+    &:hover {
+      background: var(--fg-sage-2);
+    }
+
+    strong {
+      font-size: 19px;
+      font-weight: 600;
+    }
+
+    > span:last-child {
       color: var(--fg-muted);
     }
   }
 
-  &__arrow {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--accent);
-    transition: transform 0.2s;
-  }
-
-  &:hover &__arrow {
-    transform: translateX(4px);
+  &__big {
+    margin-bottom: auto;
+    padding-bottom: 20px;
+    color: var(--fg-leaf);
+    font-size: 40px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
   }
 }
 
-// ---------- мессенджеры ----------
-.contact-cta {
-  display: flex;
+.order {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+  gap: 16px;
+
+  &__photo img {
+    width: 100%;
+    height: 100%;
+    min-height: 280px;
+    max-height: 520px;
+    border-radius: 22px;
+    object-fit: cover;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: clamp(24px, 4vw, 44px);
+    border-radius: 22px;
+    background: var(--fg-sage);
+
+    h2 {
+      font-size: clamp(26px, 3vw, 34px);
+    }
+
+    > p {
+      max-width: 520px;
+      color: var(--fg-muted);
+    }
+  }
+
+  &__info {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: auto;
+    padding-top: 12px;
+
+    div {
+      padding-top: 12px;
+      border-top: 1px solid var(--fg-sage-2);
+    }
+
+    dt {
+      color: var(--fg-muted);
+      font-size: 14px;
+    }
+
+    dd {
+      font-weight: 500;
+      line-height: 1.35;
+    }
+  }
+}
+
+.gift {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
   gap: 24px;
-  padding: 36px;
+  padding: clamp(20px, 3vw, 32px);
   border-radius: 28px;
-  background: var(--fg-leaf-soft);
+  box-shadow: inset 0 0 0 1px var(--fg-line);
 
-  h2 {
-    font-size: 32px;
+  &__text {
+    h2 {
+      font-size: clamp(26px, 3vw, 34px);
+    }
+
+    p {
+      max-width: 460px;
+      margin-top: 12px;
+      color: var(--fg-muted);
+    }
   }
-  p {
-    margin-top: 6px;
-    color: var(--fg-muted);
+
+  &__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  &__item {
+    display: grid;
+    gap: 8px;
+
+    img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border-radius: 16px;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+
+    &:hover img {
+      transform: scale(1.03);
+    }
+
+    strong {
+      font-size: 20px;
+      font-weight: 600;
+    }
   }
 }
 
-// ---------- адаптив ----------
-@media (max-width: 1000px) {
-  .grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .promo {
+@media (max-width: 1100px) {
+  .deals {
     grid-template-columns: 1fr 1fr;
 
     &__honey {
       grid-column: 1 / -1;
     }
   }
-  .zones {
-    grid-template-columns: repeat(2, 1fr);
+}
+
+@media (max-width: 960px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .cats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  // 9 разделов в две колонки: последний — на всю ширину, без «сироты»
+  .cats__item:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .season__tile {
+    min-height: 0;
+    aspect-ratio: 1;
+  }
+
+  .order,
+  .gift {
+    grid-template-columns: 1fr;
+  }
+
+  .order__photo img {
+    max-height: 320px;
   }
 }
 
 @media (max-width: 860px) {
-  .hero__grid,
-  .gift__inner {
-    grid-template-columns: 1fr;
-    gap: 32px;
+  .hero__search {
+    display: none;
   }
-  .hero__float {
-    left: 12px;
-  }
-  .facts,
-  .tiles {
-    grid-template-columns: 1fr;
-  }
-  .gift__card:nth-child(2) {
-    transform: none;
+
+  .hero__popular {
+    margin-top: 20px;
   }
 }
 
-@media (max-width: 640px) {
-  .block {
-    margin-top: 64px;
-  }
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-  .promo {
+@media (max-width: 760px) {
+  .hero__facts,
+  .order__info {
     grid-template-columns: 1fr;
+    gap: 0;
 
-    &__honey {
-      grid-template-columns: 1fr;
+    li,
+    div {
+      padding: 10px 0;
     }
   }
-  .zones {
+
+  .deals {
     grid-template-columns: 1fr;
+
+    &__honey img {
+      width: 40%;
+    }
   }
-  .contact-cta {
-    padding: 24px;
+}
+
+@media (max-width: 560px) {
+  .hero {
+    margin-top: 12px;
+  }
+
+  .season__grid {
+    gap: 8px;
+  }
+
+  .season__plate {
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
+    padding: 8px 8px 8px 10px;
+  }
+
+  .season__name {
+    font-size: 14px;
+  }
+
+  .season__row strong {
+    font-size: 17px;
+  }
+
+  .season__row small {
+    display: none;
+  }
+
+  .season__add {
+    width: 36px;
+    height: 36px;
+  }
+
+  .cats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .cats__item {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 10px;
+    min-height: 0;
+    padding: 10px 10px 14px;
+    border-radius: 18px;
+
+    img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 10;
+      border-radius: 12px;
+    }
+  }
+
+  .cats__text strong {
+    font-size: 16px;
+  }
+
+  .cats__item:last-child {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 10px 10px 14px;
+
+    img {
+      width: 72px;
+      aspect-ratio: 1;
+    }
   }
 }
 </style>

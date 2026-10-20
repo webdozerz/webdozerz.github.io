@@ -1,77 +1,114 @@
 <script lang="ts" setup>
-import AddToCart from '~/components/redesign/foodgood/AddToCart.vue'
-import ProductCard from '~/components/redesign/foodgood/ProductCard.vue'
-import SectionHead from '~/components/redesign/foodgood/SectionHead.vue'
+import FgCard from '~/components/redesign/foodgood/FgCard.vue'
+import FgBuy from '~/components/redesign/foodgood/FgBuy.vue'
 
 const route = useRoute()
-const product = fgFindProduct(route.params.id as string)
-if (!product) {
+const product = computed(() => fgFindProduct(String(route.params.id)))
+
+if (!product.value) {
   throw createError({ statusCode: 404, statusMessage: 'Товар не найден', fatal: true })
 }
 
-const related = fgProducts.filter((p) => p.kind === product.kind && p.id !== product.id).slice(0, 4)
-const fallback = fgProducts.filter((p) => p.id !== product.id && p.collection === 'in-stock').slice(0, 4)
-const more = related.length ? related : fallback
+const p = computed(() => product.value!)
+const category = computed(() => fgCategoryOf(p.value.category))
+const discount = computed(() => fgDiscount(p.value))
+const similar = computed(() => fgOf(p.value.category).filter((x) => x.id !== p.value.id).slice(0, 5))
+const isGift = computed(() => p.value.category === 'gift')
 
-useSeoMeta({ title: `${product.name} | FoodGood Tomsk` })
+const today = ref<{ today: boolean; text: string } | null>(null)
+onMounted(() => (today.value = fgTodayLabel()))
+
+useSeoMeta({ title: () => `${p.value.name} | FoodGood Tomsk` })
 </script>
 
 <template>
-  <div v-if="product" class="fg-container product">
-    <nav class="crumbs" aria-label="Навигация">
+  <div class="fg-wrap">
+    <nav class="fg-crumbs crumbs" aria-label="Навигация">
       <NuxtLink :to="fgPath()">Главная</NuxtLink>
-      <span>/</span>
+      <span aria-hidden="true">/</span>
       <NuxtLink :to="fgPath('/catalog')">Каталог</NuxtLink>
-      <span>/</span>
-      <span>{{ product.kind }}</span>
+      <span aria-hidden="true">/</span>
+      <NuxtLink :to="fgPath(`/catalog/${category.id}`)">{{ category.short }}</NuxtLink>
     </nav>
 
-    <div class="product__grid">
-      <div class="product__media">
-        <img :src="product.image" :alt="product.name" />
-        <span v-if="product.oldPrice" class="product__badge">
-          −{{ Math.round((1 - product.price / product.oldPrice) * 100) }}%
-        </span>
+    <div class="item">
+      <div class="item__photo">
+        <img :src="p.image" :alt="p.name" />
+        <span v-if="discount" class="item__sale">−{{ discount }}%</span>
       </div>
 
-      <div class="product__info">
-        <span class="product__kind">{{ product.kind }}</span>
-        <h1>{{ product.name }}</h1>
-
-        <div class="product__price">
-          <span class="product__now">{{ fgFormatPrice(product.price) }}</span>
-          <s v-if="product.oldPrice">{{ fgFormatPrice(product.oldPrice) }}</s>
-          <span v-if="product.priceNote" class="product__note">{{ product.priceNote }}</span>
-        </div>
-
-        <p class="product__lead">{{ product.lead }}</p>
-
-        <div class="product__buy">
-          <AddToCart :product-id="product.id" large />
-          <NuxtLink :to="fgPath('/cart')" class="product__cart">Перейти в корзину</NuxtLink>
-        </div>
-
-        <dl class="product__details">
-          <div v-for="d in product.details" :key="d.label">
-            <dt>{{ d.label }}</dt>
-            <dd>{{ d.value }}</dd>
-          </div>
-        </dl>
-
-        <p v-if="product.note" class="product__fine">{{ product.note }}</p>
-
-        <ul class="product__perks">
-          <li>Заказ на сегодня до 18:00</li>
-          <li>Самовывоз: Герцена 78/1</li>
-          <li>Доставка по Томску 300 ₽, от 5 000 ₽ бесплатно</li>
+      <div class="item__info">
+        <h1>{{ p.name }}</h1>
+        <ul class="item__meta">
+          <li>{{ p.pack }}</li>
+          <li v-if="p.origin">
+            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+              <path d="M12 21s-6.5-5.4-6.5-10.5a6.5 6.5 0 0 1 13 0C18.5 15.6 12 21 12 21z" />
+            </svg>
+            {{ p.origin }}
+          </li>
+          <li class="item__stock">В наличии</li>
         </ul>
+
+        <div class="item__buybox">
+          <div class="item__price">
+            <strong class="fg-price" :class="{ 'is-sale': discount }">{{ fgFormatPrice(p.price) }}</strong>
+            <s v-if="p.oldPrice" class="fg-price">{{ fgFormatPrice(p.oldPrice) }}</s>
+          </div>
+          <p v-if="p.perKg" class="item__note">
+            Весовой товар: цена за 1 кг, точную сумму назовём после взвешивания.
+          </p>
+          <FgBuy :product="p" large class="item__buy" />
+          <NuxtLink :to="fgPath('/cart')" class="fg-link item__tocart">Перейти в корзину</NuxtLink>
+        </div>
+
+        <ul class="item__terms">
+          <li>
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+              <path d="M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM17.5 19a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
+            </svg>
+            <span>
+              <strong>{{ today && !today.today ? 'Доставка завтра' : 'Доставка сегодня' }}</strong>
+              заказы на текущий день принимаем до 18:00 · по Томску 300 ₽, от 5 000 ₽ бесплатно
+            </span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+              <path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
+            </svg>
+            <span>
+              <strong>Самовывоз бесплатно</strong>
+              {{ fgContacts.address }}, ежедневно 11:00–20:00
+            </span>
+          </li>
+        </ul>
+
+        <div v-if="isGift" class="fg-panel item__gift">
+          <h2>Как работает сертификат</h2>
+          <ul>
+            <li>Любая продукция из наличия в магазине или в интернет-магазине.</li>
+            <li>Тематическая открытка в комплекте, доставим бесплатно, если нужно.</li>
+            <li>Действует 6 месяцев с момента покупки.</li>
+            <li>
+              Используется один раз: на всю сумму или на большую с доплатой. Сдача не выдаётся,
+              обмен на деньги и оплата доставки сертификатом не предусмотрены.
+            </li>
+          </ul>
+        </div>
+
+        <a :href="fgOriginalHref(p.id)" target="_blank" rel="noopener" class="item__orig">
+          Этот товар на сайте магазина
+        </a>
       </div>
     </div>
 
-    <section class="more">
-      <SectionHead title="Вам может понравиться" :to="fgPath('/catalog')" link-label="Весь каталог" />
-      <div class="more__grid">
-        <ProductCard v-for="p in more" :key="p.id" :product="p" />
+    <section v-if="similar.length" class="fg-section">
+      <div class="fg-head">
+        <h2>Ещё в разделе «{{ category.short }}»</h2>
+        <NuxtLink :to="fgPath(`/catalog/${category.id}`)" class="fg-link">Весь раздел</NuxtLink>
+      </div>
+      <div class="fg-grid similar">
+        <FgCard v-for="s in similar" :key="s.id" :product="s" />
       </div>
     </section>
   </div>
@@ -79,33 +116,21 @@ useSeoMeta({ title: `${product.name} | FoodGood Tomsk` })
 
 <style lang="scss" scoped>
 .crumbs {
-  display: flex;
-  gap: 8px;
-  padding: 28px 0 24px;
-  font-size: 13px;
-  color: var(--fg-muted);
-
-  a:hover {
-    color: var(--fg-forest);
-    text-decoration: underline;
-  }
+  padding-top: 24px;
 }
 
-.product {
-  &__grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 56px;
-    align-items: start;
-  }
+.item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 56px);
+  align-items: start;
 
-  &__media {
+  &__photo {
     position: relative;
     overflow: hidden;
-    border-radius: 28px;
-    background: var(--fg-leaf-soft);
     aspect-ratio: 1;
-    box-shadow: var(--fg-shadow);
+    border-radius: 28px;
+    background: var(--fg-sage);
 
     img {
       width: 100%;
@@ -114,159 +139,179 @@ useSeoMeta({ title: `${product.name} | FoodGood Tomsk` })
     }
   }
 
-  &__badge {
+  &__sale {
     position: absolute;
-    top: 18px;
-    left: 18px;
-    padding: 6px 14px;
-    border-radius: 999px;
-    background: var(--fg-berry);
+    top: 16px;
+    left: 16px;
+    padding: 4px 12px;
+    border-radius: 10px;
+    background: var(--fg-sale);
     color: #fff;
-    font-weight: 800;
+    font-size: 18px;
+    font-weight: 600;
   }
 
   &__info {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 20px;
 
     h1 {
-      font-size: clamp(28px, 3.6vw, 42px);
+      font-size: clamp(28px, 3.4vw, 40px);
+      line-height: 1.1;
     }
   }
 
-  &__kind {
-    align-self: flex-start;
-    padding: 4px 12px;
-    border-radius: 999px;
-    background: var(--fg-leaf-soft);
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--fg-forest);
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: -6px;
+
+    li {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      background: var(--fg-sage);
+      font-size: 15px;
+
+      svg {
+        color: var(--fg-leaf);
+      }
+    }
+  }
+
+  &__stock {
+    color: var(--fg-leaf-d);
+    font-weight: 500;
+  }
+
+  &__buybox {
+    display: grid;
+    gap: 14px;
+    padding: 24px;
+    border-radius: 22px;
+    box-shadow: inset 0 0 0 1px var(--fg-line);
   }
 
   &__price {
     display: flex;
     align-items: baseline;
-    flex-wrap: wrap;
-    gap: 4px 12px;
+    gap: 12px;
+
+    strong {
+      font-size: 36px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+
+      &.is-sale {
+        color: var(--fg-sale-d);
+      }
+    }
 
     s {
       color: var(--fg-muted);
-      font-size: 18px;
+      font-size: 20px;
     }
-  }
-
-  &__now {
-    font-size: 36px;
-    font-weight: 800;
-    color: var(--fg-forest);
   }
 
   &__note {
-    font-size: 14px;
     color: var(--fg-muted);
+    font-size: 15px;
   }
 
-  &__lead {
-    font-size: 17px;
-    color: var(--fg-ink);
+  &__tocart {
+    justify-self: center;
+    font-size: 15px;
   }
 
-  &__buy {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
+  &__terms {
+    display: grid;
+    gap: 14px;
 
-    > :first-child {
-      width: min(260px, 100%);
-    }
-  }
-
-  &__cart {
-    font-weight: 700;
-    border-bottom: 2px solid var(--fg-leaf);
-    color: var(--fg-forest);
-  }
-
-  &__details {
-    margin: 4px 0 0;
-    border-top: 1px solid var(--fg-line);
-
-    > div {
-      display: grid;
-      grid-template-columns: 150px 1fr;
-      gap: 16px;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--fg-line);
-      font-size: 15px;
-    }
-
-    dt {
+    li {
+      display: flex;
+      gap: 14px;
       color: var(--fg-muted);
+      line-height: 1.4;
     }
-    dd {
-      margin: 0;
+
+    svg {
+      color: var(--fg-leaf);
+      margin-top: 1px;
+    }
+
+    strong {
+      display: block;
+      color: var(--fg-ink);
       font-weight: 600;
     }
   }
 
-  &__fine {
-    font-size: 13px;
-    color: var(--fg-muted);
+  &__gift {
+    h2 {
+      margin-bottom: 12px;
+      font-size: 20px;
+    }
+
+    ul {
+      display: grid;
+      gap: 8px;
+      padding-left: 18px;
+      list-style: disc;
+    }
   }
 
-  &__perks {
-    display: grid;
-    gap: 8px;
-    margin: 0;
-    padding: 18px 20px;
-    list-style: none;
-    border-radius: var(--fg-radius);
-    background: var(--fg-paper);
-    border: 1px solid var(--fg-line);
+  &__orig {
+    color: var(--fg-muted);
     font-size: 14px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
 
-    li::before {
-      content: '✓';
-      margin-right: 10px;
-      font-weight: 800;
+    &:hover {
       color: var(--fg-leaf);
     }
   }
 }
 
-.more {
-  margin-top: 88px;
-
-  &__grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-  }
+.similar {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
-@media (max-width: 1000px) {
-  .more__grid {
-    grid-template-columns: repeat(2, 1fr);
+@media (max-width: 1100px) {
+  .similar {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    > :nth-child(5) {
+      display: none;
+    }
   }
 }
 
 @media (max-width: 860px) {
-  .product__grid {
+  .item {
     grid-template-columns: 1fr;
-    gap: 28px;
+  }
+
+  .item__photo {
+    max-width: 560px;
+  }
+
+  .crumbs {
+    padding-top: 16px;
   }
 }
 
-@media (max-width: 520px) {
-  .product__details > div {
-    grid-template-columns: 1fr;
-    gap: 2px;
+@media (max-width: 760px) {
+  .similar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 10px;
   }
-  .more__grid {
-    gap: 12px;
+
+  .item__buybox {
+    padding: 18px;
   }
 }
 </style>

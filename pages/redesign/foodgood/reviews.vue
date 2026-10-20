@@ -1,52 +1,65 @@
 <script lang="ts" setup>
-import PageHead from '~/components/redesign/foodgood/PageHead.vue'
-
 useSeoMeta({ title: 'Фото-отзывы | FoodGood Tomsk' })
 
 const opened = ref<string | null>(null)
-
 const onKey = (e: KeyboardEvent) => {
   if (e.key === 'Escape') opened.value = null
 }
 onMounted(() => window.addEventListener('keydown', onKey))
 onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
+
+const places = [
+  { title: '2ГИС', href: 'https://2gis.ru/tomsk/search/FoodGood' },
+  { title: 'ВКонтакте', href: 'https://vk.com/foodgoodtomsk' },
+  { title: 'Instagram', href: 'https://instagram.com/foodgood.tomsk/' },
+]
 </script>
 
 <template>
-  <div>
-    <PageHead
-      title="Фото-отзывы"
-      lead="Так о нас пишут покупатели. Оставьте свой отзыв и получите скидку 10% на следующий заказ."
-    />
+  <div class="fg-wrap">
+    <div class="fg-page-head">
+      <nav class="fg-crumbs" aria-label="Навигация">
+        <NuxtLink :to="fgPath()">Главная</NuxtLink>
+        <span aria-hidden="true">/</span>
+        <span>Фото-отзывы</span>
+      </nav>
+      <h1>Фото-отзывы</h1>
+      <p>Так о нас пишут покупатели. Оставьте свой отзыв с фото — дадим скидку 10% на следующий заказ.</p>
+    </div>
 
-    <div class="fg-container">
+    <div class="layout">
       <div class="gallery">
         <button
           v-for="(src, i) in fgImages.reviews"
           :key="src"
           type="button"
           class="gallery__item"
-          :aria-label="`Открыть отзыв ${i + 1}`"
+          :aria-label="`Открыть фото-отзыв ${i + 1}`"
           @click="opened = src"
         >
           <img :src="src" :alt="`Фото-отзыв ${i + 1}`" loading="lazy" />
         </button>
-
-        <NuxtLink :to="fgPath('/discounts')" class="cta">
-          <span class="cta__big">−10%</span>
-          <strong>Скидка за ваш фото-отзыв</strong>
-          <p>
-            Оставьте отзыв на любой площадке и получите скидку 10% на следующий заказ.
-          </p>
-          <span class="cta__link">Как получить →</span>
-        </NuxtLink>
       </div>
+
+      <aside class="fg-panel side">
+        <strong class="side__big">−10%</strong>
+        <h2>Скидка за ваш отзыв</h2>
+        <p class="fg-muted">
+          Оставьте отзыв с фото на любой площадке и покажите скриншот при следующей покупке.
+        </p>
+        <div class="side__links">
+          <a v-for="pl in places" :key="pl.title" :href="pl.href" target="_blank" rel="noopener" class="fg-btn fg-btn--line">
+            {{ pl.title }}
+          </a>
+        </div>
+        <NuxtLink :to="fgPath('/discounts')" class="fg-link">Условия скидки</NuxtLink>
+      </aside>
     </div>
 
     <Teleport to="body">
-      <div v-if="opened" class="lightbox" role="dialog" aria-modal="true" @click="opened = null">
-        <button type="button" class="lightbox__close" aria-label="Закрыть" @click="opened = null">
-          ×
+      <div v-if="opened" class="fg-lightbox" role="dialog" aria-modal="true" @click="opened = null">
+        <button type="button" class="fg-lightbox__close" aria-label="Закрыть" @click="opened = null">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
         <img :src="opened" alt="Фото-отзыв" @click.stop />
       </div>
@@ -55,105 +68,110 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 </template>
 
 <style lang="scss" scoped>
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 16px;
+  align-items: start;
+}
+
 .gallery {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 
   &__item {
-    padding: 0;
-    border: 1px solid var(--fg-line);
-    border-radius: var(--fg-radius);
     overflow: hidden;
-    background: var(--fg-paper);
     aspect-ratio: 3 / 4;
+    border-radius: 20px;
+    background: var(--fg-sage);
     cursor: zoom-in;
 
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.4s;
+      transition: transform 0.3s;
     }
 
     &:hover img {
-      transform: scale(1.03);
+      transform: scale(1.04);
     }
   }
 }
 
-.cta {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 28px;
-  border-radius: var(--fg-radius);
-  background: var(--fg-berry-soft);
+.side {
+  display: grid;
+  gap: 12px;
+
+  h2 {
+    font-size: 22px;
+  }
 
   &__big {
-    font-family: var(--fg-serif);
-    font-size: 64px;
-    font-weight: 700;
+    color: var(--fg-leaf);
+    font-size: 48px;
+    font-weight: 600;
     line-height: 1;
-    color: var(--fg-berry);
   }
 
-  strong {
-    font-size: 20px;
-    color: var(--fg-forest);
-  }
-
-  p {
-    font-size: 15px;
-    color: var(--fg-muted);
-  }
-
-  &__link {
-    margin-top: 8px;
-    font-weight: 700;
-    color: var(--fg-berry);
+  &__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 }
 
-.lightbox {
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+</style>
+
+<style lang="scss">
+.fg-lightbox {
   position: fixed;
   inset: 0;
   z-index: 100;
   display: grid;
   place-items: center;
   padding: 24px;
-  background: rgba(10, 20, 14, 0.88);
+  background: rgba(18, 38, 26, 0.85);
 
   img {
-    max-width: min(560px, 100%);
-    max-height: 90vh;
+    max-width: 100%;
+    max-height: 100%;
     border-radius: 16px;
   }
 
   &__close {
     position: absolute;
     top: 16px;
-    right: 20px;
-    width: 44px;
-    height: 44px;
+    right: 16px;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
     border: 0;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.15);
-    color: #fff;
-    font-size: 28px;
-    line-height: 1;
+    background: #fff;
+    color: #12261a;
     cursor: pointer;
-  }
-}
 
-@media (max-width: 860px) {
-  .gallery {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-  .cta {
-    grid-column: 1 / -1;
+    svg {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
   }
 }
 </style>

@@ -44,7 +44,7 @@ const projects = [
     to: '/redesign/foodgood/',
     image: '/redesign/foodgood/og.jpg',
     title: 'FoodGood Tomsk',
-    text: 'Магазин здоровой еды: ягоды, фермерское мясо, рыба. Каталог, корзина и оформление заказа.',
+    text: 'Магазин здоровой еды на Taplink: 111 товаров по разделам, поиск с подсказками, «Сейчас в сезоне» и корзина, которая собирает заказ для мессенджера.',
     source: 'https://foodgoodtomsk.ru',
     tags: ['Nuxt 3', 'Vue', 'e-commerce'],
   },

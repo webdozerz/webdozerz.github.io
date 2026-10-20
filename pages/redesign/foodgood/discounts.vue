@@ -1,225 +1,207 @@
 <script lang="ts" setup>
-import PageHead from '~/components/redesign/foodgood/PageHead.vue'
-import ProductCard from '~/components/redesign/foodgood/ProductCard.vue'
-import SectionHead from '~/components/redesign/foodgood/SectionHead.vue'
+import FgCard from '~/components/redesign/foodgood/FgCard.vue'
 
-useSeoMeta({ title: 'Скидки до 50% | FoodGood Tomsk' })
-
-const sale = fgProducts.filter((p) => p.collection === 'sale')
+useSeoMeta({ title: 'Система лояльности и скидки | FoodGood Tomsk' })
 
 const loyalty = [
-  { n: '1', text: 'При любой покупке в магазине сообщите продавцу ФИО и номер телефона. Так вы станете участником системы лояльности.' },
-  { n: '2', text: 'Когда общая сумма покупок достигнет порога, скидка начнёт действовать постоянно.' },
-  { n: '3', text: 'Чтобы воспользоваться скидкой, называйте контактный номер телефона при каждой покупке.' },
+  'При любой покупке в магазине назовите продавцу ФИО и номер телефона — так вы станете участником.',
+  'Когда сумма покупок достигнет порога, скидка начнёт действовать постоянно.',
+  'Чтобы воспользоваться скидкой, называйте номер телефона при каждой покупке.',
+]
+const review = [
+  'Оставьте фото-отзыв на одной площадке: 2ГИС, ВКонтакте или Instagram.',
+  'Покажите скриншот отзыва давностью не больше месяца.',
+  'Получите скидку 10% на любой следующий заказ или покупку.',
 ]
 
-const review = [
-  'Оставьте фото-отзыв на любой одной площадке: Instagram, 2ГИС или ВКонтакте.',
-  'Покажите скриншот отзыва давностью не более одного месяца.',
-  'Мы дадим скидку 10% на следующий любой заказ.',
-]
+// Калькулятор: сколько осталось до следующей ступени.
+const spent = ref(18000)
+const level = computed(() => (spent.value >= 35000 ? 5 : spent.value >= 25000 ? 3 : 0))
+const nextGoal = computed(() => (spent.value < 25000 ? 25000 : spent.value < 35000 ? 35000 : 0))
 </script>
 
 <template>
-  <div>
-    <PageHead
-      title="Скидки до 50%"
-      crumb="Скидки"
-      lead="Постоянные скидки для своих покупателей и акционные товары."
-    />
+  <div class="fg-wrap">
+    <div class="fg-page-head">
+      <nav class="fg-crumbs" aria-label="Навигация">
+        <NuxtLink :to="fgPath()">Главная</NuxtLink>
+        <span aria-hidden="true">/</span>
+        <span>Скидки</span>
+      </nav>
+      <h1>Система лояльности и скидки</h1>
+      <p>Постоянная скидка для своих покупателей, скидка за отзыв и акционные товары до −50%.</p>
+    </div>
 
-    <div class="fg-container grid">
-      <article class="card card--leaf">
-        <header>
-          <h2>Система лояльности</h2>
-          <p>Накопительные скидки на любые покупки в магазине.</p>
-        </header>
-
+    <div class="cards">
+      <article class="fg-panel card">
+        <h2>Накопительная скидка</h2>
         <div class="tiers">
-          <div class="tier">
+          <div class="tier" :class="{ 'is-on': level === 3 }">
             <strong>3%</strong>
             <span>после покупок на 25 000 ₽</span>
           </div>
-          <div class="tier">
+          <div class="tier" :class="{ 'is-on': level === 5 }">
             <strong>5%</strong>
             <span>после покупок на 35 000 ₽</span>
           </div>
         </div>
 
+        <div class="calc">
+          <label for="fg-spent">Сколько вы уже купили у нас</label>
+          <output class="fg-price">{{ fgFormatPrice(spent) }}</output>
+          <input id="fg-spent" v-model.number="spent" type="range" min="0" max="45000" step="500" />
+          <p v-if="nextGoal">
+            До скидки {{ nextGoal === 25000 ? '3%' : '5%' }} осталось
+            <strong class="fg-price">{{ fgFormatPrice(nextGoal - spent) }}</strong>
+          </p>
+          <p v-else><strong>Ваша скидка 5% — максимальная</strong></p>
+        </div>
+
         <ol class="steps">
-          <li v-for="s in loyalty" :key="s.n">
-            <span class="steps__n">{{ s.n }}</span>
-            <p>{{ s.text }}</p>
-          </li>
+          <li v-for="(s, i) in loyalty" :key="i">{{ s }}</li>
         </ol>
       </article>
 
-      <article class="card card--berry">
-        <header>
-          <h2>Скидка за фото-отзыв</h2>
-          <p>Расскажите о нас и получите скидку на следующую покупку.</p>
-        </header>
-
+      <article class="fg-panel card card--review">
+        <h2>Скидка за фото-отзыв</h2>
         <div class="tiers">
-          <div class="tier tier--berry">
+          <div class="tier is-on">
             <strong>−10%</strong>
-            <span>на любой следующий заказ или покупку</span>
+            <span>на любой следующий заказ</span>
           </div>
         </div>
-
-        <ol class="steps steps--berry">
-          <li v-for="(s, i) in review" :key="i">
-            <span class="steps__n">{{ i + 1 }}</span>
-            <p>{{ s }}</p>
-          </li>
+        <ol class="steps">
+          <li v-for="(s, i) in review" :key="i">{{ s }}</li>
         </ol>
-
-        <NuxtLink :to="fgPath('/reviews')" class="link">Посмотреть фото-отзывы →</NuxtLink>
+        <NuxtLink :to="fgPath('/reviews')" class="fg-btn fg-btn--line">Посмотреть фото-отзывы</NuxtLink>
       </article>
     </div>
 
-    <section class="fg-container sale">
-      <SectionHead
-        eyebrow="Акционные товары"
-        title="Скидки на товары"
-        :to="fgPath('/catalog/sale')"
-        link-label="Все акции"
-      />
-      <div class="sale__grid">
-        <ProductCard v-for="p in sale" :key="p.id" :product="p" />
+    <section class="fg-section">
+      <div class="fg-head">
+        <h2>Товары со скидкой</h2>
+        <NuxtLink :to="fgPath('/catalog/sale')" class="fg-link">Все акции</NuxtLink>
+      </div>
+      <div class="fg-grid">
+        <FgCard v-for="p in fgSale()" :key="p.id" :product="p" />
       </div>
     </section>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.grid {
+.cards {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
 }
 
 .card {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding: 36px;
-  border-radius: 28px;
-
-  &--leaf {
-    background: var(--fg-leaf-soft);
-  }
-  &--berry {
-    background: var(--fg-berry-soft);
-  }
+  display: grid;
+  gap: 20px;
 
   h2 {
-    font-size: 32px;
+    font-size: 24px;
   }
 
-  header p {
-    margin-top: 8px;
-    color: var(--fg-muted);
+  .fg-btn {
+    justify-self: start;
   }
 }
 
 .tiers {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .tier {
-  flex: 1;
-  min-width: 160px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 4px;
-  padding: 18px 20px;
-  border-radius: 18px;
-  background: var(--fg-paper);
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: #fff;
+  transition: box-shadow 0.15s;
 
   strong {
-    font-family: var(--fg-serif);
-    font-size: 44px;
-    line-height: 1;
     color: var(--fg-leaf);
+    font-size: 36px;
+    font-weight: 600;
+    line-height: 1;
   }
 
   span {
-    font-size: 14px;
     color: var(--fg-muted);
+    font-size: 15px;
+    line-height: 1.35;
   }
 
-  &--berry strong {
-    color: var(--fg-berry);
+  &.is-on {
+    box-shadow: inset 0 0 0 1.5px var(--fg-leaf);
+  }
+}
+
+.calc {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 8px 12px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: #fff;
+
+  label {
+    color: var(--fg-muted);
+    font-size: 15px;
+  }
+
+  output {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  input,
+  p {
+    grid-column: 1 / -1;
+  }
+
+  input {
+    width: 100%;
+    accent-color: var(--fg-leaf);
   }
 }
 
 .steps {
   display: grid;
-  gap: 14px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  gap: 10px;
+  counter-reset: step;
 
   li {
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-  }
+    position: relative;
+    padding-left: 32px;
+    counter-increment: step;
 
-  p {
-    font-size: 15px;
-  }
-
-  &__n {
-    flex-shrink: 0;
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--fg-forest);
-    color: #fff;
-    font-size: 13px;
-    font-weight: 800;
-  }
-
-  &--berry &__n {
-    background: var(--fg-berry);
-  }
-}
-
-.link {
-  align-self: flex-start;
-  font-weight: 700;
-  color: var(--fg-berry);
-  border-bottom: 2px solid currentColor;
-}
-
-.sale {
-  margin-top: 72px;
-
-  &__grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-  }
-}
-
-@media (max-width: 1000px) {
-  .sale__grid {
-    grid-template-columns: repeat(2, 1fr);
+    &::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--fg-leaf);
+      font-weight: 600;
+    }
   }
 }
 
 @media (max-width: 860px) {
-  .grid {
+  .cards {
     grid-template-columns: 1fr;
   }
-  .card {
-    padding: 24px;
+}
+
+@media (max-width: 420px) {
+  .tiers {
+    grid-template-columns: 1fr;
   }
 }
 </style>
