@@ -303,38 +303,73 @@
   }
 
   // ---------- мега-меню каталога ----------
+  // как у СибирьТрейда: страница под меню затемнена и не прокручивается, разделы с иконками слева,
+  // справа тонированная панель подразделов и популярные товары; на телефоне — по уровням
   var mega = $('#mega')
   if (mega) {
     var catbtn = $('.catbtn')
+    var band = mega.parentElement
     var isPhone = function () { return window.matchMedia('(max-width:768px)').matches }
+    var POP = { cheese: [0, 3, 7, 8], dairy: [1, 9, 10, 2], curd: [6, 5], condensed: [14], frozen: [11, 12, 13], sale: [0, 1, 11, 14], new: [8, 13, 5, 7] }
+    $$('.mega__panel', mega).forEach(function (p) {
+      var h = $('h3', p), all = $('h3 a', p)
+      if (all) { all.className = 'mega__all'; all.innerHTML = 'Все товары раздела <span aria-hidden="true">→</span>'; h.insertAdjacentElement('afterend', all) }
+      var ids = POP[p.dataset.key]
+      if (!ids) return
+      p.insertAdjacentHTML('beforeend', '<div class="mega__pop"><b>Часто берут</b><div>' + ids.map(function (i) {
+        var x = index[i]
+        return '<a href="product.html"><img src="' + IMG + x[2] + '" alt="" loading="lazy"><span>' + x[0] + '</span><em>' + money(x[1]) + ' ₽</em></a>'
+      }).join('') + '</div></div>')
+    })
+    var shade = document.createElement('div')
+    shade.className = 'mega-shade'
+    document.body.appendChild(shade)
+    var fit = function () {
+      // меню занимает ровно видимую часть экрана под синей полосой — ничего не уезжает вниз
+      var top = band.getBoundingClientRect().bottom
+      mega.style.setProperty('--mega-top', Math.max(0, top) + 'px')
+      shade.style.top = Math.max(0, top) + 'px'
+    }
     var show = function (key) {
       $$('.mega__l1 button', mega).forEach(function (b) { b.classList.toggle('is-on', b.dataset.key === key) })
       $$('.mega__panel', mega).forEach(function (p) { p.classList.toggle('is-on', p.dataset.key === key) })
-      var b = $('.mega__l1 button[data-key="' + key + '"]', mega)
-      $('#mega-title').textContent = isPhone() && mega.classList.contains('is-l2') && b ? b.firstChild.textContent.trim() : 'Каталог'
+      var b = $('.mega__l1 button[data-key="' + key + '"] b', mega)
+      $('#mega-title').textContent = isPhone() && mega.classList.contains('is-l2') && b ? b.textContent : 'Каталог'
     }
     var open = function () {
       mega.classList.add('is-open'); mega.classList.remove('is-l2')
+      shade.classList.add('is-on')
       if (catbtn) catbtn.setAttribute('aria-expanded', 'true')
-      show($('.mega__l1 button', mega).dataset.key)
-      if (isPhone()) document.body.style.overflow = 'hidden'
+      show(($('.mega__l1 button.is-on', mega) || $('.mega__l1 button[data-key="cheese"]', mega)).dataset.key)
+      document.documentElement.classList.add('is-locked')
+      fit()
     }
     var close = function () {
       mega.classList.remove('is-open', 'is-l2')
+      shade.classList.remove('is-on')
       if (catbtn) catbtn.setAttribute('aria-expanded', 'false')
-      document.body.style.overflow = ''
+      document.documentElement.classList.remove('is-locked')
     }
+    window.addEventListener('resize', function () { if (mega.classList.contains('is-open')) fit() })
+    shade.addEventListener('click', close)
     document.addEventListener('click', function (e) {
       var t = e.target
       if (t.closest('[data-mega]')) { e.preventDefault(); mega.classList.contains('is-open') ? close() : open(); return }
       var l1 = t.closest('.mega__l1 button')
-      if (l1) { if (isPhone()) mega.classList.add('is-l2'); show(l1.dataset.key); return }
+      if (l1) {
+        if (isPhone()) { mega.classList.add('is-l2'); show(l1.dataset.key); mega.scrollTop = 0 }
+        else location.href = 'catalog.html'
+        return
+      }
       if (t.closest('.mega__back')) { mega.classList.remove('is-l2'); show($('.mega__l1 button.is-on', mega).dataset.key); return }
       if (t.closest('.mega__close')) { close(); return }
-      if (mega.classList.contains('is-open') && !isPhone() && !t.closest('#mega') && !t.closest('.catbtn')) close()
     })
+    var hoverT = null
     $$('.mega__l1 button', mega).forEach(function (b) {
-      b.addEventListener('mouseenter', function () { if (!isPhone()) show(b.dataset.key) })
+      // небольшая задержка, чтобы при движении мыши по диагонали к подразделам раздел не перескакивал
+      b.addEventListener('mouseenter', function () { if (isPhone()) return; clearTimeout(hoverT); hoverT = setTimeout(function () { show(b.dataset.key) }, 90) })
+      b.addEventListener('mouseleave', function () { clearTimeout(hoverT) })
+      b.addEventListener('focus', function () { if (!isPhone()) show(b.dataset.key) })
     })
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && mega.classList.contains('is-open')) { close(); if (catbtn) catbtn.focus() } })
   }
