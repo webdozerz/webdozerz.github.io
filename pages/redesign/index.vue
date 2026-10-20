@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+import '~/assets/scss/home.scss'
+
+useHomeHead()
 useSeoMeta({
   title: 'Концепты редизайна | webdozerz',
   robots: 'noindex, nofollow',
@@ -7,6 +10,7 @@ useSeoMeta({
 const projects = [
   {
     to: '/redesign/sibirtreid/',
+    image: '/redesign/sibirtreid/og.jpg',
     title: '«СибирьТрейд»',
     text: 'Крупнооптовые поставки продуктов из Новосибирска в Якутию: сцена с товарами при прокрутке, каталог из 373 позиций с ценой за упаковку, заявка со шкалой до минимального заказа, цветные формы прайса.',
     source: 'https://sibirtreid.ru',
@@ -14,6 +18,7 @@ const projects = [
   },
   {
     to: '/redesign/rybasibiri/',
+    image: '/redesign/rybasibiri/og.jpg',
     title: '«Стиль Продукт»',
     text: 'Рыба и морепродукты из своих цехов в Кемерове: переключатель «Розница / Опт», магазин с понятной ценой за кг и за 100 г, оптовый прайс с заявкой, услуги копчения и заморозки.',
     source: 'https://www.rybasibiri.ru',
@@ -21,6 +26,7 @@ const projects = [
   },
   {
     to: '/redesign/sanych/',
+    image: '/redesign/sanych/og.jpg',
     title: 'Мясная лавка «Саныч»',
     text: 'Доставка фермерского мяса по Новосибирску: каталог с ценой за кг и весом куска, выбор разделки, корзина с примерной суммой, опт и рецепты.',
     source: 'http://доставка-мяса.рф',
@@ -28,6 +34,7 @@ const projects = [
   },
   {
     to: '/redesign/tomich/',
+    image: '/redesign/tomich/og.jpg',
     title: 'Торговый Дом «Томич»',
     text: 'Мясо, полуфабрикаты и обеды в офис в Томске: меню на завтра, конструктор комплексного обеда, корзина с печатной формой, магазины и кафе.',
     source: 'https://myaso.tomsk.ru',
@@ -35,6 +42,7 @@ const projects = [
   },
   {
     to: '/redesign/foodgood/',
+    image: '/redesign/foodgood/og.jpg',
     title: 'FoodGood Tomsk',
     text: 'Магазин здоровой еды: ягоды, фермерское мясо, рыба. Каталог, корзина и оформление заказа.',
     source: 'https://foodgoodtomsk.ru',
@@ -42,6 +50,7 @@ const projects = [
   },
   {
     to: '/redesign/sttorg70/',
+    image: '/redesign/sttorg70/og.jpg',
     title: 'СТ-ТОРГ70',
     text: 'Продукты оптом и в розницу. Статичные экраны для перекраски WordPress/WooCommerce: главная, каталог, карточка, корзина, доставка.',
     source: 'https://sttorg70.ru',
@@ -50,6 +59,7 @@ const projects = [
   },
   {
     to: '/redesign/prodagro/',
+    image: '/redesign/prodagro/og.jpg',
     title: 'ПродАгро',
     text: 'Продукты оптом и в розницу в Иркутске: цены за штуку и упаковку, корзина с доставкой от 3 000 ₽, страница для бизнеса.',
     source: 'https://prodmak38.ru',
@@ -58,6 +68,7 @@ const projects = [
   },
   {
     to: '/redesign/sibprod/',
+    image: '/redesign/sibprod/og.jpg',
     title: 'Сибирский продукт',
     text: 'Доставка продуктов по Новосибирску: каталог с выпадающим меню, ближайший интервал доставки, своя марка «Сливкин Дом», корзина с выбором дня и времени.',
     source: 'https://sibprod.info',
@@ -65,118 +76,262 @@ const projects = [
     plain: true,
   },
 ]
+
+const ui = useHomeUi()
+onMounted(() => ui.syncTheme())
+
+// Домен без протокола и www; строкой, а не через URL, чтобы кириллица не превратилась в punycode.
+const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/.*$/, '')
+const pad = (n: number) => String(n).padStart(2, '0')
 </script>
 
 <template>
-  <main class="wrap">
-    <h1>Концепты редизайна</h1>
-    <p class="lead">
-      Демонстрационные версии сайтов местного бизнеса. Это не официальные сайты компаний:
-      тексты, цены и изображения принадлежат их владельцам.
-    </p>
+  <div class="home catalog">
+    <div class="shell">
+      <NuxtLink to="/" class="catalog__back">
+        ← На сайт
+      </NuxtLink>
 
-    <ul class="list">
-      <li v-for="p in projects" :key="p.to">
-        <!-- Статичные концепты рисуем только в браузере, чтобы краулер Nuxt не пытался их prerender-ить. -->
-        <ClientOnly v-if="p.plain">
-          <a :href="p.to" class="card">
-            <h2>{{ p.title }}</h2>
-            <p>{{ p.text }}</p>
-            <div class="tags">
-              <span v-for="t in p.tags" :key="t">{{ t }}</span>
+      <header class="catalog__head">
+        <span class="catalog__kicker mono">redesign / {{ pad(projects.length) }} концептов</span>
+        <h1 class="catalog__title">
+          Концепты редизайна
+        </h1>
+        <p class="catalog__lead">
+          Демонстрационные версии сайтов местного бизнеса. Это не официальные сайты компаний:
+          тексты, цены и изображения принадлежат их владельцам.
+        </p>
+      </header>
+
+      <ul class="catalog__grid">
+        <li v-for="(p, i) in projects" :key="p.to" class="concept">
+          <RedesignCatalogLink :to="p.to" :plain="p.plain" class="concept__preview" tabindex="-1" aria-hidden="true">
+            <img v-if="p.image" :src="p.image" alt="" width="1200" height="630" loading="lazy">
+            <span v-else class="concept__placeholder">{{ p.title.replace(/[«»]/g, '') }}</span>
+          </RedesignCatalogLink>
+
+          <div class="concept__body">
+            <div class="concept__meta mono">
+              <span>{{ pad(i + 1) }}</span>
+              <span>{{ host(p.source) }}</span>
             </div>
-          </a>
-        </ClientOnly>
-        <NuxtLink v-else :to="p.to" class="card">
-          <h2>{{ p.title }}</h2>
-          <p>{{ p.text }}</p>
-          <div class="tags">
-            <span v-for="t in p.tags" :key="t">{{ t }}</span>
+            <h2 class="concept__title">
+              {{ p.title }}
+            </h2>
+            <p class="concept__text">
+              {{ p.text }}
+            </p>
+            <p class="concept__stack mono">
+              {{ p.tags.join(' · ') }}
+            </p>
+            <div class="concept__actions">
+              <RedesignCatalogLink :to="p.to" :plain="p.plain" class="h-btn h-btn--primary">
+                Посмотреть
+              </RedesignCatalogLink>
+              <a :href="p.source" target="_blank" rel="noopener" class="h-btn">
+                Оригинал
+                <svg class="concept__arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" /></svg>
+              </a>
+            </div>
           </div>
-        </NuxtLink>
-        <a :href="p.source" target="_blank" rel="noopener" class="source">Оригинал</a>
-      </li>
-    </ul>
-  </main>
+        </li>
+      </ul>
+    </div>
+  </div>
 </template>
 
 <style lang="scss" scoped>
-.wrap {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 72px 20px;
-  font-family: 'Inter', system-ui, sans-serif;
-}
+.catalog {
+  padding: 32px 0 96px;
 
-h1 {
-  font-size: 40px;
-  margin: 0 0 12px;
-}
+  &__back {
+    color: var(--h-muted);
+    font-size: 14px;
+    text-decoration: none;
+    transition: color 0.2s;
 
-.lead {
-  margin: 0 0 40px;
-  color: #9a9a9a;
-  line-height: 1.6;
-}
+    &:hover {
+      color: var(--h-text);
+    }
+  }
 
-.list {
-  display: grid;
-  gap: 16px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  &__head {
+    max-width: 680px;
+    margin: 56px 0 48px;
+  }
 
-  li {
-    position: relative;
+  &__kicker {
+    color: var(--h-accent);
+    font-size: 12px;
+  }
+
+  &__title {
+    margin: 12px 0 0;
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+  }
+
+  &__lead {
+    margin: 16px 0 0;
+    color: var(--h-muted);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 }
 
-.card {
-  display: block;
-  padding: 24px;
-  border-radius: 16px;
-  border: 1px solid #2c2c2c;
-  background: #161616;
-  color: inherit;
-  text-decoration: none;
-  transition: border-color 0.2s, transform 0.2s;
+.concept {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--h-line);
+  border-radius: 14px;
+  background: var(--h-surface);
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.25s, box-shadow 0.25s;
 
   &:hover {
-    border-color: #4fc3f7;
-    transform: translateY(-2px);
+    border-color: var(--h-line-strong);
+    box-shadow: var(--h-shadow);
+    transform: translateY(-3px);
   }
 
-  h2 {
-    margin: 0 0 8px;
-    font-size: 22px;
+  &__preview {
+    display: block;
+    aspect-ratio: 1200 / 630;
+    border-bottom: 1px solid var(--h-line);
+    background: var(--h-raised);
+    overflow: hidden;
+
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
   }
 
-  p {
-    margin: 0 0 16px;
-    color: #b5b5b5;
+  &:hover &__preview img {
+    transform: scale(1.035);
+  }
+
+  &__placeholder {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    padding: 24px;
+    background:
+      radial-gradient(circle at 1px 1px, var(--h-dot) 1px, transparent 0) 0 0 / 18px 18px,
+      radial-gradient(120% 90% at 0% 0%, var(--h-accent-glow), transparent 60%);
+    color: var(--h-text);
+    font-size: clamp(22px, 3vw, 30px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-align: center;
+  }
+
+  &__body {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    padding: 22px 24px 24px;
+  }
+
+  &__meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--h-faint);
+    font-size: 12px;
+
+    span:first-child {
+      color: var(--h-accent);
+    }
+  }
+
+  &__title {
+    margin: 10px 0 0;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  &__text {
+    flex-grow: 1;
+    margin: 10px 0 0;
+    color: var(--h-text-soft);
+    font-size: 15px;
     line-height: 1.55;
   }
-}
 
-.tags {
-  display: flex;
-  gap: 8px;
-
-  span {
-    padding: 3px 10px;
-    border-radius: 999px;
-    background: #232323;
+  &__stack {
+    margin: 16px 0 0;
+    color: var(--h-faint);
     font-size: 12px;
-    color: #9a9a9a;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+
+    .h-btn {
+      gap: 6px;
+      height: 40px;
+      padding: 0 16px;
+      font-size: 14px;
+    }
+  }
+
+  &__arrow {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 }
 
-.source {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  font-size: 13px;
-  color: #9a9a9a;
-  text-decoration: underline;
+@media (max-width: 760px) {
+  .catalog {
+    padding-top: 20px;
+
+    &__head {
+      margin: 36px 0 32px;
+    }
+
+    &__grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+
+  .concept__body {
+    padding: 18px 18px 20px;
+  }
+}
+
+@media (max-width: 420px) {
+  .catalog .shell {
+    padding: 0 16px;
+  }
+
+  .concept__actions .h-btn {
+    flex: 1;
+    justify-content: center;
+  }
 }
 </style>
