@@ -9,6 +9,14 @@ useSeoMeta({
 
 const projects = [
   {
+    to: '/redesign/fermertomska/',
+    image: '/redesign/fermertomska/og.jpg',
+    title: '«Куендатское»',
+    text: 'Молочный завод из Первомайского с доставкой по Томску: снимок всей линейки с ценами по нажатию, фасовки в одной карточке, расчёт дня доставки по расписанию завода, корзина без обязательной регистрации.',
+    source: 'https://fermertomska.ru',
+    tags: ['Nuxt 3', 'Vue', 'InSales'],
+  },
+  {
     to: '/redesign/sibirtreid/',
     image: '/redesign/sibirtreid/og.jpg',
     title: '«СибирьТрейд»',
