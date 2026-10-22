@@ -11,6 +11,7 @@ export default defineNuxtConfig({
         { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
         { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       ],
+      script: [{ src: "/metrika.js" }],
     },
   },
   modules: [
