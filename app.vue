@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 useSeoMeta({
   title: 'IlDev | Портфолио frontend разработчика',
-})</script>
+})
+</script>
 
 <template>
   <div class="app">
