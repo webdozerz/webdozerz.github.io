@@ -2,6 +2,10 @@
 useSeoMeta({
   title: 'IlDev | Портфолио frontend разработчика',
 })
+// Здесь, а не в nuxt.config.ts: в CI configure-pages подменяет конфиг пустым nuxt.config.js.
+useHead({
+  script: [{ src: '/metrika.js', tagPriority: 'critical' }],
+})
 </script>
 
 <template>
