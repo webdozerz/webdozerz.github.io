@@ -9,6 +9,14 @@ useSeoMeta({
 
 const projects = [
   {
+    to: '/redesign/fermatomsk/',
+    image: '/redesign/fermatomsk/og.jpg',
+    title: 'FermaTomsk',
+    text: 'Семейная ферма из посёлка Рассвет: история и фото фермы на первом экране, продукты с ценами, список заказа, который сам складывается в сообщение для Telegram или MAX, ближайший день доставки.',
+    source: 'https://fermatomsk.ru',
+    tags: ['Nuxt 3', 'Vue', 'был одностраничник'],
+  },
+  {
     to: '/redesign/fermertomska/',
     image: '/redesign/fermertomska/og.jpg',
     title: '«Куендатское»',
