@@ -10,7 +10,7 @@
 | Продукты: крупный опт без корзины, прайс по запросу | `niches/grocery-distributor.md` | sibirtreid |
 | Продукты: доставка по городу, своя марка, интервалы | `niches/grocery-city-delivery.md` | sibprod |
 | Рыба и морепродукты: опт + розница на одном сайте | `niches/fish-wholesale-retail.md` | rybasibiri |
-| Фермерские продукты, маленькие магазины на Taplink / в соцсетях | `niches/farm-taplink.md` | foodgood |
+| Фермерские продукты, маленькие магазины на Taplink / в соцсетях | `niches/farm-taplink.md` | foodgood, fermatomsk |
 | Молочный завод / производитель со своей доставкой | `niches/dairy-producer.md` | fermertomska |
 | Мясное производство + обеды в офис + кафе | `niches/meat-lunch.md` | tomich |
 | Мясная лавка с доставкой | `niches/meat-shop.md` | sanych |
