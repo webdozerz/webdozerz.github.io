@@ -4,8 +4,36 @@
     {
       "name": "redesign-static",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "4173", "--directory", "public/redesign"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4173",
+        "--directory",
+        "public/redesign"
+      ],
       "port": 4173
+    },
+    {
+      "name": "nuxt-dev",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "nuxt",
+        "dev",
+        "--port",
+        "3017"
+      ],
+      "port": 3017
+    },
+    {
+      "name": "nuxt-dev-ft",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "nuxt",
+        "dev",
+        "--port",
+        "3021"
+      ],
+      "port": 3021
     }
   ]
 }

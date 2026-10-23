@@ -28,3 +28,7 @@ logs
 
 # Redesign concept working materials (recon brief, scraped data)
 /.redesign/
+
+# Project uses npm (package-lock.json); stray pnpm files from local installs
+pnpm-lock.yaml
+pnpm-workspace.yaml
