@@ -9,6 +9,14 @@ useSeoMeta({
 
 const projects = [
   {
+    to: '/redesign/lavkafish/',
+    image: '/redesign/lavkafish/og.jpg',
+    title: 'Лавка Fish',
+    text: 'Охлаждённая форель из Хакасии и морепродукты под привоз: каталог из постов Telegram-канала с датами привоза и остатками, цена сама снижается по лесенке «от 3 шт», расчёт суммы по весу и предоплата 1 кг, зоны доставки Томска и Новосибирска.',
+    source: 'https://lavkafish.com',
+    tags: ['Nuxt 3', 'Vue', 'Tilda'],
+  },
+  {
     to: '/redesign/fermatomsk/',
     image: '/redesign/fermatomsk/og.jpg',
     title: 'FermaTomsk',
