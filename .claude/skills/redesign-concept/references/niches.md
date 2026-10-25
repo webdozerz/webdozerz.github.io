@@ -16,7 +16,7 @@
 | Мёд и продукты пчеловодства: семейная пасека | `niches/honey-apiary.md` | 38pchel |
 | Мясное производство + обеды в офис + кафе | `niches/meat-lunch.md` | tomich |
 | Мясная лавка с доставкой | `niches/meat-shop.md` | sanych |
-| Цветы и подарки | `niches/flowers.md` | — |
+| Цветы и подарки | `niches/flowers.md` | bukety |
 | Кафе, рестораны, доставка еды | `niches/cafe.md` | — |
 | Услуги по записи: салоны, клиники, автосервисы | `niches/services.md` | — |
 | Стройматериалы, B2B-каталоги | `niches/b2b-building.md` | — |
