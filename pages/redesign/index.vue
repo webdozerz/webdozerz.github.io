@@ -9,6 +9,14 @@ useSeoMeta({
 
 const projects = [
   {
+    to: '/redesign/38pchel/',
+    image: '/redesign/38pchel/og.jpg',
+    title: '38пчёл',
+    text: 'Семейная пасека Черепановых под Иркутском: «медовая линейка» из шести сортов от светлого к тёмному, цена каждой фасовки сразу в карточке, прозрачный или севший мёд, пластик или стекло, доставка по зонам Иркутска и фотодневник сезона.',
+    source: 'https://38pchel.ru',
+    tags: ['Nuxt 3', 'Vue', 'OpenCart'],
+  },
+  {
     to: '/redesign/lavkafish/',
     image: '/redesign/lavkafish/og.jpg',
     title: 'Лавка Fish',
