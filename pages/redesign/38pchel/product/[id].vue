@@ -390,7 +390,7 @@ useSeoMeta({ title: () => `${p.value.title} — 38пчёл | Концепт ре
       min-width: 0;
     }
 
-    b {
+    > div:first-child b {
       font-family: var(--pc-head);
       font-size: 36px;
       line-height: 1;

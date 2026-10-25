@@ -592,19 +592,19 @@ const scrollDiary = (dir: number) => diary.value?.scrollBy({ left: dir * diary.v
     padding-top: 18px;
     border-top: 1px solid var(--pc-line);
 
-    > div {
+    > div:first-child {
       display: flex;
       flex-direction: column;
     }
 
-    b {
+    > div:first-child b {
       font-family: var(--pc-head);
       font-size: 34px;
       line-height: 1;
       font-variant-numeric: tabular-nums;
     }
 
-    > div > span {
+    > div:first-child > span {
       margin-top: 4px;
       color: var(--pc-muted);
       font-size: 14px;
