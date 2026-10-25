@@ -13,6 +13,7 @@
 | Рыба под привоз: заказ к дню доставки, витрина в Telegram-канале | `niches/fish-preorder.md` | lavkafish |
 | Фермерские продукты, маленькие магазины на Taplink / в соцсетях | `niches/farm-taplink.md` | foodgood, fermatomsk |
 | Молочный завод / производитель со своей доставкой | `niches/dairy-producer.md` | fermertomska |
+| Мёд и продукты пчеловодства: семейная пасека | `niches/honey-apiary.md` | 38pchel |
 | Мясное производство + обеды в офис + кафе | `niches/meat-lunch.md` | tomich |
 | Мясная лавка с доставкой | `niches/meat-shop.md` | sanych |
 | Цветы и подарки | `niches/flowers.md` | — |
