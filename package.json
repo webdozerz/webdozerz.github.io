@@ -16,6 +16,7 @@
     "resume:pdf": "./scripts/resume-pdf.sh"
   },
   "dependencies": {
+    "@artmizu/yandex-metrika-nuxt": "^1.2.1",
     "@nuxtjs/google-fonts": "^3.2.0",
     "highlight.js": "^11.11.1",
     "nuxt": "^3.12.2",

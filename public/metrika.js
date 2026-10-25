@@ -1,5 +1,5 @@
-// Яндекс Метрика для всего andryushov.me: Nuxt-страниц и статичных концептов в public/redesign/.
-// Номер счётчика задаётся здесь, в одном месте.
+// Яндекс Метрика для старых статичных концептов в public/redesign/.
+// Nuxt-страницы считает модуль @artmizu/yandex-metrika-nuxt (nuxt.config.ts).
 (function () {
   var YM_ID = 113726820;
   if (!YM_ID || location.hostname === "localhost" || location.hostname === "127.0.0.1") return;
@@ -18,18 +18,12 @@
   })(window, document, "script", "https://mc.yandex.ru/metrika/tag.js?id=" + YM_ID, "ym");
 
   ym(YM_ID, "init", {
-    defer: true, // первый и последующие хиты в Nuxt шлёт плагин plugins/metrika.client.ts
+    defer: true,
     clickmap: true,
     trackLinks: true,
     accurateTrackBounce: true,
     webvisor: true,
   });
 
-  // Статичным HTML-страницам плагин не нужен: хит отправляем сразу, если Nuxt на странице нет.
-  window.ymHit = function (url, referer) {
-    ym(YM_ID, "hit", url, { referer: referer });
-  };
-  document.addEventListener("DOMContentLoaded", function () {
-    if (!window.__NUXT__ && !document.getElementById("__nuxt")) window.ymHit(location.href, document.referrer);
-  });
+  ym(YM_ID, "hit", location.href, { referer: document.referrer });
 })();

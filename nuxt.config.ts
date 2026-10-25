@@ -11,11 +11,11 @@ export default defineNuxtConfig({
         { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
         { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       ],
-      script: [{ src: "/metrika.js" }],
     },
   },
   modules: [
     "@nuxt/eslint",
+    "@artmizu/yandex-metrika-nuxt",
     [
       "@nuxtjs/google-fonts",
       {
@@ -29,6 +29,10 @@ export default defineNuxtConfig({
       },
     ],
   ],
+  // Яндекс Метрика для Nuxt-страниц; статичные концепты в public/redesign/ подключают public/metrika.js.
+  yandexMetrika: {
+    id: "113726820",
+  },
   nitro: {
     // Статичные концепты лежат в public/redesign/<name>/, у Nuxt для них нет маршрутов.
     prerender: { ignore: ['/redesign/sttorg70', '/redesign/prodagro', '/redesign/sibprod'] },
