@@ -245,7 +245,7 @@ useSeoMeta({ title: () => `${p.value.title} — 38пчёл | Концепт ре
     border-radius: var(--pc-r-panel);
     overflow: hidden;
     background: #fff;
-    box-shadow: inset 0 0 0 1px var(--pc-line);
+    border: 1px solid var(--pc-line);
 
     img {
       display: block;
@@ -292,7 +292,7 @@ useSeoMeta({ title: () => `${p.value.title} — 38пчёл | Концепт ре
       height: 80px;
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: inset 0 0 0 1px var(--pc-line);
+      border: 1px solid var(--pc-line);
 
       &.is-on {
         box-shadow: 0 0 0 2px var(--pc-ink);

@@ -913,7 +913,7 @@ const isActive = (to: string, exact?: boolean) =>
       object-fit: contain;
       border-radius: 10px;
       background: #fff;
-      box-shadow: inset 0 0 0 1px var(--pc-line);
+      border: 1px solid var(--pc-line);
     }
 
     b {

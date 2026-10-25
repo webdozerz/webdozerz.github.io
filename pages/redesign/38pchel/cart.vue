@@ -205,7 +205,7 @@ const submit = () => {
     height: 96px;
     object-fit: contain;
     border-radius: 16px;
-    box-shadow: inset 0 0 0 1px var(--pc-line);
+    border: 1px solid var(--pc-line);
   }
 
   &__name {
