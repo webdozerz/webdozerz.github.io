@@ -9,6 +9,14 @@ useSeoMeta({
 
 const projects = [
   {
+    to: '/redesign/bukety/',
+    image: '/redesign/bukety/og.jpg',
+    title: 'Любимые Букеты',
+    text: 'Круглосуточная доставка цветов по Томску: подбор букета по получателю и бюджету на первом экране, живое «привезём к 15:20», состав и варианты с ценой в карточке, открытка с превью, фото вручения, анонимная доставка и выбор интервала в оформлении.',
+    source: 'https://bukety.tomsk.ru',
+    tags: ['Nuxt 3', 'Vue', 'OpenCart'],
+  },
+  {
     to: '/redesign/38pchel/',
     image: '/redesign/38pchel/og.jpg',
     title: '38пчёл',
