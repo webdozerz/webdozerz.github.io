@@ -9,6 +9,14 @@ useSeoMeta({
 
 const projects = [
   {
+    to: '/redesign/produkt24/',
+    image: '/redesign/produkt24/og.jpg',
+    title: '24produkt',
+    text: 'Продукты оптом и в розницу со склада в Красноярске: прайс из 1С на 645 позиций с поиском и понятными группами, три колонки цен одним переключателем, список с весом до доставки от 200 кг и крупного опта от 1 т, готовая заявка менеджеру вместо корзины.',
+    source: 'https://24-produkt.ru',
+    tags: ['Nuxt 3', 'Vue', 'Drupal'],
+  },
+  {
     to: '/redesign/mnerozy/',
     image: '/redesign/mnerozy/og.jpg',
     title: 'Мне розы',
