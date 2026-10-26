@@ -9,6 +9,14 @@ useSeoMeta({
 
 const projects = [
   {
+    to: '/redesign/naslagdenia/',
+    image: '/redesign/naslagdenia/og.jpg',
+    title: 'Наслаждение',
+    text: 'Сеть кондитерских в Новосибирске: два пути на первом экране — готовый торт сегодня с живым временем доставки и заказной к дате; расчёт заказного торта по числу гостей с начинкой из готовых тортов, ближайшей датой и предоплатой, пирожные с ценой коробки, 12 магазинов на карте.',
+    source: 'https://naslagdenia.com',
+    tags: ['Nuxt 3', 'Vue', 'MODX'],
+  },
+  {
     to: '/redesign/bukety/',
     image: '/redesign/bukety/og.jpg',
     title: 'Любимые Букеты',
