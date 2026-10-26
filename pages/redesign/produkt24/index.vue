@@ -5,6 +5,7 @@ import PkTiers from '~/components/redesign/produkt24/PkTiers.vue'
 import PkRow from '~/components/redesign/produkt24/PkRow.vue'
 import PkLetter from '~/components/redesign/produkt24/PkLetter.vue'
 import PkFeedback from '~/components/redesign/produkt24/PkFeedback.vue'
+import PkMap from '~/components/redesign/produkt24/PkMap.vue'
 
 useSeoMeta({ title: '24produkt — продукты оптом и в розницу в Красноярске | Концепт редизайна' })
 
@@ -138,7 +139,7 @@ const facts = [
             <PkIcon name="clock" :size="18" />
             <span>Пн–пт 8:30–16:30, сб 9:00–12:00, вс — выходной</span>
           </p>
-          <iframe :src="pkContacts.map" title="Склад на карте" loading="lazy" />
+          <PkMap class="pk-visit__map" />
         </div>
         <PkFeedback />
       </div>
@@ -547,10 +548,11 @@ const facts = [
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
   gap: 24px;
 
+  // Колонка: карта забирает высоту, которую задаёт форма справа.
   &__card {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 12px;
-    align-content: start;
     padding: 24px;
     border-radius: var(--pk-r-lg);
     background: var(--pk-surface);
@@ -571,14 +573,12 @@ const facts = [
       }
     }
 
-    iframe {
-      width: 100%;
-      height: 260px;
-      margin-top: 8px;
-      border: 0;
-      border-radius: var(--pk-r);
-      background: var(--pk-map) url('/redesign/produkt24/map.svg') center / 72px no-repeat;
-    }
+  }
+
+  &__map {
+    flex: 1 1 auto;
+    margin-top: 8px;
+    border-radius: var(--pk-r);
   }
 
   &__phones {

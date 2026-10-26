@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import PkIcon from '~/components/redesign/produkt24/PkIcon.vue'
 import PkFeedback from '~/components/redesign/produkt24/PkFeedback.vue'
+import PkMap from '~/components/redesign/produkt24/PkMap.vue'
 
 useSeoMeta({ title: 'Контакты, доставка и оплата — 24produkt | Концепт редизайна' })
 
@@ -41,7 +42,7 @@ const terms = [
       </div>
 
       <div class="pk-contacts__map">
-        <iframe :src="pkContacts.map" title="Склад на карте" loading="lazy" />
+        <PkMap class="pk-contacts__mapbox" />
         <div>
           <p><PkIcon name="pin" :size="18" /><b>{{ pkContacts.address }}</b></p>
           <a :href="pkContacts.mapLink" target="_blank" rel="noopener" class="pk-btn pk-btn--line">Маршрут</a>
@@ -164,17 +165,15 @@ const terms = [
   }
 
   &__map {
-    display: grid;
-    grid-template-rows: minmax(300px, 1fr) auto;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     border: 1px solid var(--pk-line);
     border-radius: var(--pk-r-lg);
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      background: var(--pk-map) url('/redesign/produkt24/map.svg') center / 72px no-repeat;
+    .pk-map {
+      flex: 1 1 auto;
+      min-height: 320px;
     }
 
     > div {
