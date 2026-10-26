@@ -6,7 +6,7 @@
 | Ниша | Файл | Проекты |
 |---|---|---|
 | Продукты: общее (главная, карточка, корзина, мобильное, фото) | `niches/grocery.md` | sttorg70, foodgood, sibprod, sibirtreid |
-| Продукты: опт + розница, HoReCa, две цены в карточке | `niches/grocery-wholesale.md` | prodagro |
+| Продукты: опт + розница, HoReCa, две цены в карточке | `niches/grocery-wholesale.md` | prodagro, produkt24 |
 | Продукты: крупный опт без корзины, прайс по запросу | `niches/grocery-distributor.md` | sibirtreid |
 | Продукты: доставка по городу, своя марка, интервалы | `niches/grocery-city-delivery.md` | sibprod |
 | Рыба и морепродукты: опт + розница на одном сайте | `niches/fish-wholesale-retail.md` | rybasibiri |
