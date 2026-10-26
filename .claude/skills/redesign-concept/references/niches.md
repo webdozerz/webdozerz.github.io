@@ -17,6 +17,7 @@
 | Мясное производство + обеды в офис + кафе | `niches/meat-lunch.md` | tomich |
 | Мясная лавка с доставкой | `niches/meat-shop.md` | sanych |
 | Цветы и подарки | `niches/flowers.md` | bukety |
+| Кондитерская: готовые торты + заказные по весу к дате | `niches/confectionery.md` | naslagdenia |
 | Кафе, рестораны, доставка еды | `niches/cafe.md` | — |
 | Услуги по записи: салоны, клиники, автосервисы | `niches/services.md` | — |
 | Стройматериалы, B2B-каталоги | `niches/b2b-building.md` | — |
