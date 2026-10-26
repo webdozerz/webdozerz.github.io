@@ -9,6 +9,14 @@ useSeoMeta({
 
 const projects = [
   {
+    to: '/redesign/mnerozy/',
+    image: '/redesign/mnerozy/og.jpg',
+    title: 'Мне розы',
+    text: 'Круглосуточная доставка цветов по Томску: охапка роз Эквадор поштучно на первом экране — число, цвет и длина, цена за розу сама снижается на ступенях 15/25/51; поиск с фото и ценой, варианты оформления с доплатой в карточке, зоны доставки, дата и интервал в оформлении.',
+    source: 'https://mnerozy.ru',
+    tags: ['Nuxt 3', 'Vue', 'OpenCart'],
+  },
+  {
     to: '/redesign/naslagdenia/',
     image: '/redesign/naslagdenia/og.jpg',
     title: 'Наслаждение',
