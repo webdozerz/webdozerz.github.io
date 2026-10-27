@@ -9,6 +9,14 @@ useSeoMeta({
 
 const projects = [
   {
+    to: '/redesign/papinalavka/',
+    image: '/redesign/papinalavka/og.jpg',
+    title: 'Папина лавка',
+    text: 'Натуральные продукты с экоферм под заказ, Воронеж: доска ближайших поставок с датами и сроком заказа на первом экране, 34 раздела с круглыми фото и деревянными табличками, поиск с подсказками, корзина с датой привоза у каждой позиции, доставкой или одним из 7 офисов.',
+    source: 'https://papinalavka.ru',
+    tags: ['Nuxt 3', 'Vue', 'самописная CMS'],
+  },
+  {
     to: '/redesign/mrkfish/',
     image: '/redesign/mrkfish/og.jpg',
     title: 'Миякинская Рыбная Компания',

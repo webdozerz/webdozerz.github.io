@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="192" viewBox="0 0 640 192">
+  <filter id="g7" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.0028 0.075" numOctaves="4" seed="7" stitchTiles="stitch"/>
+    <feColorMatrix values="0 0 0 0 0.42  0 0 0 0 0.22  0 0 0 0 0.08  2.0 0 0 0 -0.85"/>
+  </filter>
+  <filter id="f7" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.012 0.55" numOctaves="2" seed="10" stitchTiles="stitch"/>
+    <feColorMatrix values="0 0 0 0 1.0  0 0 0 0 0.9  0 0 0 0 0.72  0.48 0 0 0 -0.192"/>
+  </filter>
+  <rect width="640" height="192" fill="#c58a52"/>
+  <rect y="0" width="640" height="48" fill="#fff" opacity="0.06"/><rect y="48" width="640" height="48" fill="#000" opacity="0.05"/><rect y="96" width="640" height="48" fill="#fff" opacity="0.0"/><rect y="144" width="640" height="48" fill="#000" opacity="0.07"/>
+  <rect width="640" height="192" filter="url(#g7)"/>
+  <rect width="640" height="192" filter="url(#f7)"/>
+  <g opacity=".38"><ellipse cx="150" cy="24" rx="16" ry="5.5" fill="none" stroke="#3b1e0b" stroke-width="1.4"/><ellipse cx="150" cy="24" rx="9" ry="3" fill="#3b1e0b" opacity=".7"/><path d="M90 16c30 0 40 3 60 3s30-3 60-3M90 32c30 0 40-3 60-3s30 3 60 3" fill="none" stroke="#3b1e0b" stroke-width="1" opacity=".6"/></g><g opacity=".38"><ellipse cx="520" cy="118" rx="16" ry="5.5" fill="none" stroke="#3b1e0b" stroke-width="1.4"/><ellipse cx="520" cy="118" rx="9" ry="3" fill="#3b1e0b" opacity=".7"/><path d="M460 110c30 0 40 3 60 3s30-3 60-3M460 126c30 0 40-3 60-3s30 3 60 3" fill="none" stroke="#3b1e0b" stroke-width="1" opacity=".6"/></g><rect y="46" width="640" height="2" fill="rgba(70,36,12,.55)"/><rect y="0" width="640" height="1" fill="rgba(255,240,210,.35)"/><rect y="94" width="640" height="2" fill="rgba(70,36,12,.55)"/><rect y="48" width="640" height="1" fill="rgba(255,240,210,.35)"/><rect y="142" width="640" height="2" fill="rgba(70,36,12,.55)"/><rect y="96" width="640" height="1" fill="rgba(255,240,210,.35)"/><rect y="190" width="640" height="2" fill="rgba(70,36,12,.55)"/><rect y="144" width="640" height="1" fill="rgba(255,240,210,.35)"/><rect x="410" y="0" width="2" height="46" fill="rgba(70,36,12,.55)"/><rect x="412" y="0" width="1" height="46" fill="rgba(255,240,210,.35)"/><rect x="120" y="48" width="2" height="46" fill="rgba(70,36,12,.55)"/><rect x="122" y="48" width="1" height="46" fill="rgba(255,240,210,.35)"/><rect x="560" y="96" width="2" height="46" fill="rgba(70,36,12,.55)"/><rect x="562" y="96" width="1" height="46" fill="rgba(255,240,210,.35)"/><rect x="260" y="144" width="2" height="46" fill="rgba(70,36,12,.55)"/><rect x="262" y="144" width="1" height="46" fill="rgba(255,240,210,.35)"/>
+</svg>
