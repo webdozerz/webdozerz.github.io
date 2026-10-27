@@ -83,6 +83,17 @@
         "cd /private/tmp/claude-501/-Users-iliyaandrushov-WebstormProjects-webdozerz-github-io/241c5530-b948-4824-882d-c2eb5cce84ff/scratchpad/repo && npx nuxt dev --port 3039"
       ],
       "port": 3039
+    },
+    {
+      "name": "nuxt-dev-mf",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "nuxt",
+        "dev",
+        "--port",
+        "3043"
+      ],
+      "port": 3043
     }
   ]
 }
