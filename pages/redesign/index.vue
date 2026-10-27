@@ -9,6 +9,14 @@ useSeoMeta({
 
 const projects = [
   {
+    to: '/redesign/mrkfish/',
+    image: '/redesign/mrkfish/og.jpg',
+    title: 'Миякинская Рыбная Компания',
+    text: 'Производитель копчёной, солёной и вяленой рыбы из Башкортостана, опт без цен на сайте: каталог 58 позиций по разделам вместо одностраничника, фасовки в карточке, «В заявку» в кг или упаковках и готовый запрос прайса в отдел продаж, две площадки с картами.',
+    source: 'https://www.mrkfish.ru',
+    tags: ['Nuxt 3', 'Vue', 'Платформа LP'],
+  },
+  {
     to: '/redesign/produkt24/',
     image: '/redesign/produkt24/og.jpg',
     title: '24produkt',
