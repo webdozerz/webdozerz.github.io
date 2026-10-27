@@ -11,7 +11,7 @@
 | Продукты: доставка по городу, своя марка, интервалы | `niches/grocery-city-delivery.md` | sibprod |
 | Рыба и морепродукты: опт + розница на одном сайте | `niches/fish-wholesale-retail.md` | rybasibiri, mrkfish |
 | Рыба под привоз: заказ к дню доставки, витрина в Telegram-канале | `niches/fish-preorder.md` | lavkafish |
-| Фермерские продукты, маленькие магазины на Taplink / в соцсетях | `niches/farm-taplink.md` | foodgood, fermatomsk |
+| Фермерские продукты, маленькие магазины на Taplink / в соцсетях | `niches/farm-taplink.md` | foodgood, fermatomsk, papinalavka |
 | Молочный завод / производитель со своей доставкой | `niches/dairy-producer.md` | fermertomska |
 | Мёд и продукты пчеловодства: семейная пасека | `niches/honey-apiary.md` | 38pchel |
 | Мясное производство + обеды в офис + кафе | `niches/meat-lunch.md` | tomich |
