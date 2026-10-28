@@ -331,6 +331,8 @@ body > main { padding-block: 28px 80px; }
 [data-view="bem"], .bar__tab[data-go="bem"], [data-topic="bem"] { --accent: var(--c-bem); }
 [data-view="js"], .bar__tab[data-go="js"], [data-topic="js"] { --accent: var(--c-js); }
 [data-view="git"], .bar__tab[data-go="git"], [data-topic="git"] { --accent: var(--c-git); }
+[data-topic="gloss"] { --accent: var(--muted); }
+div.results__item { cursor: default; }
 body { background-color: var(--canvas); background-image: radial-gradient(var(--dot) 1px, transparent 1.4px); background-size: 22px 22px; background-attachment: fixed; }
 h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spacing: -.03em; }
 .view-head h1 { font-size: clamp(26px, 4.2vw, 44px); line-height: 1.1; }
@@ -434,12 +436,70 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
   .bar__tabs { flex-wrap: wrap; overflow: visible; }
   .play { display: flex; flex-direction: column; }
   .play__out { display: contents; }
-  .stage { order: -1; position: sticky; top: calc(var(--bar-h, 96px) + 8px); z-index: 5; min-height: 170px; }
+  .bm-stage { order: -1; }
+  .play .stage-wrap { order: -1; position: sticky; top: calc(var(--bar-h, 96px) + 8px); z-index: 5; }
+  .stage { min-height: 230px; }
+  .axis span { font-size: 10px; }
   .play__controls { order: 0; }
   .explain { order: 1; }
   .play__out .codebox { order: 2; }
   .git__zone + .git__zone::before { display: none; }
 }
+/* ---------- glossary ---------- */
+.gl { text-decoration: underline dotted color-mix(in srgb, var(--accent) 70%, transparent); text-decoration-thickness: 1.5px; text-underline-offset: 3px; cursor: help; border-radius: 2px; }
+.gl:hover, .gl:focus-visible, .gl--open { background: color-mix(in srgb, var(--accent) 14%, transparent); outline: none; }
+.tip { position: fixed; z-index: 50; max-width: min(320px, calc(100vw - 24px)); background: var(--ink); color: var(--surface); padding: 10px 12px; border-radius: 6px; font-size: 13px; line-height: 1.45; box-shadow: var(--shadow); pointer-events: none; }
+.tip b { display: block; font-size: 12px; margin-bottom: 2px; opacity: .75; font-family: var(--f-mono); }
+
+/* ---------- flex axes ---------- */
+.stage-wrap { position: relative; }
+.stage-wrap .stage { padding: 10px 40px 40px 10px; }
+.axis { position: absolute; pointer-events: none; --ac: var(--muted); }
+.axis--main { --ac: var(--accent); }
+.axis--h { left: 12px; right: 40px; bottom: 12px; height: 2px; background: var(--ac); }
+.axis--h::after { content: ""; position: absolute; right: -2px; top: -5px; border: 6px solid transparent; border-left: 9px solid var(--ac); border-right: 0; }
+.axis--h.axis--rev::after { right: auto; left: -2px; border-left: 0; border-right: 9px solid var(--ac); }
+.axis--h span { position: absolute; left: 0; bottom: 6px; }
+.axis--v { top: 12px; bottom: 40px; right: 16px; width: 2px; background: var(--ac); }
+.axis--v::after { content: ""; position: absolute; bottom: -2px; left: -5px; border: 6px solid transparent; border-top: 9px solid var(--ac); border-bottom: 0; }
+.axis--v span { position: absolute; right: 8px; top: 0; writing-mode: vertical-rl; transform: rotate(180deg); }
+.axis span { font: 600 11px var(--f-mono); color: var(--ac); white-space: nowrap; background: var(--surface); padding: 1px 4px; border-radius: 3px; }
+.axis--grid { --ac: var(--muted); }
+
+/* ---------- box model ---------- */
+.bm-stage { overflow-x: auto; border: 2px dashed var(--line); border-radius: 4px; padding: 16px; background: var(--surface); }
+.bm { position: relative; display: inline-block; background: repeating-linear-gradient(45deg, color-mix(in srgb, #f59f00 22%, transparent) 0 6px, transparent 6px 12px); outline: 1px dashed #f59f00; }
+.bm__box { position: relative; border-style: solid; border-color: var(--ink); background: color-mix(in srgb, #2fb344 28%, var(--surface)); }
+.bm__content { background: color-mix(in srgb, #1c64f2 30%, var(--surface)); color: var(--ink); font: 600 12px var(--f-mono); display: grid; place-items: center; min-height: 48px; text-align: center; overflow: hidden; }
+.bm__tag { position: absolute; font: 600 10px var(--f-mono); padding: 1px 4px; border-radius: 3px; white-space: nowrap; z-index: 1; }
+.bm__tag--m { top: 0; left: 0; color: #b86e00; }
+.bm__tag--b { top: -16px; right: 0; color: var(--ink); background: var(--surface); }
+.bm__tag--p { top: 0; left: 0; color: #1d7a32; }
+:root[data-theme="dark"] .bm__tag--m { color: #ffc14d; } :root[data-theme="dark"] .bm__tag--p { color: #7ee29a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .bm__tag--m { color: #ffc14d; } :root:not([data-theme="light"]) .bm__tag--p { color: #7ee29a; } }
+.range { display: grid; gap: 4px; font: 600 12px var(--f-mono); color: var(--muted); }
+.range input { width: 100%; accent-color: var(--accent); }
+
+/* ---------- BEM intro ---------- */
+.bem-intro .widget__body { gap: 14px; }
+.bem-intro__lead { font-size: 16px; max-width: 70ch; }
+.bem-intro__formula { font-size: clamp(16px, 3vw, 26px); font-weight: 600; display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
+.bem-intro__formula span { padding: 4px 10px; border-radius: 4px; }
+.bem-intro__formula .a-b { background: color-mix(in srgb, var(--block) 18%, transparent); color: var(--block); }
+.bem-intro__formula .a-e { background: color-mix(in srgb, var(--elem) 18%, transparent); color: var(--elem); }
+.bem-intro__formula .a-m { background: color-mix(in srgb, var(--mod) 18%, transparent); color: var(--mod); }
+.bem-intro__formula i { font-style: normal; color: var(--muted); }
+.bem-intro__parts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.bem-intro__part { display: grid; gap: 4px; border-left: 3px solid var(--c); padding: 8px 12px; background: color-mix(in srgb, var(--c) 7%, transparent); font-size: 14px; }
+.bem-intro__part > b { color: var(--c); font-size: 14px; }
+.bem-intro__note { font-size: 14px; color: var(--muted); }
+@media (max-width: 760px) { .bem-intro__parts { grid-template-columns: minmax(0, 1fr); } }
+@media (hover: none) { .bem-tools .switch { display: none; } }
+
+.block-title { font-size: 20px; margin-top: 8px; }
+.note { font-size: 14px; color: var(--muted); border-left: 3px solid var(--accent); padding: 4px 0 4px 10px; }
+.note a { color: var(--accent); font-weight: 600; }
+
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 </style>
 <script src="/metrika.js"></script>
@@ -481,6 +541,18 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
       <span class="eyebrow">БЭМ</span>
       <h1>Макет лендинга по БЭМ</h1>
       <p>Шапка, первый экран, «О нас», «Мероприятия», «Блог», «Контакты» и подвал. Нажмите на любую часть: откроется разбор её классов, что в каждом из них писать и пример CSS. При наведении видны имя класса, размер и внутренние отступы, как в Pixso.</p>
+    </div>
+    <div class="widget bem-intro" data-frame="Frame · Что такое БЭМ">
+      <div class="widget__body">
+        <p class="bem-intro__lead">БЭМ — это правило, как называть классы, чтобы по имени было понятно, что это и где оно лежит. Расшифровка: <b>Б</b>лок, <b>Э</b>лемент, <b>М</b>одификатор.</p>
+        <div class="bem-intro__formula mono" aria-label="Формула имени класса"><span class="a-b">блок</span><i>__</i><span class="a-e">элемент</span><i>--</i><span class="a-m">модификатор</span></div>
+        <div class="bem-intro__parts">
+          <div class="bem-intro__part" style="--c: var(--block)"><b class="mono">header</b><span><b>Блок</b> — самостоятельная часть: шапка, меню, кнопка, карточка. Её можно перенести в другое место.</span></div>
+          <div class="bem-intro__part" style="--c: var(--elem)"><b class="mono">header__logo</b><span><b>Элемент</b> — часть блока, без него не живёт. Два подчёркивания.</span></div>
+          <div class="bem-intro__part" style="--c: var(--mod)"><b class="mono">button--primary</b><span><b>Модификатор</b> — вариант или состояние. Два дефиса, пишется вместе с основным классом.</span></div>
+        </div>
+        <p class="bem-intro__note">Иногда на одном теге несколько классов из разных блоков, например <code>logo header__logo</code>. Это называется микс: <code>logo</code> отвечает за вид, <code>header__logo</code> — за место в шапке.</p>
+      </div>
     </div>
     <div class="bem-tools">
       <div class="legend">
@@ -647,7 +719,7 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
 
   <!-- ================= HTML ================= -->
   <section data-view="html" hidden>
-    <div class="view-head"><span class="eyebrow">HTML</span><h1>Семантика и разметка</h1><p>Нажмите на часть страницы и посмотрите, какой тег здесь нужен и почему.</p></div>
+    <div class="view-head"><span class="eyebrow">HTML</span><h1>Семантика и разметка</h1><p>Нажмите на часть страницы и посмотрите, какой тег здесь нужен и почему.</p><p class="note">Имена классов вида <code>nav__list</code> и <code>button--primary</code> — это БЭМ. Как их придумывать, разобрано в разделе <a href="#bem" data-go="bem">БЭМ</a>.</p></div>
     <div class="widget" data-frame="Frame · Карта страницы">
       <div class="widget__head"><div><h2>Карта страницы</h2><p>Из каких тегов собирается типичная страница</p></div></div>
       <div class="widget__body">
@@ -662,7 +734,23 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
 
   <!-- ================= CSS ================= -->
   <section data-view="css" hidden>
-    <div class="view-head"><span class="eyebrow">CSS</span><h1>Раскладка и селекторы</h1><p>Двигайте блоки во Flexbox и Grid, проверяйте, какие элементы выбирают псевдоклассы. Готовый код можно скопировать.</p></div>
+    <div class="view-head"><span class="eyebrow">CSS</span><h1>Блоки, раскладка и селекторы</h1><p>Разберитесь, из чего состоит любой элемент, двигайте блоки во Flexbox и Grid, проверяйте, какие элементы выбирают псевдоклассы. Готовый код можно скопировать.</p><p class="note">Имена классов вида <code>nav__list</code> и <code>button--primary</code> — это БЭМ. Как их придумывать, разобрано в разделе <a href="#bem" data-go="bem">БЭМ</a>.</p></div>
+    <div class="widget" data-frame="Frame · Блочная модель">
+      <div class="widget__head">
+        <div><h2>Из чего состоит любой элемент</h2><p>Двигайте ползунки и смотрите, как меняется размер коробки</p></div>
+        <div class="seg" id="bmSizing"><button type="button" aria-pressed="true" data-v="content-box">content-box</button><button type="button" aria-pressed="false" data-v="border-box">border-box</button></div>
+      </div>
+      <div class="widget__body">
+        <div class="play">
+          <div class="play__controls" id="bmControls"></div>
+          <div class="play__out">
+            <div class="bm-stage"><div class="bm" id="bm"><span class="bm__tag bm__tag--m">margin</span><div class="bm__box" id="bmBox"><span class="bm__tag bm__tag--b">border</span><span class="bm__tag bm__tag--p">padding</span><div class="bm__content" id="bmContent">контент</div></div></div></div>
+            <div class="explain" id="bmExplain"></div>
+            <div class="codebox"><span class="codebox__lang">CSS</span><pre id="bmCode"></pre><button class="btn btn--small" type="button" data-copy="#bmCode">Скопировать</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="widget" data-frame="Frame · Песочница раскладки">
       <div class="widget__head">
         <div><h2>Песочница раскладки</h2><p>Пять блоков внутри контейнера</p></div>
@@ -672,7 +760,7 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
         <div class="play">
           <div class="play__controls" id="playControls"></div>
           <div class="play__out">
-            <div class="stage" id="stage"></div>
+            <div class="stage-wrap"><div class="stage" id="stage"></div><div class="axis axis--h" id="axH"><span></span></div><div class="axis axis--v" id="axV"><span></span></div></div>
             <div class="explain" id="playExplain"></div>
             <div class="codebox"><span class="codebox__lang">CSS</span><pre id="playCode"></pre><button class="btn btn--small" type="button" data-copy="#playCode">Скопировать</button></div>
           </div>
@@ -698,7 +786,7 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
 
   <!-- ================= JS ================= -->
   <section data-view="js" hidden>
-    <div class="view-head"><span class="eyebrow">JS</span><h1>Работа со страницей (DOM)</h1><p>Нажимайте на команды слева: каждая выполняется на живом меню справа.</p></div>
+    <div class="view-head"><span class="eyebrow">JS</span><h1>JavaScript: основы и DOM</h1><p>Нажимайте на команды слева: каждая выполняется на живом меню справа. Ниже шпаргалки: сначала основы языка, потом работа со страницей.</p></div>
     <div class="widget" data-frame="Frame · Песочница DOM">
       <div class="widget__head"><div><h2>Песочница DOM</h2><p>Блок <code>.menu</code> из трёх пунктов</p></div><button class="btn btn--small" type="button" id="sandReset">Сбросить</button></div>
       <div class="widget__body">
@@ -712,12 +800,16 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
         </div>
       </div>
     </div>
+    <div class="filter" id="jsFilter"></div>
     <div class="cards" data-cards="js"></div>
   </section>
 
   <!-- ================= GIT ================= -->
   <section data-view="git" hidden>
-    <div class="view-head"><span class="eyebrow">Git</span><h1>Путь изменений: от файла до GitHub</h1><p>Нажимайте команды по порядку и смотрите, куда переезжают файлы.</p></div>
+    <div class="view-head"><span class="eyebrow">Git</span><h1>Git: от файла до GitHub</h1><p>Сначала три шага подготовки, потом симулятор: нажимайте команды по порядку и смотрите, куда переезжают файлы. Внизу шпаргалки и частые ошибки с решениями.</p></div>
+    <h2 class="block-title">Перед первым коммитом</h2>
+    <div class="cards" data-cards-start="git"></div>
+    <h2 class="block-title">Как Git сохраняет изменения</h2>
     <div class="widget" data-frame="Frame · Симулятор Git">
       <div class="widget__head"><div><h2>Симулятор</h2><p>Рабочая папка → индекс → коммит → GitHub</p></div><button class="btn btn--small" type="button" id="gitReset">Сначала</button></div>
       <div class="widget__body">
@@ -733,6 +825,7 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
         <div id="gitAnswer" style="display:grid; gap:10px"></div>
       </div>
     </div>
+    <div class="filter" id="gitFilter"></div>
     <div class="cards" data-cards="git"></div>
   </section>
 </main>
@@ -756,6 +849,85 @@ function hl(code, lang) {
   return s.replace(/(\/\/.*)$/gm, '<span class="tok-c">$1</span>').replace(/(&#39;|'|`)(.*?)\1/g, '<span class="tok-s">$1$2$1</span>').replace(/\b(const|let|function|return|if|else|for|of|await|async|new|true|false)\b/g, '<span class="tok-x">$1</span>').replace(/\.([a-zA-Z]+)(?=\()/g, '.<span class="tok-k">$1</span>');
 }
 const LANG = { html: 'HTML', css: 'CSS', js: 'JavaScript', git: 'Терминал' };
+/* glossary: dotted terms with one-line explanations */
+const GLOSSARY = [
+  ['главн[а-яё]* ос[а-яё]*', 'Главная ось', 'Направление, в котором flex выстраивает блоки: по горизонтали при row, по вертикали при column. Вдоль неё работает justify-content.'],
+  ['поперечн[а-яё]* ос[а-яё]*', 'Поперечная ось', 'Перпендикуляр к главной оси. Вдоль неё работает align-items.'],
+  ['блочн[а-яё]* модел[а-яё]*', 'Блочная модель', 'Каждый элемент — коробка: содержимое, внутренний отступ padding, рамка border и внешний отступ margin.'],
+  ['коммит[а-яё]*', 'Коммит', 'Сохранённый снимок проекта с подписью, что сделано. Из коммитов складывается история.'],
+  ['индекс[а-яё]*', 'Индекс', 'Список файлов, которые попадут в следующий коммит. Файл попадает туда командой git add.'],
+  ['репозитори[а-яё]*', 'Репозиторий', 'Папка проекта, за которой следит Git: файлы плюс вся история изменений.'],
+  ['ветк[а-яё]*', 'Ветка', 'Отдельная линия истории. В ветке пробуют новое, не трогая основную версию main.'],
+  ['origin', 'origin', 'Так Git по умолчанию называет копию вашего репозитория на GitHub.'],
+  ['пуш[а-яё]*|push', 'push', 'Отправка ваших коммитов на GitHub.'],
+  ['merge', 'merge', 'Слияние: изменения из одной ветки переносятся в другую.'],
+  ['терминал[а-яё]*', 'Терминал', 'Окно, где команды вводят текстом. В VS Code: меню Terminal → New Terminal или Ctrl + ` (клавиша Ё).'],
+  ['семантик[а-яё]*|семантическ[а-яё]*', 'Семантика', 'Выбор тегов по смыслу: шапка — header, меню — nav, статья — article. Это помогает поисковикам и скринридерам.'],
+  ['скринридер[а-яё]*', 'Скринридер', 'Программа, которая читает страницу вслух незрячим людям. Она опирается на теги и атрибут alt.'],
+  ['атрибут[а-яё]*', 'Атрибут', 'Настройка тега внутри угловых скобок: href у ссылки, src и alt у картинки, class у любого тега.'],
+  ['тег[а-яё]*', 'Тег', 'Кирпичик HTML в угловых скобках: <p>, <a>, <section>. Обычно есть открывающий и закрывающий.'],
+  ['селектор[а-яё]*', 'Селектор', 'Часть CSS-правила до фигурных скобок: к каким элементам применить стили. Например, .button.'],
+  ['свойств[а-яё]*', 'Свойство', 'Что меняем в CSS: color, padding, display. Пишется до двоеточия, после него идёт значение.'],
+  ['псевдокласс[а-яё]*', 'Псевдокласс', 'Добавка к селектору через одно двоеточие: выбирает элемент в состоянии (:hover) или по месту (:first-child).'],
+  ['псевдоэлемент[а-яё]*', 'Псевдоэлемент', 'Через два двоеточия: ::before и ::after добавляют «виртуальный» кусочек в начало или конец тега.'],
+  ['медиазапрос[а-яё]*', 'Медиазапрос', 'Условие @media: «если экран шире 768px, примени эти стили». Так делают адаптив.'],
+  ['адаптив[а-яё]*', 'Адаптив', 'Страница подстраивается под ширину экрана: на телефоне одна колонка, на компьютере несколько.'],
+  ['контейнер[а-яё]*', 'Контейнер', 'Родитель, у которого стоит display: flex или grid. Его свойства управляют детьми внутри.'],
+  ['padding', 'padding', 'Внутренний отступ: от рамки до содержимого. Фон элемента заливает и его.'],
+  ['margin', 'margin', 'Внешний отступ: от рамки до соседей. Он всегда прозрачный.'],
+  ['DOM', 'DOM', 'Страница глазами JavaScript: дерево из всех тегов, которое можно читать и менять из кода.'],
+  ['промис[а-яё]*', 'Промис', 'Обещание результата «потом», например ответа сервера. await ждёт, пока он придёт.'],
+  ['обработчик[а-яё]*', 'Обработчик', 'Функция, которую браузер вызовет, когда случится событие: клик, ввод, отправка формы.'],
+  ['событи[а-яё]*', 'Событие', 'То, что произошло на странице: click, input, submit. На него вешают обработчик.'],
+  ['консол[а-яё]*', 'Консоль', 'Панель разработчика в браузере: F12 → вкладка Console. Туда пишет console.log и туда же падают ошибки.'],
+  ['микс[а-яё]*', 'Микс', 'Несколько БЭМ-классов на одном теге: один задаёт вид блока, другой — его место внутри родителя.'],
+  ['модификатор[а-яё]*', 'Модификатор', 'Класс с двумя дефисами (button--primary): вариант или состояние. Пишется только рядом с основным классом.'],
+  ['Frame', 'Frame', 'Так в Pixso и Figma называется рамка-контейнер, внутри которой рисуют экран или блок.'],
+  ['специфичност[а-яё]*', 'Специфичность', 'Вес селектора. Если два правила меняют одно свойство, побеждает то, у которого вес больше.'],
+];
+const TERM_RE = new RegExp('(?<![a-zа-яё])(' + GLOSSARY.map(g => g[0]).join('|') + ')(?![a-zа-яё])', 'giu');
+const termOf = w => GLOSSARY.find(g => new RegExp('^(?:' + g[0] + ')$', 'iu').test(w));
+function termify(root) {
+  if (!root) return;
+  const used = new Set();
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n =>
+    n.parentElement.closest('pre, code, .gl, button, select, option, textarea, .anatomy, .crumbs, .tok-c, .codebox, h1, h2, h3, h4') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const text = node.nodeValue; TERM_RE.lastIndex = 0;
+    let m, last = 0, frag = null;
+    while ((m = TERM_RE.exec(text))) {
+      const g = termOf(m[1]); if (!g || used.has(g[1])) continue;
+      used.add(g[1]);
+      frag = frag || document.createDocumentFragment();
+      frag.append(text.slice(last, m.index));
+      const s = document.createElement('span');
+      s.className = 'gl'; s.tabIndex = 0; s.dataset.t = g[1]; s.textContent = m[1];
+      frag.append(s); last = m.index + m[1].length;
+    }
+    if (frag) { frag.append(text.slice(last)); node.replaceWith(frag); }
+  });
+}
+const tip = document.createElement('div'); tip.className = 'tip'; tip.hidden = true; tip.setAttribute('role', 'tooltip');
+document.body.append(tip);
+let tipFor = null;
+function showTip(el) {
+  const g = GLOSSARY.find(x => x[1] === el.dataset.t); if (!g) return;
+  if (tipFor) tipFor.classList.remove('gl--open');
+  tipFor = el; el.classList.add('gl--open');
+  tip.innerHTML = `<b>${esc(g[1])}</b>${esc(g[2])}`; tip.hidden = false;
+  const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.max(12, Math.min(r.left, innerWidth - w - 12)) + 'px';
+  tip.style.top = (r.bottom + h + 12 < innerHeight ? r.bottom + 6 : r.top - h - 6) + 'px';
+}
+function hideTip() { tip.hidden = true; if (tipFor) tipFor.classList.remove('gl--open'); tipFor = null; }
+document.addEventListener('mouseover', e => { const t = e.target.closest('.gl'); if (t) showTip(t); });
+document.addEventListener('mouseout', e => { if (e.target.closest('.gl')) hideTip(); });
+document.addEventListener('focusin', e => { const t = e.target.closest('.gl'); if (t) showTip(t); });
+document.addEventListener('focusout', e => { if (e.target.closest('.gl')) hideTip(); });
+document.addEventListener('click', e => { const t = e.target.closest('.gl'); if (t) { e.stopPropagation(); tipFor === t ? hideTip() : showTip(t); } else hideTip(); }, true);
+addEventListener('scroll', hideTip, { passive: true });
+
 function codebox(code, lang) {
   const box = document.createElement('div');
   box.className = 'codebox';
@@ -785,16 +957,18 @@ document.addEventListener('click', e => {
 const SHEETS = {
   html: { name: 'HTML', badge: '</>', desc: 'Каркас страницы, семантические теги, формы и картинки.', lang: 'html', items: [
     { t: 'Каркас документа', d: 'С этого начинается любой index.html. В VS Code его вставляет «!» и Tab.', tags: ['doctype', 'head', 'meta'], code:
-`<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
+`<!DOCTYPE html>                <!-- «это современный HTML» -->
+<html lang="ru">               <!-- язык страницы: русский -->
+<head>                         <!-- служебное, на странице не видно -->
+  <meta charset="UTF-8">       <!-- кодировка, чтобы буквы не превратились в «кракозябры» -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lenni</title>
-  <link rel="stylesheet" href="css/style.css">
+                               <!-- без этой строки телефон покажет сайт мелко, как на компьютере -->
+  <title>Lenni</title>         <!-- текст на вкладке браузера -->
+  <link rel="stylesheet" href="css/style.css">  <!-- подключить CSS -->
 </head>
-<body>
+<body>                         <!-- всё, что видно на странице -->
   <script src="js/main.js" defer><\/script>
+                               <!-- defer: запустить JS, когда HTML загрузится -->
 </body>
 </html>` },
     { t: 'Ссылки и якоря', d: 'Якорь ведёт к элементу с таким же id на странице. Внешние ссылки открываем в новой вкладке.', tags: ['a', 'href', 'якорь'], code:
@@ -802,9 +976,10 @@ const SHEETS = {
 <section id="about">…</section>
 
 <a href="https://example.com" target="_blank" rel="noopener">Сайт</a>
+<!-- target="_blank" — в новой вкладке, rel="noopener" — защита, ставится в паре с ним -->
 <a href="tel:+70000000000">Позвонить</a>
 <a href="mailto:hello@lenni.example">Написать</a>` },
-    { t: 'Картинки', d: 'alt обязателен: его читают скринридеры, и он виден, если картинка не загрузилась.', tags: ['img', 'alt', 'picture'], code:
+    { t: 'Картинки', d: 'alt обязателен: его читают скринридеры, и он виден, если картинка не загрузилась. Блок picture ниже пригодится позже, когда дойдёте до адаптива.', tags: ['img', 'alt', 'picture'], code:
 `<img src="img/hero.jpg" alt="Зал перед лекцией" width="800" height="600">
 
 <!-- разные картинки для разных экранов -->
@@ -817,6 +992,7 @@ const SHEETS = {
   <label class="form__field">
     Имя
     <input class="form__input" type="text" name="name" required>
+    <!-- name — под этим именем значение уйдёт на сервер, required — поле обязательно -->
   </label>
   <label class="form__field">
     Почта
@@ -839,11 +1015,19 @@ const SHEETS = {
 `<a class="button" href="#events">Смотреть афишу</a>   <!-- переход -->
 <button class="button" type="button">Открыть меню</button> <!-- действие -->
 <button class="button" type="submit">Отправить</button>    <!-- в форме -->` },
+    { t: 'div или section?', d: 'section — смысловой раздел со своим заголовком, его видно в оглавлении страницы. div — просто коробка для оформления, смысла не несёт. Если не можете придумать заголовок части, скорее всего, нужен div.', tags: ['div', 'section', 'article', 'семантика'], code:
+`<section class="home__about about">  <!-- раздел «О нас», есть заголовок -->
+  <h2 class="section-title about__title">О нас</h2>
+  <div class="about__inner">           <!-- обёртка для двух колонок, просто для сетки -->
+    …
+  </div>
+</section>` },
   ]},
   css: { name: 'CSS', badge: '{ }', desc: 'Flexbox и Grid, псевдоклассы и псевдоэлементы, адаптив, частые приёмы.', lang: 'css', items: [
     { t: 'Сброс и box-sizing', d: 'Чтобы padding не раздувал ширину блока. Ставится в начале style.css.', tags: ['база', 'box-sizing'], cat: 'База', code:
-`*, *::before, *::after {
-  box-sizing: border-box;
+`/* * — все элементы; ::before и ::after — псевдоэлементы, о них ниже */
+*, *::before, *::after {
+  box-sizing: border-box;   /* width включает padding и border, см. «Блочная модель» */
 }
 body {
   margin: 0;
@@ -862,6 +1046,37 @@ img {
 /* так не надо: */
 .card .card__title { }
 div.card h3 { }` },
+    { t: 'Единицы размеров', d: 'px — точные пиксели. Остальные единицы считаются от чего-то: от родителя, от шрифта или от экрана.', tags: ['px', 'rem', 'em', '%', 'vw', 'vh', 'fr', 'единицы'], cat: 'База', code:
+`.box {
+  width: 300px;      /* px — ровно 300 пикселей */
+  width: 50%;        /* % — половина ширины родителя */
+  font-size: 1.5rem; /* rem — от шрифта страницы (обычно 16px), тут 24px */
+  padding: 1em;      /* em — от шрифта самого элемента */
+  height: 100vh;     /* vh — 100% высоты экрана, vw — ширины */
+}
+.list {
+  display: grid;
+  grid-template-columns: 1fr 2fr; /* fr — доля свободного места в grid */
+}` },
+    { t: 'display: block, inline, inline-block', d: 'Блочные элементы встают друг под другом и тянутся на всю ширину. Строчные идут в строку, как слова, и не принимают width и height.', tags: ['display', 'block', 'inline', 'inline-block', 'none'], cat: 'База', code:
+`div, p, section, h1 { display: block; }   /* так по умолчанию */
+a, span, strong     { display: inline; }  /* так по умолчанию */
+
+.nav__link {
+  display: inline-block; /* в строку, но width, height и padding работают */
+  padding: 8px 12px;
+}
+.menu { display: none; }  /* спрятать полностью */` },
+    { t: 'Какой стиль победит: специфичность', d: 'Если два правила меняют одно свойство, побеждает более «тяжёлый» селектор. При равном весе побеждает то, что ниже в файле. В БЭМ все селекторы из одного класса, поэтому почти всегда решает порядок.', tags: ['специфичность', 'каскад', 'important', 'вес'], cat: 'База', code:
+`p { color: gray; }            /* тег: вес 1 */
+.about__text { color: blue; } /* класс: вес 10, победит тег */
+#about p { color: red; }      /* id: вес 100, победит всех */
+
+.button { color: black; }
+.button { color: white; }     /* тот же вес, стоит ниже — побеждает */
+
+/* !important перебивает всё. Новичку лучше не использовать:
+   потом его самого ничем не перебить */` },
     { t: 'Центрирование', d: 'Три способа поставить блок ровно по центру.', tags: ['центр', 'flex', 'grid', 'margin'], cat: 'Раскладка', code:
 `/* 1. grid — самый короткий */
 .box { display: grid; place-items: center; }
@@ -874,12 +1089,15 @@ div.card h3 { }` },
     { t: 'Адаптивная сетка карточек', d: 'Колонок столько, сколько влезает. Медиазапросы не нужны.', tags: ['grid', 'auto-fit', 'minmax', 'адаптив'], cat: 'Раскладка', code:
 `.events__list {
   display: grid;
+  /* колонка не уже 240px (minmax), колонок сколько влезет (auto-fit), 1fr — поровну */
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 24px;
 }` },
     { t: 'Медиазапросы', d: 'Сначала стили для телефона, потом расширяем для больших экранов.', tags: ['media', 'адаптив', 'breakpoint'], cat: 'Адаптив', code:
-`.about__inner { display: grid; gap: 16px; }
+`/* сначала стили для телефона (без @media) */
+.about__inner { display: grid; gap: 16px; }
 
+/* min-width: 768px — «если экран шире 768px» */
 @media (min-width: 768px) {
   .about__inner { grid-template-columns: 1fr 1fr; }
 }
@@ -888,11 +1106,12 @@ div.card h3 { }` },
 }` },
     { t: 'Плавный размер шрифта', d: 'clamp(мин, желаемый, макс): заголовок растёт вместе с экраном.', tags: ['clamp', 'font-size', 'адаптив'], cat: 'Адаптив', code:
 `.hero__name {
+  /* не меньше 40px, обычно 8% ширины экрана, не больше 96px */
   font-size: clamp(40px, 8vw, 96px);
 }` },
-    { t: 'Ховер и переходы', d: 'transition пишем на обычном состоянии, а не на :hover.', tags: ['hover', 'transition'], cat: 'Эффекты', code:
+    { t: 'Ховер и переходы', d: 'transition пишем на обычном состоянии, а не на :hover.', tags: ['hover', 'transition'], cat: 'Псевдо', code:
 `.button {
-  transition: background-color .2s, transform .2s;
+  transition: background-color 0.2s, transform 0.2s; /* 0.2s — две десятых секунды */
 }
 .button:hover {
   background-color: #222;
@@ -985,31 +1204,89 @@ div.card h3 { }` },
   top: 12px;
   right: 12px;
 }
-.header { position: sticky; top: 0; z-index: 10; }` },
+.header { position: sticky; top: 0; z-index: 10; }
+/* sticky — прилипает к верху при прокрутке; z-index — кто выше, когда элементы накладываются */` },
   ]},
   js: { name: 'JavaScript', badge: 'JS', desc: 'Песочница DOM: поиск элементов, классы-модификаторы, события.', lang: 'js', items: [
-    { t: 'Найти элементы', d: 'querySelector возвращает первый подходящий элемент, querySelectorAll — список всех.', tags: ['querySelector', 'dom'], code:
-`const menu = document.querySelector('.menu');
-const items = document.querySelectorAll('.menu__item');
+    { t: 'Где увидеть результат', d: 'Откройте страницу в браузере, нажмите F12 и перейдите на вкладку Console. Туда выводит console.log, и там же красным появляются ошибки с номером строки.', tags: ['console', 'консоль', 'f12', 'ошибка'], cat: 'Основы', code:
+`// подключаем скрипт в конце <body> или с defer в <head>:
+// <script src="js/main.js" defer><\/script>
 
+console.log('Скрипт подключился');   // увидите в консоли
+console.log(2 + 2);                  // 4` },
+    { t: 'Переменные', d: 'Переменная — коробка с именем, в которой лежит значение. const нельзя переназначить, let можно. var в новом коде не используют.', tags: ['const', 'let', 'переменная', 'строка', 'число'], cat: 'Основы', code:
+`const name = 'Полина';      // строка — текст в кавычках
+const age = 20;             // число — без кавычек
+const isOpen = false;       // логическое: true или false
+
+let count = 0;              // let — если значение будет меняться
+count = count + 1;          // теперь 1
+
+console.log(\`Привет, \${name}!\`); // шаблонная строка в обратных кавычках` },
+    { t: 'Условия', d: 'if выполняет код, только если условие верно. === сравнивает строго: и значение, и тип.', tags: ['if', 'else', 'условие', '==='], cat: 'Основы', code:
+`const width = window.innerWidth;   // ширина окна
+
+if (width < 768) {
+  console.log('Телефон');
+} else if (width < 1200) {
+  console.log('Планшет');
+} else {
+  console.log('Компьютер');
+}
+
+// === равно, !== не равно, && «и», || «или»` },
+    { t: 'Функции', d: 'Функция — кусок кода с именем, который можно вызывать много раз. В скобках — входные данные, return отдаёт результат.', tags: ['function', 'функция', 'return', 'стрелочная'], cat: 'Основы', code:
+`function sum(a, b) {
+  return a + b;
+}
+console.log(sum(2, 3));   // 5
+
+// то же самое стрелочной функцией: () => { … }
+const double = (n) => {
+  return n * 2;
+};
+console.log(double(4));   // 8` },
+    { t: 'Массивы и перебор', d: 'Массив — список значений в квадратных скобках. Счёт элементов идёт с нуля. forEach выполняет функцию для каждого элемента.', tags: ['массив', 'array', 'forEach', 'length'], cat: 'Основы', code:
+`const menu = ['О нас', 'Блог', 'Контакты'];
+
+console.log(menu[0]);       // 'О нас' — первый, номер 0
+console.log(menu.length);   // 3 — сколько элементов
+
+menu.push('Афиша');         // добавить в конец
+
+menu.forEach((item) => {
+  console.log(item);        // выведет каждый пункт по очереди
+});` },
+    { t: 'Найти элементы', d: 'querySelector возвращает первый подходящий элемент, querySelectorAll — список всех.', tags: ['querySelector', 'dom'], cat: 'DOM', code:
+`const menu = document.querySelector('.menu');           // первый .menu на странице
+const items = document.querySelectorAll('.menu__item');  // все пункты списком
+
+// перебрать все пункты и вывести их текст в консоль (F12 → Console)
 items.forEach((item) => {
   console.log(item.textContent);
 });` },
-    { t: 'Классы и БЭМ-модификаторы', d: 'Состояние меняем модификатором: JS добавляет класс, CSS решает, как это выглядит.', tags: ['classList', 'toggle', 'модификатор'], code:
-`menu.classList.add('menu--open');
-menu.classList.remove('menu--open');
-menu.classList.toggle('menu--open');      // вкл/выкл
-menu.classList.contains('menu--open');    // true / false` },
-    { t: 'События', d: 'Обработчик клика. preventDefault отменяет стандартное действие, например отправку формы.', tags: ['addEventListener', 'click', 'submit'], code:
+    { t: 'Классы и БЭМ-модификаторы', d: 'Состояние меняем модификатором: JS добавляет класс, CSS решает, как это выглядит.', tags: ['classList', 'toggle', 'модификатор'], cat: 'DOM', code:
+`const menu = document.querySelector('.menu');
+
+menu.classList.add('menu--open');        // добавить класс
+menu.classList.remove('menu--open');     // убрать класс
+menu.classList.toggle('menu--open');     // был — уберёт, не было — добавит
+menu.classList.contains('menu--open');   // есть ли класс: true или false` },
+    { t: 'События', d: 'Обработчик клика. preventDefault отменяет стандартное действие, например отправку формы.', tags: ['addEventListener', 'click', 'submit'], cat: 'DOM', code:
 `const button = document.querySelector('.header__burger');
+const menu = document.querySelector('.menu');
+
+// () => { … } — функция, которая выполнится при клике
 button.addEventListener('click', () => {
   menu.classList.toggle('menu--open');
 });
 
+const form = document.querySelector('.form');
 form.addEventListener('submit', (event) => {
-  event.preventDefault();
+  event.preventDefault();   // не перезагружать страницу при отправке
+  console.log('Форма отправлена');
 });` },
-    { t: 'Бургер-меню целиком', d: 'Классическое задание из курса: кнопка открывает и закрывает меню.', tags: ['бургер', 'меню', 'toggle'], code:
+    { t: 'Бургер-меню целиком', d: 'Классическое задание из курса: кнопка открывает и закрывает меню.', tags: ['бургер', 'меню', 'toggle'], cat: 'DOM', code:
 `const burger = document.querySelector('.header__burger');
 const nav = document.querySelector('.nav');
 
@@ -1017,54 +1294,100 @@ burger.addEventListener('click', () => {
   nav.classList.toggle('nav--open');
   burger.classList.toggle('header__burger--active');
 });` },
-    { t: 'Создать и удалить элемент', d: 'Новый элемент создаётся в памяти и появляется на странице после append.', tags: ['createElement', 'append', 'remove'], code:
-`const li = document.createElement('li');
-li.className = 'menu__item';
-li.textContent = 'Новый пункт';
-list.append(li);
+    { t: 'Создать и удалить элемент', d: 'Новый элемент создаётся в памяти и появляется на странице после append.', tags: ['createElement', 'append', 'remove'], cat: 'DOM', code:
+`const list = document.querySelector('.menu__list');
 
-li.remove();` },
-    { t: 'Загрузить данные', d: 'fetch возвращает промис. С await код читается сверху вниз.', tags: ['fetch', 'async', 'json'], code:
-`async function loadEvents() {
-  const response = await fetch('/api/events.json');
-  const events = await response.json();
-  return events;
-}` },
+const li = document.createElement('li');  // создали тег <li> в памяти
+li.className = 'menu__item';              // дали ему класс
+li.textContent = 'Новый пункт';           // и текст
+list.append(li);                          // вставили в конец списка
+
+li.remove();                              // удалить со страницы` },
+    { t: 'Загрузить данные', d: 'fetch возвращает промис. С await код читается сверху вниз.', tags: ['fetch', 'async', 'json'], cat: 'DOM', code:
+`// async — внутри функции можно ждать через await
+async function loadEvents() {
+  const response = await fetch('data/events.json'); // запрос файла
+  const events = await response.json();             // превращаем ответ в данные
+  console.log(events);
+}
+
+loadEvents();` },
   ]},
-  git: { name: 'Git', badge: 'git', desc: 'Симулятор коммитов и пуша, подбор команды под задачу.', lang: 'git', items: [
-    { t: 'Первый раз на компьютере', d: 'Один раз указываем имя и почту, они попадут в каждый коммит.', tags: ['config', 'настройка'], code:
+  git: { name: 'Git', badge: 'git', desc: 'Симулятор коммитов и пуша, подбор команды под задачу, частые ошибки.', lang: 'git', items: [
+    { t: '1. Проверить Git и открыть терминал', d: 'Команды вводятся в терминале. В VS Code: меню Terminal → New Terminal или Ctrl + ` (клавиша Ё). Терминал сразу открывается в папке проекта.', tags: ['терминал', 'установка', 'version', 'vs code'], cat: 'Начало', code:
+`git --version
+# ответ вида «git version 2.4x» — Git установлен
+# «command not found» — скачайте Git с git-scm.com и перезапустите VS Code` },
+    { t: '2. Представиться Git', d: 'Один раз на компьютере. Имя и почта попадут в каждый коммит. Почту лучше указать ту же, что на GitHub.', tags: ['config', 'настройка', 'имя', 'почта'], cat: 'Начало', code:
 `git config --global user.name "Полина"
-git config --global user.email "polina@example.com"` },
-    { t: 'Начать проект', d: 'init создаёт новый репозиторий, clone скачивает готовый.', tags: ['init', 'clone'], code:
-`git init
+git config --global user.email "polina@example.com"
+# --global — настройка для всех проектов на этом компьютере` },
+    { t: '3. Войти в GitHub', d: 'При первом push GitHub спросит вход. Обычный пароль от сайта тут не подходит. Проще всего войти через VS Code: он откроет браузер и всё сделает сам.', tags: ['github', 'вход', 'пароль', 'токен', 'login'], cat: 'Начало', code:
+`# Способ 1 (проще): в VS Code слева внизу значок человечка →
+#   «Sign in with GitHub» → подтвердить в браузере
+
+# Способ 2: если терминал просит Username и Password —
+#   Username: ваш логин на GitHub
+#   Password: не пароль, а токен с github.com →
+#   Settings → Developer settings → Personal access tokens` },
+    { t: 'Начать проект', d: 'init превращает обычную папку в репозиторий. clone скачивает готовый репозиторий с GitHub.', tags: ['init', 'clone', 'remote'], cat: 'Каждый день', code:
+`git init                # «Git, следи за этой папкой»
 git remote add origin https://github.com/polina/lenni.git
+# remote add origin — запомнить адрес репозитория на GitHub под именем origin
 
 # или скачать существующий
 git clone https://github.com/polina/lenni.git` },
-    { t: 'Сохранить и отправить', d: 'Три команды, которые нужны каждый день.', tags: ['add', 'commit', 'push'], code:
-`git status                  # что изменилось
-git add .                   # подготовить все файлы
-git commit -m "Сверстала шапку"
-git push                    # отправить на GitHub` },
-    { t: 'Ветки', d: 'В ветке работа идёт отдельно и не ломает основную версию.', tags: ['branch', 'switch', 'merge'], code:
-`git switch -c feature/header   # создать и перейти
-git switch main                 # вернуться
-git merge feature/header        # влить ветку в main
-git branch                      # список веток` },
-    { t: 'Посмотреть историю', d: 'Короткий список коммитов и что поменялось в файлах.', tags: ['log', 'diff'], code:
-`git log --oneline
-git diff                # несохранённые изменения
-git diff --staged       # то, что уже в git add` },
-    { t: 'Отменить', d: 'Как отменить, зависит от того, на каком шаге файл.', tags: ['restore', 'reset', 'отмена'], code:
-`git restore index.html           # вернуть файл как в коммите
-git restore --staged index.html  # убрать из git add
-git commit --amend -m "Новый текст"  # поправить последний коммит` },
-    { t: '.gitignore', d: 'Файлы, которые не нужно класть в репозиторий.', tags: ['gitignore', 'node_modules'], code:
-`node_modules/
-.DS_Store
+    { t: 'Сохранить и отправить', d: 'Три команды, которые нужны каждый день. Сначала выбираем файлы, потом сохраняем снимок, потом отправляем.', tags: ['add', 'commit', 'push', 'status'], cat: 'Каждый день', code:
+`git status                       # что изменилось
+git add .                        # точка — все изменённые файлы в этой папке
+git commit -m "Сверстала шапку"  # -m — message, подпись к коммиту
+git push                         # отправить коммиты на GitHub` },
+    { t: 'Забрать изменения', d: 'Если работаете с двух компьютеров или правили файлы прямо на GitHub, сначала заберите свежую версию.', tags: ['pull', 'fetch'], cat: 'Каждый день', code:
+`git pull   # скачать новые коммиты с GitHub и применить к своей папке` },
+    { t: 'Ветки', d: 'В ветке работа идёт отдельно и не ломает основную версию main.', tags: ['branch', 'switch', 'merge'], cat: 'Ветки и история', code:
+`git switch -c feature/header   # -c — create: создать ветку и перейти в неё
+git switch main                 # вернуться в main
+git merge feature/header        # влить ветку в текущую (main)
+git branch                      # список веток, текущая со звёздочкой` },
+    { t: 'Посмотреть историю', d: 'Короткий список коммитов и что поменялось в файлах. Выход из длинного списка — клавиша q.', tags: ['log', 'diff'], cat: 'Ветки и история', code:
+`git log --oneline       # по одной строке на коммит; выход — q
+git diff                # изменения, ещё не добавленные через add
+git diff --staged       # изменения, которые уже в git add` },
+    { t: 'Отменить', d: 'Как отменить, зависит от того, на каком шаге файл.', tags: ['restore', 'reset', 'отмена', 'amend'], cat: 'Ветки и история', code:
+`git restore index.html           # вернуть файл как в последнем коммите
+git restore --staged index.html  # убрать из git add, правки останутся
+git commit --amend -m "Новый текст"  # переписать подпись последнего коммита (до push)` },
+    { t: '.gitignore', d: 'Файл с таким именем в корне проекта. Всё, что в нём перечислено, Git не будет сохранять.', tags: ['gitignore', 'node_modules'], cat: 'Каждый день', code:
+`node_modules/   # скачанные библиотеки, их всегда можно поставить заново
+.DS_Store       # служебный файл macOS
 .idea/
-.vscode/
-dist/` },
+.vscode/        # настройки редакторов
+dist/           # собранная версия сайта` },
+    { t: 'fatal: not a git repository', d: 'Терминал открыт не в папке проекта, или в папке ещё не делали git init.', tags: ['ошибка', 'not a git repository', 'fatal', 'cd'], cat: 'Ошибки', code:
+`pwd                   # где я сейчас
+cd ~/projects/lenni   # перейти в папку проекта
+git status            # теперь должно работать
+# если папка новая — сначала git init` },
+    { t: 'push отклонён: rejected', d: 'На GitHub есть коммиты, которых нет у вас. Сначала заберите их, потом отправляйте.', tags: ['ошибка', 'rejected', 'non-fast-forward', 'push', 'pull'], cat: 'Ошибки', code:
+`git pull    # забрать чужие или свои коммиты с GitHub
+git push    # теперь отправится` },
+    { t: 'Please tell me who you are', d: 'Git не знает, чьё имя ставить в коммит. Нужно один раз представиться.', tags: ['ошибка', 'config', 'who you are'], cat: 'Ошибки', code:
+`git config --global user.name "Полина"
+git config --global user.email "polina@example.com"
+git commit -m "..."   # повторить коммит` },
+    { t: 'Authentication failed', d: 'GitHub не принял вход: скорее всего, ввели пароль от сайта вместо токена. Войдите через VS Code (карточка «3. Войти в GitHub»).', tags: ['ошибка', 'authentication', 'password', 'токен'], cat: 'Ошибки', code:
+`# VS Code → значок человечка слева внизу → Sign in with GitHub
+git push   # повторить` },
+    { t: 'Конфликт: CONFLICT (content)', d: 'Одни и те же строки поменяли в двух местах, и Git не знает, какую версию оставить. Выберите сами и сохраните.', tags: ['ошибка', 'conflict', 'конфликт', 'merge'], cat: 'Ошибки', code:
+`# В файле появятся метки:
+# <<<<<<< HEAD
+#   ваша версия
+# =======
+#   версия с GitHub
+# >>>>>>>
+# Оставьте нужное, удалите метки, затем:
+git add .
+git commit -m "Решила конфликт"` },
   ]},
 };
 const BEM_CARD = { name: 'БЭМ', badge: 'B--M', desc: 'Макет лендинга: нажмите на любую часть, и появится разбор её классов.' };
@@ -1102,22 +1425,40 @@ ORDER.forEach((key, i) => {
   choice.append(li);
 });
 
-const INDEX = [];
-Object.entries(SHEETS).forEach(([key, s]) => s.items.forEach((it, i) => INDEX.push({ key, id: `${key}-${i}`, it, hay: (it.t + ' ' + it.d + ' ' + it.tags.join(' ') + ' ' + it.code).toLowerCase() })));
+/* search covers cheat cards, live widgets, BEM classes and the glossary; built on first use */
+let INDEX = null;
+function buildIndex() {
+  INDEX = [];
+  Object.entries(SHEETS).forEach(([key, s]) => s.items.forEach((it, i) => INDEX.push({ key, title: it.t, desc: it.d, go: () => show(key, `${key}-${i}`), hay: it.t + ' ' + it.d + ' ' + it.tags.join(' ') + ' ' + it.code })));
+  $$('.widget[data-frame]').forEach((w, i) => {
+    if (!w.id) w.id = 'widget-' + i;
+    const key = w.closest('[data-view]').dataset.view;
+    const title = w.dataset.frame.replace('Frame · ', '');
+    const desc = [$('.widget__head h2', w)?.textContent, $('.widget__head p', w)?.textContent].filter(Boolean).join('. ') || 'Интерактивный пример';
+    INDEX.push({ key, title: '▸ ' + title, desc, go: () => show(key, w.id), hay: title + ' ' + w.textContent });
+  });
+  Object.entries(INFO).forEach(([cls, [does]]) => INDEX.push({ key: 'bem', title: '.' + cls, desc: does, go: () => { show('bem'); const el = $('.' + CSS.escape(cls), site); if (el) { inspect(el); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }, hay: cls + ' ' + does }));
+  GLOSSARY.forEach(([, term, def]) => INDEX.push({ key: 'gloss', title: term, desc: def, hay: term + ' ' + def }));
+  INDEX.forEach(x => x.hay = x.hay.toLowerCase());
+}
+const TOPIC_NAME = k => (SHEETS[k] && SHEETS[k].name) || { bem: 'БЭМ', gloss: 'Словарь' }[k] || k;
 $('#q').addEventListener('input', e => {
+  if (!INDEX) buildIndex();
   const q = e.target.value.trim().toLowerCase();
   const box = $('#results');
   box.innerHTML = '';
   box.hidden = !q;
   choice.hidden = !!q;
   if (!q) return;
-  const hits = INDEX.filter(x => q.split(/\s+/).every(w => x.hay.includes(w))).slice(0, 12);
-  if (!hits.length) { box.innerHTML = '<p style="color:var(--muted)">Ничего не нашлось. Попробуйте другое слово, например «flex» или «commit».</p>'; return; }
+  const words = q.split(/\s+/);
+  const score = x => (x.title.toLowerCase().includes(q) ? 0 : 1) + (x.key === 'gloss' ? 0.5 : 0) - (x.title.startsWith('▸') ? 0.6 : 0);
+  const hits = INDEX.filter(x => words.every(w => x.hay.includes(w))).sort((a, b) => score(a) - score(b)).slice(0, 14);
+  if (!hits.length) { box.innerHTML = '<p style="color:var(--muted)">Ничего не нашлось. Попробуйте другое слово, например «flex», «коммит» или «padding».</p>'; return; }
   hits.forEach(h => {
-    const b = document.createElement('button');
-    b.className = 'results__item'; b.type = 'button'; b.dataset.topic = h.key;
-    b.innerHTML = `<span class="results__topic">${esc(SHEETS[h.key].name)}</span><span><b>${esc(h.it.t)}</b><small>${esc(h.it.d)}</small></span>`;
-    b.addEventListener('click', () => show(h.key, h.id));
+    const b = document.createElement(h.go ? 'button' : 'div');
+    b.className = 'results__item'; if (h.go) b.type = 'button'; b.dataset.topic = h.key;
+    b.innerHTML = `<span class="results__topic">${esc(TOPIC_NAME(h.key))}</span><span><b>${esc(h.title)}</b><small>${esc(h.desc)}</small></span>`;
+    if (h.go) b.addEventListener('click', h.go);
     box.append(b);
   });
 });
@@ -1126,23 +1467,28 @@ $('#q').addEventListener('input', e => {
 function renderCards(key, filter) {
   const s = SHEETS[key];
   const box = $(`[data-cards="${key}"]`);
+  const start = $(`[data-cards-start="${key}"]`);
   box.innerHTML = '';
+  if (start) start.innerHTML = '';
   s.items.forEach((it, i) => {
-    if (filter && filter !== 'Все' && it.cat !== filter) return;
+    const target = start && it.cat === 'Начало' ? start : box;
+    if (target === box && filter && filter !== 'Все' && it.cat !== filter) return;
     const c = document.createElement('article');
     c.className = 'cheat'; c.id = `${key}-${i}`;
     c.innerHTML = `<h3>${esc(it.t)}</h3><p>${esc(it.d)}</p>`;
     c.append(codebox(it.code, s.lang));
-    box.append(c);
+    termify(c);
+    target.append(c);
   });
 }
 Object.keys(SHEETS).forEach(k => renderCards(k));
-const cats = ['Все', ...new Set(SHEETS.css.items.map(i => i.cat))];
-cats.forEach(c => {
-  const b = document.createElement('button');
-  b.type = 'button'; b.textContent = c; b.setAttribute('aria-pressed', c === 'Все');
-  b.addEventListener('click', () => { $$('#cssFilter button').forEach(x => x.setAttribute('aria-pressed', x === b)); renderCards('css', c); });
-  $('#cssFilter').append(b);
+[['css', '#cssFilter'], ['js', '#jsFilter'], ['git', '#gitFilter']].forEach(([key, sel]) => {
+  ['Все', ...new Set(SHEETS[key].items.map(i => i.cat).filter(c => c !== 'Начало'))].forEach(c => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = c; b.setAttribute('aria-pressed', c === 'Все');
+    b.addEventListener('click', () => { $$(sel + ' button').forEach(x => x.setAttribute('aria-pressed', x === b)); renderCards(key, c); });
+    $(sel).append(b);
+  });
 });
 
 /* ================= HTML semantic map ================= */
@@ -1172,7 +1518,8 @@ const art = document.createElement('div'); art.style.cssText = 'display:grid;gri
 art.append(semBtn('article', null, '<article>'), semBtn('article', null, '<article>'));
 semMain.append(art, semBtn('section', null, '<section> «Контакты»'));
 semPage.append(semMain, semBtn('aside', 'a'), semBtn('footer', 'f'));
-function semPick(tag) {
+function semPick(tag) { semPick0(tag); termify($('#semInfo')); }
+function semPick0(tag) {
   const d = SEM[tag];
   $$('.sem__tag').forEach(b => b.setAttribute('aria-pressed', b.dataset.tag === tag));
   const info = $('#semInfo');
@@ -1218,7 +1565,22 @@ function renderControls() {
   g.querySelector('input').addEventListener('input', e => { state.gap = +e.target.value; $('#gapVal').textContent = state.gap + 'px'; applyPlay('gap'); });
   box.append(g);
 }
-function applyPlay(changed) {
+function applyPlay(changed) { applyPlay0(changed); drawAxes(); termify($('#playExplain')); }
+function drawAxes() {
+  const h = $('#axH'), v = $('#axV');
+  h.className = 'axis axis--h'; v.className = 'axis axis--v';
+  if (mode === 'grid') {
+    h.classList.add('axis--grid'); v.classList.add('axis--grid');
+    h.firstChild.textContent = 'по горизонтали: justify-items'; v.firstChild.textContent = 'по вертикали: align-items';
+    return;
+  }
+  const dir = state.flex['flex-direction'], col = dir.startsWith('column');
+  const main = col ? v : h, cross = col ? h : v;
+  main.classList.add('axis--main'); if (dir === 'row-reverse') main.classList.add('axis--rev');
+  main.firstChild.textContent = 'главная ось: justify-content';
+  cross.firstChild.textContent = 'поперечная ось: align-items';
+}
+function applyPlay0(changed) {
   const props = mode === 'flex' ? FLEX : GRID;
   stage.removeAttribute('style');
   stage.style.display = mode;
@@ -1243,6 +1605,34 @@ $$('#layoutMode button').forEach(b => b.addEventListener('click', () => {
 state.flex['align-items'] = 'center';
 renderControls(); applyPlay('justify-content');
 
+/* ================= box model ================= */
+const BM = { width: 160, padding: 16, border: 4, margin: 20, sizing: 'content-box' };
+const BM_RANGES = [['width', 80, 220, 'ширина, которую вы задали'], ['padding', 0, 32, 'внутренний отступ'], ['border', 0, 12, 'толщина рамки'], ['margin', 0, 32, 'внешний отступ']];
+BM_RANGES.forEach(([k, min, max, hint]) => {
+  const l = document.createElement('label'); l.className = 'range'; l.htmlFor = 'bm-' + k;
+  l.innerHTML = `<span>${k}: <b id="bmv-${k}">${BM[k]}px</b> · ${hint}</span><input type="range" id="bm-${k}" min="${min}" max="${max}" value="${BM[k]}">`;
+  l.querySelector('input').addEventListener('input', e => { BM[k] = +e.target.value; $('#bmv-' + k).textContent = BM[k] + 'px'; bmApply(); });
+  $('#bmControls').append(l);
+});
+$$('#bmSizing button').forEach(b => b.addEventListener('click', () => {
+  BM.sizing = b.dataset.v; $$('#bmSizing button').forEach(x => x.setAttribute('aria-pressed', x === b)); bmApply();
+}));
+function bmApply() {
+  const { width, padding, border, margin, sizing } = BM;
+  Object.assign($('#bm').style, { padding: margin + 'px' });
+  Object.assign($('#bmBox').style, { width: width + 'px', padding: padding + 'px', borderWidth: border + 'px', boxSizing: sizing });
+  const inner = width - 2 * padding - 2 * border;
+  const total = sizing === 'content-box' ? width + 2 * padding + 2 * border : width;
+  const content = sizing === 'content-box' ? width : Math.max(0, inner);
+  $('#bmContent').textContent = `контент ${content}px`;
+  $('#bmExplain').innerHTML = sizing === 'content-box'
+    ? `<b>content-box</b> (так по умолчанию): width — это ширина только контента. Коробка на странице шире: ${width} + ${padding}×2 + ${border}×2 = <b>${total}px</b>, плюс margin ${margin}px с каждой стороны до соседей. Поэтому блок «вдруг» не влезает в колонку.`
+    : `<b>border-box</b>: width — это вся коробка вместе с padding и border, ровно <b>${total}px</b>. Под контент остаётся ${width} − ${padding}×2 − ${border}×2 = ${content}px. Так считать проще, поэтому в начале style.css ставят box-sizing: border-box для всех элементов.`;
+  $('#bmCode').innerHTML = hl(`.card {\n  box-sizing: ${sizing};\n  width: ${width}px;\n  padding: ${padding}px;\n  border: ${border}px solid #1b2130;\n  margin: ${margin}px;\n}`, 'css');
+  termify($('#bmExplain'));
+}
+bmApply();
+
 /* ================= selector sandbox ================= */
 const PICK = [
   { s: ':first-child', d: 'Первый пункт среди соседей.' },
@@ -1259,7 +1649,8 @@ const PICK = [
 ];
 const pickList = $('#pickList');
 for (let i = 1; i <= 8; i++) { const li = document.createElement('li'); li.className = 'pick__item'; li.textContent = 'пункт ' + i; pickList.append(li); }
-function pickApply(p) {
+function pickApply(p) { pickApply0(p); termify($('#pickExplain')); }
+function pickApply0(p) {
   pickList.className = 'pick__list' + (p.live ? ` pick__list--${p.live}` : '');
   const items = $$('.pick__item', pickList);
   items.forEach(li => li.classList.toggle('pick__item--hit', !p.live && li.matches(p.s)));
@@ -1280,19 +1671,19 @@ const demo = $('#demo');
 const DEMO_HTML = `<div class="menu"><div class="menu__title">Меню</div><ul class="menu__list"><li class="menu__item">О нас</li><li class="menu__item">Мероприятия</li><li class="menu__item">Блог</li></ul></div>`;
 const log = msg => { const l = $('#sandLog'); const d = document.createElement('div'); d.textContent = '> ' + msg; l.append(d); l.scrollTop = l.scrollHeight; };
 const ACTIONS = [
-  { t: 'Открыть / закрыть меню', code: `const menu = document.querySelector('.menu');\nmenu.classList.toggle('menu--open');`, run: r => { const m = $('.menu', r); m.classList.toggle('menu--open'); log(`menu.className = "${m.className}"`); } },
-  { t: 'Тёмная тема меню', code: `menu.classList.toggle('menu--dark');`, run: r => { const m = $('.menu', r); m.classList.toggle('menu--dark'); log(`menu--dark: ${m.classList.contains('menu--dark')}`); } },
-  { t: 'Сменить заголовок', code: `const title = document.querySelector('.menu__title');\ntitle.textContent = 'Навигация';`, run: r => { $('.menu__title', r).textContent = 'Навигация'; log(`title.textContent = "Навигация"`); } },
-  { t: 'Посчитать пункты', code: `const items = document.querySelectorAll('.menu__item');\nconsole.log(items.length);`, run: r => log(`items.length = ${$$('.menu__item', r).length}`) },
-  { t: 'Добавить пункт', code: `const li = document.createElement('li');\nli.className = 'menu__item';\nli.textContent = 'Контакты';\ndocument.querySelector('.menu__list').append(li);`, run: r => { const m = $('.menu', r); const li = document.createElement('li'); li.className = 'menu__item'; li.textContent = 'Контакты'; $('.menu__list', r).append(li); m.classList.add('menu--open'); log('добавлен <li class="menu__item">Контакты</li>'); } },
-  { t: 'Подсветить пункт по клику', code: `items.forEach((item) => {\n  item.addEventListener('click', () => {\n    items.forEach((i) => i.classList.remove('menu__item--active'));\n    item.classList.add('menu__item--active');\n  });\n});`, run: r => { $('.menu', r).classList.add('menu--open'); $$('.menu__item', r).forEach(it => it.onclick = () => { $$('.menu__item', r).forEach(i => i.classList.remove('menu__item--active')); it.classList.add('menu__item--active'); log(`клик: «${it.textContent}» → menu__item--active`); }); log('обработчики повешены, нажмите на пункт меню'); } },
-  { t: 'Удалить последний пункт', code: `const items = document.querySelectorAll('.menu__item');\nitems[items.length - 1].remove();`, run: r => { const it = $$('.menu__item', r); if (it.length) { const t = it[it.length - 1].textContent; it[it.length - 1].remove(); log(`удалён «${t}»`); } else log('пунктов не осталось'); } },
+  { t: 'Открыть / закрыть меню', peek: "classList.toggle('menu--open')", code: `const menu = document.querySelector('.menu');\nmenu.classList.toggle('menu--open');`, run: r => { const m = $('.menu', r); m.classList.toggle('menu--open'); log(`menu.className = "${m.className}"`); } },
+  { t: 'Тёмная тема меню', peek: "classList.toggle('menu--dark')", code: `const menu = document.querySelector('.menu');\nmenu.classList.toggle('menu--dark');`, run: r => { const m = $('.menu', r); m.classList.toggle('menu--dark'); log(`menu--dark: ${m.classList.contains('menu--dark')}`); } },
+  { t: 'Сменить заголовок', peek: "title.textContent = 'Навигация'", code: `const title = document.querySelector('.menu__title');\ntitle.textContent = 'Навигация';`, run: r => { $('.menu__title', r).textContent = 'Навигация'; log(`title.textContent = "Навигация"`); } },
+  { t: 'Посчитать пункты', peek: "querySelectorAll('.menu__item').length", code: `const items = document.querySelectorAll('.menu__item');\nconsole.log(items.length);`, run: r => log(`items.length = ${$$('.menu__item', r).length}`) },
+  { t: 'Добавить пункт', peek: "createElement('li') + append()", code: `const li = document.createElement('li');\nli.className = 'menu__item';\nli.textContent = 'Контакты';\ndocument.querySelector('.menu__list').append(li);`, run: r => { const m = $('.menu', r); const li = document.createElement('li'); li.className = 'menu__item'; li.textContent = 'Контакты'; $('.menu__list', r).append(li); m.classList.add('menu--open'); log('добавлен <li class="menu__item">Контакты</li>'); } },
+  { t: 'Подсветить пункт по клику', peek: "addEventListener('click', …)", code: `const items = document.querySelectorAll('.menu__item');\n\nitems.forEach((item) => {\n  item.addEventListener('click', () => {\n    items.forEach((i) => i.classList.remove('menu__item--active'));\n    item.classList.add('menu__item--active');\n  });\n});`, run: r => { $('.menu', r).classList.add('menu--open'); $$('.menu__item', r).forEach(it => it.onclick = () => { $$('.menu__item', r).forEach(i => i.classList.remove('menu__item--active')); it.classList.add('menu__item--active'); log(`клик: «${it.textContent}» → menu__item--active`); }); log('обработчики повешены, нажмите на пункт меню'); } },
+  { t: 'Удалить последний пункт', peek: "items[items.length - 1].remove()", code: `const items = document.querySelectorAll('.menu__item');\nitems[items.length - 1].remove();`, run: r => { const it = $$('.menu__item', r); if (it.length) { const t = it[it.length - 1].textContent; it[it.length - 1].remove(); log(`удалён «${t}»`); } else log('пунктов не осталось'); } },
 ];
 function sandReset() { demo.innerHTML = DEMO_HTML; $('#sandLog').innerHTML = ''; log('меню на месте, выберите команду слева'); }
 ACTIONS.forEach((a, i) => {
   const b = document.createElement('button');
   b.className = 'sand__action'; b.type = 'button';
-  b.innerHTML = `<b>${esc(a.t)}</b><code>${esc(a.code.split('\n').pop())}</code>`;
+  b.innerHTML = `<b>${esc(a.t)}</b><code>${esc(a.peek)}</code>`;
   b.addEventListener('click', () => { $('#sandCode').innerHTML = hl(a.code, 'js'); a.run(demo); });
   $('#sandActions').append(b);
 });
@@ -1305,7 +1696,7 @@ ACTIONS[0].run(demo);
 const Z = [['work', 'Рабочая папка', 'файлы на компьютере'], ['stage', 'Индекс', 'подготовлено к коммиту'], ['local', 'Локальный репозиторий', 'коммиты на компьютере'], ['remote', 'GitHub', 'origin/main']];
 let G;
 function gitReset() {
-  G = { work: [], stage: [], local: [], remote: ['init'], n: 0, hot: null, step: 0 };
+  G = { work: [], stage: [], local: [], remote: ['первый коммит'], n: 0, hot: null, step: 0 };
   $('#term').innerHTML = '<span class="tok-c"># проект только что скачан с GitHub, изменений пока нет. Нажмите подсвеченную кнопку «Изменить файлы»</span>';
   renderGit();
 }
@@ -1313,12 +1704,13 @@ const FILES = ['index.html', 'style.css', 'main.js'];
 const MSGS = ['Сверстала шапку', 'Добавила hero', 'Бургер-меню', 'Секция «О нас»', 'Адаптив'];
 const STEPS = [
   { cmd: 'Изменить файлы', ok: () => true, run: () => { const f = FILES.filter(x => !G.work.includes(x)).slice(0, 2); if (!f.length) return '<span class="tok-c"># все файлы уже изменены</span>'; G.work.push(...f); G.hot = 'work'; return `<span class="tok-c"># редактируем ${f.join(', ')} в VS Code</span>`; } },
-  { cmd: 'git status', ok: () => true, run: () => `$ git status\n${G.work.length ? 'Changes not staged:\n  ' + G.work.map(f => '<b>изменён:</b> ' + f).join('\n  ') : ''}${G.stage.length ? '\nChanges to be committed:\n  ' + G.stage.join('\n  ') : ''}${!G.work.length && !G.stage.length ? 'nothing to commit, working tree clean' : ''}` },
+  { cmd: 'git status', ok: () => true, run: () => `$ git status\n${G.work.length ? 'Changes not staged:   <span class="tok-c"># изменено, но не добавлено</span>\n  ' + G.work.map(f => '<b>изменён:</b> ' + f).join('\n  ') : ''}${G.stage.length ? '\nChanges to be committed:   <span class="tok-c"># войдёт в следующий коммит</span>\n  ' + G.stage.join('\n  ') : ''}${!G.work.length && !G.stage.length ? 'nothing to commit, working tree clean   <span class="tok-c"># всё сохранено, изменений нет</span>' : ''}` },
   { cmd: 'git add .', ok: () => G.work.length, no: 'Нечего добавлять: сначала измените файлы', run: () => { G.stage.push(...G.work); G.work = []; G.hot = 'stage'; return `$ git add .\n<span class="tok-c"># файлы в индексе и ждут коммита</span>`; } },
   { cmd: 'git commit -m "…"', ok: () => G.stage.length, no: 'Индекс пуст: сначала git add', run: () => { const m = MSGS[G.n++ % MSGS.length]; G.local.push(m); G.stage = []; G.hot = 'local'; return `$ git commit -m "${m}"\n<b>[main ${Math.random().toString(16).slice(2, 9)}]</b> ${m}`; } },
   { cmd: 'git push', ok: () => G.local.length, no: 'Нечего отправлять: нет новых коммитов', run: () => { const c = G.local.length; G.remote.push(...G.local); G.local = []; G.hot = 'remote'; return `$ git push\n<b>To github.com:polina/lenni.git</b>\n<span class="tok-c"># отправлено коммитов: ${c}</span>`; } },
 ];
-function renderGit() {
+function renderGit() { renderGit0(); $$('.git__zone small').forEach(termify); }
+function renderGit0() {
   $('#gitZones').innerHTML = Z.map(([k, t, s]) => {
     const list = k === 'remote' ? G.remote.slice(-4) : G[k];
     const cls = k === 'work' ? 'file--changed' : (k === 'local' || k === 'remote') ? 'file--commit' : '';
@@ -1355,7 +1747,8 @@ const ASK = [
   ['Включить GitHub Pages для сайта', '# Settings → Pages → Branch: main → / (root) → Save\n# сайт появится по адресу user.github.io/repo', 'index.html должен лежать в корне репозитория.'],
 ];
 $('#gitAsk').innerHTML = ASK.map((a, i) => `<option value="${i}">${esc(a[0])}</option>`).join('');
-function askRender() { const a = ASK[+$('#gitAsk').value]; const box = $('#gitAnswer'); box.innerHTML = ''; box.append(codebox(a[1], 'git')); const p = document.createElement('p'); p.className = 'explain'; p.textContent = a[2]; box.append(p); }
+function askRender() { askRender0(); termify($('#gitAnswer')); }
+function askRender0() { const a = ASK[+$('#gitAsk').value]; const box = $('#gitAnswer'); box.innerHTML = ''; box.append(codebox(a[1], 'git')); const p = document.createElement('p'); p.className = 'explain'; p.textContent = a[2]; box.append(p); }
 $('#gitAsk').addEventListener('change', askRender);
 askRender();
 
@@ -1509,7 +1902,8 @@ function whyMany(ps) {
       : 'Общие стили пишутся один раз в первом классе, а второй добавляет только особенности. Так не приходится повторять одно и то же.';
   return `<div><h4>Почему здесь ${word}</h4><div class="hint"><ul class="why">${rows}</ul><p>${tail}</p></div></div>`;
 }
-function inspect(el) {
+function inspect(el) { inspect0(el); $$('#inspBody .hint').forEach(termify); }
+function inspect0(el) {
   if (picked) picked.removeAttribute('data-bem-picked');
   picked = el;
   el.setAttribute('data-bem-picked', '');
@@ -1522,8 +1916,8 @@ function inspect(el) {
     return `/* ${KIND[p.kind][0].toLowerCase()} */\n.${p.cls} {\n${props}\n}`;
   }).join('\n\n');
   body.innerHTML = `
-    <div><h4>Путь</h4><div class="crumbs">${crumbs.map((c, i) => `<button type="button" data-i="${i}">${c.classList[0]}</button>`).join('<span>›</span>')}</div></div>
-    <div><h4>Классы на элементе · &lt;${el.tagName.toLowerCase()}&gt;</h4><div class="parts">${ps.map(p => `<div class="part" style="--c:${KIND[p.kind][1]}"><span class="part__kind">${KIND[p.kind][0]}</span><span class="part__name anatomy">${anatomy(p)}</span>${INFO[p.cls] ? `<span class="part__does"><b>Что пишем в этом классе:</b> ${esc(INFO[p.cls][0])}</span>` : ''}<span class="part__desc">${esc(KIND[p.kind][2](p))}</span></div>`).join('')}</div></div>
+    <div><h4>Где лежит: от страницы до элемента</h4><div class="crumbs">${crumbs.map((c, i) => `<button type="button" data-i="${i}">${c.classList[0]}</button>`).join('<span>›</span>')}</div></div>
+    <div><h4>Классы на элементе · &lt;${el.tagName.toLowerCase()}&gt;</h4><div class="parts">${ps.map(p => `<div class="part" style="--c:${KIND[p.kind][1]}"><span class="part__kind">${KIND[p.kind][0]}</span><span class="part__name anatomy">${anatomy(p)}</span>${INFO[p.cls] ? `<span class="part__does"><b>Что пишем в этом классе:</b> ${esc(INFO[p.cls][0])}</span>` : ''}</div>`).join('')}</div></div>
     ${whyMany(ps)}
     <div><h4>Коротко</h4><p class="hint">${esc(el.dataset.hint || generic(el, ps))}</p></div>
     <div><h4>Разметка</h4><div id="inspHtml"></div></div>
@@ -1567,8 +1961,10 @@ inspect($('.header__login', site));
 if (matchMedia('(max-width: 1100px)').matches) $('#inspector').classList.add('inspector--hidden');
 
 /* start */
+$$('.view-head p, .widget__head p').forEach(termify);
 const setBarH = () => document.documentElement.style.setProperty('--bar-h', $('.bar').offsetHeight + 'px');
 setBarH(); addEventListener('resize', setBarH);
+if (window.ResizeObserver) new ResizeObserver(setBarH).observe($('.bar'));
 const startHash = (location.hash || '').slice(1);
 show(VIEWS.includes(startHash) ? startHash : 'home');
 })();
