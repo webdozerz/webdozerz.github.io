@@ -228,7 +228,8 @@ main { padding-block: 28px 80px; }
 .home { display: grid; }
 .home__about, .home__events, .home__blog, .home__contacts { padding: clamp(28px, 5vw, 52px) var(--s-pad); border-top: 1px solid var(--line); }
 .about, .events, .blog, .contacts { display: grid; gap: 20px; }
-.about__title, .events__title, .blog__title, .contacts__title { font-size: clamp(22px, 3vw, 30px); font-weight: 800; letter-spacing: -.02em; }
+.section-title { margin: 0; font-size: clamp(22px, 3vw, 30px); font-weight: 800; letter-spacing: -.02em; }
+.about__title, .events__title, .blog__title { margin-bottom: 4px; }
 .about__inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: center; }
 .about__image { aspect-ratio: 4 / 3; max-width: 100%; }
 .about__content { display: grid; gap: 12px; }
@@ -408,7 +409,7 @@ main { padding-block: 28px 80px; }
           </section>
 
           <section class="home__about about" id="about" data-hint="Микс: home__about отвечает за место секции на главной (отступы, граница сверху), about — за всё, что внутри «О нас». Если секцию перенести на другую страницу, about останется, а home__about поменяется.">
-            <h2 class="about__title" data-hint="Заголовок — элемент своей секции. Если заголовки всех секций выглядят одинаково, им дают общие стили через перечисление селекторов: .about__title, .events__title { … }.">О нас</h2>
+            <h2 class="section-title about__title" data-hint="Микс, как в уроке: все заголовки секций выглядят одинаково, поэтому их вид вынесен в отдельный блок section-title. А about__title задаёт место заголовка именно в «О нас», например отступ снизу.">О нас</h2>
             <div class="about__inner">
               <div class="ph about__image" data-hint="Картинка. Класс ph — блок-заглушка макета, about__image — элемент секции."></div>
               <div class="about__content">
@@ -423,7 +424,7 @@ main { padding-block: 28px 80px; }
           </section>
 
           <section class="home__events events" id="events">
-            <h2 class="events__title">Мероприятия</h2>
+            <h2 class="section-title events__title">Мероприятия</h2>
             <div class="events__list">
               <article class="event-card event-card--featured" data-hint="Карточка — отдельный блок event-card, ведь она повторяется. Модификатор --featured выделяет главную карточку.">
                 <div class="ph event-card__image"></div>
@@ -450,7 +451,7 @@ main { padding-block: 28px 80px; }
           </section>
 
           <section class="home__blog blog" id="blog">
-            <h2 class="blog__title">Блог</h2>
+            <h2 class="section-title blog__title">Блог</h2>
             <div class="blog__list">
               <article class="post" data-hint="Статья блога — блок post. Его можно вставить и на другую страницу, и он не сломается.">
                 <div class="ph post__image"></div>
@@ -474,7 +475,7 @@ main { padding-block: 28px 80px; }
           </section>
 
           <section class="home__contacts contacts" id="contacts">
-            <h2 class="contacts__title">Контакты</h2>
+            <h2 class="section-title contacts__title">Контакты</h2>
             <div class="contacts__inner">
               <ul class="contacts__list">
                 <li class="contacts__item"><span class="contacts__label">Адрес</span>ул. Примерная, 1</li>
@@ -931,11 +932,11 @@ const SEM = {
   header: { why: 'Шапка страницы или секции: логотип, меню, кнопка входа.', use: 'Можно использовать несколько раз, например в article.', code: '<header class="header">\n  <a class="logo" href="/">Lenni</a>\n  <nav class="nav">…</nav>\n</header>' },
   nav: { why: 'Главная навигация: меню со ссылками по сайту.', use: 'Не для каждой группы ссылок, а для основной навигации.', code: '<nav class="nav">\n  <ul class="nav__list">\n    <li class="nav__item"><a class="nav__link" href="#about">О нас</a></li>\n  </ul>\n</nav>' },
   main: { why: 'Основное содержимое. На странице один main.', use: 'Шапка и подвал остаются снаружи. Внутри main удобно положить обёртку страницы, а в неё секции.', code: '<body class="page">\n  <header class="header">…</header>\n  <main class="main">\n    <div class="home">\n      <section class="home__hero hero">…</section>\n      <section class="home__about about">…</section>\n    </div>\n  </main>\n  <footer class="footer">…</footer>\n</body>' },
-  section: { why: 'Смысловой раздел со своим заголовком: «О нас», «Мероприятия», «Контакты».', use: 'Если у части нет заголовка, скорее всего, это просто div.', code: '<section class="home__about about" id="about">\n  <h2 class="about__title">О нас</h2>\n  …\n</section>' },
+  section: { why: 'Смысловой раздел со своим заголовком: «О нас», «Мероприятия», «Контакты».', use: 'Если у части нет заголовка, скорее всего, это просто div.', code: '<section class="home__about about" id="about">\n  <h2 class="section-title about__title">О нас</h2>\n  …\n</section>' },
   article: { why: 'Самостоятельная единица, которую можно унести на другую страницу: пост, карточка события, отзыв.', use: 'Карточки в «Блоге» и «Мероприятиях» — это article.', code: '<article class="post">\n  <img class="post__image" src="…" alt="…">\n  <h3 class="post__title">Заголовок</h3>\n</article>' },
   aside: { why: 'Дополнительное содержимое сбоку: виджеты, реклама, связанные ссылки.', use: 'Если убрать aside, основной смысл страницы не пострадает.', code: '<aside class="sidebar">\n  <h2 class="sidebar__title">Популярное</h2>\n</aside>' },
   footer: { why: 'Подвал: копирайт, контакты, ссылки на соцсети.', use: 'Как и header, бывает у страницы и у article.', code: '<footer class="footer">\n  <p class="footer__copy">© 2026 Lenni</p>\n</footer>' },
-  h1: { why: 'Главный заголовок страницы. Он один, дальше идут h2 для секций и h3 для карточек.', use: 'Уровни не пропускаем: после h2 идёт h3, а не h5.', code: '<h1 class="hero__name">Lenni</h1>\n<h2 class="about__title">О нас</h2>\n<h3 class="event-card__title">Лекция</h3>' },
+  h1: { why: 'Главный заголовок страницы. Он один, дальше идут h2 для секций и h3 для карточек.', use: 'Уровни не пропускаем: после h2 идёт h3, а не h5.', code: '<h1 class="hero__name">Lenni</h1>\n<h2 class="section-title about__title">О нас</h2>\n<h3 class="event-card__title">Лекция</h3>' },
 };
 const semPage = $('#semPage');
 function semBtn(tag, area, label) {
@@ -1185,7 +1186,8 @@ const INFO = {
   'hero__actions': ['Ряд кнопок: ставит их рядом и задаёт расстояние между ними. Вид самих кнопок задаёт .button.', 'display: flex;\ngap: 10px;\nflex-wrap: wrap;'],
   'home__about': ['Место секции «О нас» на главной: внутренние отступы и линия сверху. Это раскладка страницы, а не вид секции.', 'padding: 52px 40px;\nborder-top: 1px solid #cfd5e0;'],
   'about': ['Внешний вид самой секции «О нас»: расстояние между заголовком и содержимым.', 'display: grid;\ngap: 20px;'],
-  'about__title': ['Заголовок секции: размер и жирность.', 'font-size: 30px;\nfont-weight: 800;'],
+  'section-title': ['Как выглядят все заголовки секций: размер, жирность, межстрочный интервал. Заголовки одинаковые, поэтому стили пишутся один раз в отдельном блоке, а не повторяются в about__title, events__title и других.', 'font-size: 30px;\nfont-weight: 800;\nline-height: 1.2;\nmargin: 0;'],
+  'about__title': ['Где заголовок стоит в секции «О нас»: отступ до содержимого, выравнивание. Размер и шрифт уже заданы в .section-title.', 'margin-bottom: 4px;'],
   'about__inner': ['Делит секцию на две колонки: картинка слева, текст справа.', 'display: grid;\ngrid-template-columns: 1fr 1fr;\ngap: 24px;'],
   'ph': ['Заглушка картинки, как на макете в Pixso. В настоящем проекте здесь будет тег img, а класс ph не нужен.', 'background: #eef1f6;'],
   'about__image': ['Размер и пропорции картинки в секции «О нас».', 'aspect-ratio: 4 / 3;\nwidth: 100%;'],
@@ -1194,7 +1196,7 @@ const INFO = {
   'about__list': ['Список преимуществ: отступ слева под точки, расстояние между пунктами.', 'display: grid;\ngap: 6px;\npadding-left: 18px;'],
   'home__events': ['Место секции «Мероприятия» на главной: отступы и линия сверху, как у остальных секций.', 'padding: 52px 40px;\nborder-top: 1px solid #cfd5e0;'],
   'events': ['Внешний вид секции «Мероприятия»: расстояние между заголовком и карточками.', 'display: grid;\ngap: 20px;'],
-  'events__title': ['Заголовок секции. Если у всех секций заголовки одинаковые, пишут общее правило: .about__title, .events__title { … }.', 'font-size: 30px;\nfont-weight: 800;'],
+  'events__title': ['Место заголовка в секции «Мероприятия», например отступ до карточек. Вид заголовка задаёт .section-title.', 'margin-bottom: 4px;'],
   'events__list': ['Сетка карточек: сколько колонок и расстояние между ними. Вид самих карточек задаёт .event-card.', 'display: grid;\ngrid-template-columns: repeat(auto-fill, minmax(190px, 1fr));\ngap: 14px;'],
   'event-card': ['Как выглядит одна карточка мероприятия: рамка, скругление. Карточки повторяются, поэтому это отдельный блок.', 'border: 1px solid #cfd5e0;\nborder-radius: 10px;\noverflow: hidden;'],
   'event-card--featured': ['Только отличие выделенной карточки: толстая тёмная рамка. Всё остальное приходит из .event-card.', 'border: 2px solid #1b2130;'],
@@ -1204,7 +1206,7 @@ const INFO = {
   'event-card__title': ['Название мероприятия.', 'font-size: 15px;\nfont-weight: 700;'],
   'home__blog': ['Место секции «Блог» на главной: отступы и линия сверху.', 'padding: 52px 40px;\nborder-top: 1px solid #cfd5e0;'],
   'blog': ['Внешний вид секции «Блог»: расстояние между заголовком и статьями.', 'display: grid;\ngap: 20px;'],
-  'blog__title': ['Заголовок секции «Блог».', 'font-size: 30px;\nfont-weight: 800;'],
+  'blog__title': ['Место заголовка в секции «Блог». Вид заголовка задаёт .section-title.', 'margin-bottom: 4px;'],
   'blog__list': ['Сетка статей: колонки и промежутки.', 'display: grid;\ngrid-template-columns: repeat(3, 1fr);\ngap: 14px;'],
   'post': ['Одна статья в списке: расстояние между картинкой, тегом, заголовком и ссылкой.', 'display: grid;\ngap: 8px;'],
   'post__image': ['Картинка статьи: пропорции и скругление.', 'aspect-ratio: 3 / 2;\nborder-radius: 8px;'],
@@ -1213,7 +1215,7 @@ const INFO = {
   'post__link': ['Ссылка «Читать».', 'font-weight: 600;\ncolor: #3d5afe;'],
   'home__contacts': ['Место секции «Контакты» на главной: отступы и линия сверху.', 'padding: 52px 40px;\nborder-top: 1px solid #cfd5e0;'],
   'contacts': ['Внешний вид секции «Контакты»: расстояние между заголовком и содержимым.', 'display: grid;\ngap: 20px;'],
-  'contacts__title': ['Заголовок секции «Контакты».', 'font-size: 30px;\nfont-weight: 800;'],
+  'contacts__title': ['Место заголовка в секции «Контакты». Сейчас стилей нет, но класс оставляем: если отступ понадобится только здесь, его добавят сюда, не трогая остальные заголовки.', '/* пока пусто */'],
   'contacts__inner': ['Две колонки: слева контакты, справа форма.', 'display: grid;\ngrid-template-columns: 1fr 1fr;\ngap: 24px;'],
   'contacts__list': ['Список контактов: без точек, с расстоянием между пунктами.', 'display: grid;\ngap: 10px;\nlist-style: none;\npadding: 0;'],
   'contacts__item': ['Один контакт: подпись сверху, значение снизу.', 'display: grid;\ngap: 2px;'],
