@@ -560,6 +560,9 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
 .note { font-size: 14px; color: var(--muted); border-left: 3px solid var(--accent); padding: 4px 0 4px 10px; }
 .note a { color: var(--accent); font-weight: 600; }
 
+.inspector__tools { display: flex; gap: 6px; }
+.inspector__tools .btn:disabled { opacity: .4; cursor: default; }
+
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 </style>
 <script src="/metrika.js"></script>
@@ -819,7 +822,7 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
       <aside class="inspector" id="inspector" aria-live="polite">
         <div class="inspector__head">
           <h2>Разбор класса</h2>
-          <button class="btn btn--small inspector__close" type="button" id="inspClose">Скрыть</button>
+          <span class="inspector__tools"><button class="btn btn--small" type="button" id="inspUp" title="Выбрать элемент, внутри которого лежит текущий">↑ Родитель</button><button class="btn btn--small inspector__close" type="button" id="inspClose">Скрыть</button></span>
         </div>
         <div class="inspector__body" id="inspBody"></div>
       </aside>
@@ -1896,6 +1899,16 @@ function anatomy(p) {
   return `<span class="a-b">${p.block}</span>__<span class="a-e">${p.elem}</span>${m}`;
 }
 function sketch(el) {
+  const own = sketchOwn(el);
+  const parent = el.parentElement;
+  if (!parent || parent === site || !parent.className) return own;
+  const ptag = parent.tagName.toLowerCase();
+  const sibs = [...parent.children].filter(c => c !== el && c.className).length;
+  const body = own.split('\n').map(l => '  ' + l).join('\n');
+  const note = sibs ? `\n  <!-- и ещё ${sibs} ${sibs === 1 ? 'соседний элемент' : sibs < 5 ? 'соседних элемента' : 'соседних элементов'} -->` : '';
+  return `<${ptag} class="${parent.className}">  <!-- родитель -->\n${body}${note}\n</${ptag}>`;
+}
+function sketchOwn(el) {
   const tag = el.tagName.toLowerCase();
   const open = `<${tag} class="${el.className}">`;
   const kids = [...el.children].filter(c => c.className);
@@ -2071,7 +2084,12 @@ function whyMany(ps) {
       : 'Общие стили пишутся один раз в первом классе, а второй добавляет только особенности. Так не приходится повторять одно и то же.';
   return `<div><h4>Почему здесь ${word}</h4><div class="hint"><ul class="why">${rows}</ul><p>${tail}</p></div></div>`;
 }
-function inspect(el) { inspect0(el); $$('#inspBody .hint').forEach(termify); }
+function inspect(el) {
+  inspect0(el); $$('#inspBody .hint').forEach(termify);
+  const up = el.parentElement && el.parentElement !== site ? el.parentElement.closest('[data-bem]') : null;
+  $('#inspUp').disabled = !up;
+  $('#inspUp').onclick = () => up && (inspect(up), up.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+}
 function inspect0(el) {
   if (picked) picked.removeAttribute('data-bem-picked');
   picked = el;
