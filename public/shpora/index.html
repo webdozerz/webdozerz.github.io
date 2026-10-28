@@ -1,0 +1,1203 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Интерактивные шпаргалки по HTML, CSS, JavaScript и Git и кликабельный макет лендинга с разбором классов по БЭМ.">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>Шпора фронтендера</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sticky top bar → one view at a time (choice grid / BEM canvas+inspector / cheatsheet with live widget + snippet cards) */
+:root {
+  --canvas: #e8ebf1;
+  --surface: #ffffff;
+  --surface-2: #f3f5f9;
+  --ink: #1b2130;
+  --muted: #5b6476;
+  --line: #cfd5e0;
+  --wire: #eef1f6;
+  --wire-ink: #9aa3b4;
+  --accent: #3d5afe;
+  --accent-ink: #ffffff;
+  --block: #2f6fed;
+  --elem: #0f9466;
+  --mod: #c96a06;
+  --code-bg: #f6f7fb;
+  --shadow: 0 1px 2px rgba(27, 33, 48, .06), 0 8px 24px rgba(27, 33, 48, .06);
+  --f-ui: "Onest", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --canvas: #11141b; --surface: #1a1e28; --surface-2: #222736; --ink: #e7eaf1; --muted: #9ba4b6;
+    --line: #333a4b; --wire: #232938; --wire-ink: #6c768b; --accent: #7b8cff; --accent-ink: #0f1320;
+    --block: #74a0ff; --elem: #3ccf98; --mod: #f3a24c; --code-bg: #141821;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --canvas: #11141b; --surface: #1a1e28; --surface-2: #222736; --ink: #e7eaf1; --muted: #9ba4b6;
+  --line: #333a4b; --wire: #232938; --wire-ink: #6c768b; --accent: #7b8cff; --accent-ink: #0f1320;
+  --block: #74a0ff; --elem: #3ccf98; --mod: #f3a24c; --code-bg: #141821;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--canvas); color: var(--ink); font: 15px/1.55 var(--f-ui); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--surface); }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.2; }
+p { margin: 0; }
+code, pre, .mono { font-family: var(--f-mono); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* ---------- app bar ---------- */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); }
+.bar .wrap { display: flex; align-items: center; gap: 16px; padding-block: 10px; }
+.bar__logo { font-weight: 800; font-size: 17px; letter-spacing: -.01em; text-decoration: none; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+.bar__logo span { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 7px; background: var(--accent); color: var(--accent-ink); font-family: var(--f-mono); font-size: 13px; }
+.bar__tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; min-width: 0; }
+.bar__tab { border: 0; background: none; padding: 7px 12px; border-radius: 8px; color: var(--muted); font-weight: 600; cursor: pointer; white-space: nowrap; text-decoration: none; font-size: 14px; }
+.bar__tab:hover { background: var(--surface-2); color: var(--ink); }
+.bar__tab[aria-current="page"] { background: var(--ink); color: var(--surface); }
+
+main { padding-block: 28px 80px; }
+[data-view] { display: grid; gap: 24px; }
+.view-head { display: grid; gap: 8px; max-width: 68ch; }
+.view-head h1 { font-size: clamp(26px, 4vw, 38px); letter-spacing: -.02em; }
+.view-head p { color: var(--muted); font-size: 16px; }
+.eyebrow { font: 600 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- home ---------- */
+.search { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px 14px; max-width: 560px; }
+.search input { border: 0; background: none; outline: none; padding: 10px 0; flex: 1; min-width: 0; font-size: 16px; }
+.search svg { flex: none; color: var(--muted); }
+.results { display: grid; gap: 8px; max-width: 760px; }
+.results__item { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: baseline; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; cursor: pointer; }
+.results__item:hover { border-color: var(--accent); }
+.results__topic { font: 600 12px var(--f-mono); color: var(--accent); text-transform: uppercase; }
+.results__item b { display: block; }
+.results__item small { color: var(--muted); }
+.choice { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.choice__card { display: grid; grid-template-rows: auto auto 1fr auto; gap: 10px; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 20px; cursor: pointer; transition: transform .15s, border-color .15s, box-shadow .15s; }
+.choice__card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: var(--shadow); }
+.choice__badge { font: 700 13px var(--f-mono); width: 44px; height: 44px; display: grid; place-items: center; border-radius: 10px; background: var(--surface-2); color: var(--accent); }
+.choice__card h2 { font-size: 20px; }
+.choice__card p { color: var(--muted); }
+.choice__meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 12px var(--f-mono); padding: 3px 8px; border-radius: 6px; background: var(--surface-2); color: var(--muted); }
+
+/* ---------- widget shell ---------- */
+.widget { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.widget__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.widget__head h2 { font-size: 17px; }
+.widget__head p { color: var(--muted); font-size: 14px; }
+.widget__body { padding: 18px; display: grid; gap: 16px; }
+.seg { display: inline-flex; background: var(--surface-2); border-radius: 9px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+.seg button { border: 0; background: none; padding: 6px 12px; border-radius: 7px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; }
+.btn:hover { border-color: var(--accent); }
+.btn--primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn--small { padding: 4px 10px; font-size: 12px; }
+
+.codebox { position: relative; background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
+.codebox pre { margin: 0; padding: 12px 14px; overflow-x: auto; font-size: 13px; line-height: 1.6; white-space: pre; }
+.codebox .btn { position: absolute; top: 6px; right: 6px; }
+.tok-k { color: var(--block); } .tok-s { color: var(--elem); } .tok-c { color: var(--muted); font-style: italic; } .tok-p { color: var(--mod); }
+
+/* cheat cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.cheat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.cheat--flash { animation: flash 1.4s ease; }
+@keyframes flash { 0%, 40% { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent); } }
+.cheat h3 { font-size: 16px; }
+.cheat p { color: var(--muted); font-size: 14px; }
+.filter { display: flex; flex-wrap: wrap; gap: 6px; }
+.filter button { border: 1px solid var(--line); background: var(--surface); padding: 5px 11px; border-radius: 99px; cursor: pointer; font-size: 13px; }
+.filter button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+
+/* ---------- CSS playground ---------- */
+.play { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 18px; }
+.play__controls { display: grid; gap: 12px; align-content: start; }
+.play__controls label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); font-weight: 600; }
+.play__controls select, .play__controls input[type=range] { width: 100%; }
+.play__controls select { background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 8px; font-family: var(--f-mono); font-size: 13px; }
+.play__out { display: grid; gap: 12px; min-width: 0; }
+.stage { min-height: 260px; border: 2px dashed var(--line); border-radius: 12px; padding: 10px; background: repeating-linear-gradient(45deg, transparent 0 10px, var(--surface-2) 10px 11px); transition: all .3s; }
+.stage__item { background: var(--accent); color: var(--accent-ink); font: 700 14px var(--f-mono); border-radius: 8px; display: grid; place-items: center; min-width: 48px; padding: 10px; transition: all .3s; }
+.stage__item:nth-child(2) { min-height: 70px; } .stage__item:nth-child(3) { min-height: 40px; } .stage__item:nth-child(4) { min-height: 90px; }
+.explain { font-size: 14px; background: var(--surface-2); border-radius: 10px; padding: 10px 14px; }
+.explain b { font-family: var(--f-mono); font-weight: 600; }
+
+/* ---------- HTML semantic map ---------- */
+.sem { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+.sem__page { display: grid; gap: 6px; grid-template-columns: 1fr 120px; grid-template-areas: "h h" "n n" "m a" "f f"; font: 600 13px var(--f-mono); }
+.sem__tag { border: 1.5px solid var(--line); background: var(--surface-2); border-radius: 8px; padding: 10px; cursor: pointer; text-align: left; color: var(--muted); transition: all .15s; }
+.sem__tag:hover, .sem__tag[aria-pressed="true"] { border-color: var(--accent); color: var(--ink); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+.sem__main { grid-area: m; display: grid; gap: 6px; align-content: start; cursor: pointer; }
+.sem__info { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.sem__info h3 { font: 700 20px var(--f-mono); color: var(--accent); }
+
+/* ---------- JS sandbox ---------- */
+.sand { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+.sand__actions { display: grid; gap: 8px; align-content: start; }
+.sand__action { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 9px; padding: 9px 12px; cursor: pointer; display: grid; gap: 2px; }
+.sand__action:hover { border-color: var(--accent); }
+.sand__action code { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sand__right { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.demo { border: 2px dashed var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 10px; min-height: 190px; align-content: start; }
+.menu { border-radius: 10px; background: var(--surface-2); padding: 12px; display: grid; gap: 8px; transition: all .3s; }
+.menu__title { font-weight: 700; }
+.menu__list { display: none; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.menu--open .menu__list { display: grid; }
+.menu--dark { background: var(--ink); color: var(--surface); }
+.menu__item { padding: 6px 10px; border-radius: 6px; background: var(--surface); color: var(--ink); font-size: 14px; }
+.menu__item--active { outline: 2px solid var(--accent); }
+.log { font: 12px/1.6 var(--f-mono); background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 64px; max-height: 140px; overflow: auto; color: var(--muted); }
+.log div:last-child { color: var(--ink); }
+
+/* ---------- Git flow ---------- */
+.git { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.git__zone { border: 1.5px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 8px; align-content: start; min-height: 170px; background: var(--surface-2); transition: border-color .2s; }
+.git__zone--hot { border-color: var(--accent); }
+.git__zone h3 { font-size: 14px; }
+.git__zone small { color: var(--muted); font-size: 12px; }
+.git__files { display: flex; flex-wrap: wrap; gap: 6px; }
+.file { font: 600 12px var(--f-mono); padding: 4px 8px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line); animation: pop .35s ease; }
+.file--changed { border-color: var(--mod); color: var(--mod); }
+.file--commit { border-color: var(--elem); color: var(--elem); }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } }
+.git__btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.term { background: #151923; color: #d7dcea; border-radius: 10px; padding: 12px 14px; font: 13px/1.7 var(--f-mono); min-height: 92px; max-height: 180px; overflow: auto; }
+.term .tok-c { color: #8a93a8; }
+.term b { color: #8ff0c0; font-weight: 600; }
+.ask { display: grid; gap: 10px; }
+.ask select { background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; max-width: 100%; }
+
+/* ---------- BEM view ---------- */
+.bem-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 14px; border-radius: 4px; border: 2px solid; }
+.switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; font-size: 14px; }
+.switch input { appearance: none; width: 40px; height: 22px; border-radius: 99px; background: var(--line); position: relative; cursor: pointer; transition: background .2s; margin: 0; }
+.switch input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--surface); transition: transform .2s; }
+.switch input:checked { background: var(--accent); }
+.switch input:checked::after { transform: translateX(18px); }
+.bem-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 18px; align-items: start; }
+.frame { background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; border: 1px solid var(--line); }
+.frame__bar { display: flex; align-items: center; gap: 6px; padding: 9px 12px; border-bottom: 1px solid var(--line); background: var(--surface-2); font: 12px var(--f-mono); color: var(--muted); }
+.frame__bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.frame__bar span { margin-left: 8px; }
+
+/* the wireframe landing (BEM markup the inspector reads) */
+.site { --s-pad: clamp(16px, 4vw, 40px); font-size: 14px; color: var(--ink); }
+.site [data-bem] { cursor: default; }
+.site--inspect [data-bem] { cursor: help; }
+.site [data-bem-hover] { outline: 1.5px dashed var(--hl, var(--block)); outline-offset: 2px; }
+.site [data-bem-picked] { outline: 2.5px solid var(--hl, var(--block)) !important; outline-offset: 2px; background-color: color-mix(in srgb, var(--hl, var(--block)) 7%, transparent); }
+.ph { background: var(--wire); border-radius: 8px; position: relative; overflow: hidden; }
+.ph::before, .ph::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - 1px), var(--line) 50%, transparent calc(50% + 1px)); }
+.ph::after { transform: scaleX(-1); }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px var(--s-pad); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; text-decoration: none; }
+.logo__mark { width: 26px; height: 26px; border-radius: 50%; border: 6px solid var(--ink); }
+.nav__list { display: flex; gap: 20px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+.nav__link { text-decoration: none; color: var(--muted); font-weight: 500; padding-block: 4px; }
+.nav__link--active { color: var(--ink); box-shadow: inset 0 -2px 0 var(--ink); }
+.button { display: inline-flex; align-items: center; justify-content: center; padding: 10px 20px; border-radius: 8px; font-weight: 700; border: 2px solid var(--ink); background: none; cursor: inherit; text-decoration: none; font-size: 14px; }
+.button--primary { background: var(--ink); color: var(--surface); }
+.button--outline { background: none; }
+.header__login { padding: 6px 14px; font-size: 13px; }
+.hero { padding: clamp(28px, 6vw, 64px) var(--s-pad); display: grid; gap: 14px; text-align: center; justify-items: center; background: var(--surface-2); }
+.hero__title { font-size: clamp(13px, 1.6vw, 15px); font-weight: 600; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
+.hero__name { font-size: clamp(42px, 9vw, 96px); font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+.hero__subtitle { font-size: clamp(18px, 2.6vw, 26px); font-weight: 700; max-width: 26ch; line-height: 1.25; }
+.hero__features { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; width: 100%; max-width: 760px; margin-top: 10px; }
+.feature { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 4px; text-align: left; }
+.feature__value { font-size: 22px; font-weight: 800; }
+.feature__text { color: var(--muted); font-size: 13px; }
+.hero__actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+/* место секций на странице задают элементы блока home */
+.home { display: grid; }
+.home__about, .home__events, .home__blog, .home__contacts { padding: clamp(28px, 5vw, 52px) var(--s-pad); border-top: 1px solid var(--line); }
+.about, .events, .blog, .contacts { display: grid; gap: 20px; }
+.about__title, .events__title, .blog__title, .contacts__title { font-size: clamp(22px, 3vw, 30px); font-weight: 800; letter-spacing: -.02em; }
+.about__inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: center; }
+.about__image { aspect-ratio: 4 / 3; max-width: 100%; }
+.about__content { display: grid; gap: 12px; }
+.about__text { color: var(--muted); }
+.about__list { display: grid; gap: 6px; padding-left: 18px; margin: 0; }
+.events__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+.event-card { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: grid; }
+.event-card__image { aspect-ratio: 16 / 10; border-radius: 0; }
+.event-card__body { padding: 12px; display: grid; gap: 6px; }
+.event-card__date { font: 600 12px var(--f-mono); color: var(--muted); }
+.event-card__title { font-weight: 700; font-size: 15px; }
+.event-card--featured { border: 2px solid var(--ink); }
+.blog__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+.post { display: grid; gap: 8px; }
+.post__image { aspect-ratio: 3 / 2; }
+.post__tag { font: 600 11px var(--f-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.post__title { font-weight: 700; }
+.post__link { font-weight: 600; font-size: 13px; }
+.contacts__inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+.contacts__list { display: grid; gap: 10px; list-style: none; padding: 0; margin: 0; }
+.contacts__item { display: grid; gap: 2px; }
+.contacts__label { font-size: 12px; color: var(--muted); }
+.form { display: grid; gap: 10px; }
+.form__field { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.form__input { border: 1.5px solid var(--line); border-radius: 8px; padding: 9px 11px; background: var(--surface); width: 100%; font-size: 14px; }
+.form__textarea { min-height: 80px; resize: vertical; }
+.footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 20px var(--s-pad); background: var(--ink); color: var(--surface); }
+.footer .logo__mark { border-color: var(--surface); }
+.footer__copy { font-size: 13px; opacity: .7; }
+.footer__links { display: flex; gap: 14px; list-style: none; padding: 0; margin: 0; font-size: 13px; }
+
+.tag-label { position: fixed; z-index: 15; pointer-events: none; font: 600 11px var(--f-mono); padding: 2px 7px; border-radius: 5px; background: var(--hl, var(--block)); color: #fff; white-space: nowrap; transform: translateY(-100%); }
+
+/* inspector */
+.inspector { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 70px); background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); display: grid; max-height: calc(100vh - 100px); overflow: hidden; grid-template-rows: auto 1fr; }
+.inspector__head { padding: 12px 16px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.inspector__head h2 { font-size: 15px; }
+.inspector__close { display: none; }
+.inspector__body { padding: 14px 16px; display: grid; gap: 14px; overflow: auto; align-content: start; }
+.crumbs { display: flex; flex-wrap: wrap; gap: 4px; font: 12px var(--f-mono); color: var(--muted); }
+.crumbs button { border: 0; background: var(--surface-2); padding: 2px 6px; border-radius: 5px; cursor: pointer; font: inherit; color: inherit; }
+.crumbs button:hover { color: var(--ink); }
+.parts { display: grid; gap: 8px; }
+.part { border-left: 3px solid var(--c); padding: 6px 10px; background: color-mix(in srgb, var(--c) 8%, transparent); border-radius: 0 8px 8px 0; display: grid; gap: 2px; }
+.part__name { font: 600 14px var(--f-mono); word-break: break-all; }
+.part__kind { font-size: 12px; font-weight: 700; color: var(--c); text-transform: uppercase; letter-spacing: .05em; }
+.part__desc { font-size: 13px; color: var(--muted); }
+.anatomy { font: 600 15px var(--f-mono); word-break: break-all; line-height: 1.8; }
+.anatomy span { padding: 1px 3px; border-radius: 4px; }
+.anatomy .a-b { background: color-mix(in srgb, var(--block) 18%, transparent); color: var(--block); }
+.anatomy .a-e { background: color-mix(in srgb, var(--elem) 18%, transparent); color: var(--elem); }
+.anatomy .a-m { background: color-mix(in srgb, var(--mod) 18%, transparent); color: var(--mod); }
+.hint { font-size: 14px; background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
+.inspector h4 { margin: 0 0 6px; font: 600 11px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); background: var(--ink); color: var(--surface); padding: 10px 16px; border-radius: 10px; font-size: 14px; opacity: 0; transition: all .25s; pointer-events: none; z-index: 40; }
+.toast--show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 1040px) {
+  .bem-layout { grid-template-columns: minmax(0, 1fr); }
+  .inspector { position: fixed; top: auto; left: 0; right: 0; bottom: 0; max-height: 48vh; border-radius: 16px 16px 0 0; z-index: 25; padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); transition: transform .25s; }
+  .inspector--hidden { transform: translateY(110%); }
+  .inspector__close { display: inline-flex; }
+  [data-view="bem"] { padding-bottom: 46vh; }
+}
+@media (max-width: 760px) {
+  .play, .sem, .sand { grid-template-columns: minmax(0, 1fr); }
+  .git { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .about__inner, .contacts__inner { grid-template-columns: minmax(0, 1fr); }
+  .cards { grid-template-columns: minmax(0, 1fr); }
+  .header { justify-content: center; }
+  .bar .wrap { flex-wrap: wrap; gap: 8px; }
+  .bar__tabs { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style>
+<script src="/metrika.js"></script>
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <a class="bar__logo" href="#" data-go="home"><span>{ }</span>Шпора</a>
+    <nav class="bar__tabs" aria-label="Шпаргалки">
+      <a class="bar__tab" href="#" data-go="home">Все</a>
+      <a class="bar__tab" href="#bem" data-go="bem">БЭМ на макете</a>
+      <a class="bar__tab" href="#html" data-go="html">HTML</a>
+      <a class="bar__tab" href="#css" data-go="css">CSS</a>
+      <a class="bar__tab" href="#js" data-go="js">JavaScript</a>
+      <a class="bar__tab" href="#git" data-go="git">Git</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ================= HOME ================= -->
+  <section data-view="home">
+    <div class="view-head">
+      <span class="eyebrow">Шпаргалки фронтендера</span>
+      <h1>Что открыть?</h1>
+      <p>Выберите тему или найдите нужную команду. В каждой шпаргалке есть живой пример, который можно покрутить, и готовые фрагменты кода с кнопкой «Скопировать».</p>
+    </div>
+    <label class="search" for="q">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Например: commit, flex, querySelector, label" autocomplete="off">
+    </label>
+    <div class="results" id="results" hidden></div>
+    <div class="choice" id="choice"></div>
+  </section>
+
+  <!-- ================= BEM ================= -->
+  <section data-view="bem" hidden>
+    <div class="view-head">
+      <span class="eyebrow">БЭМ на макете лендинга</span>
+      <h1>Нажмите на любую часть страницы</h1>
+      <p>Это каркас лендинга: шапка, первый экран, «О нас», «Мероприятия», «Блог», «Контакты» и подвал. Нажмите на элемент, и справа появится его класс по БЭМ, разбор имени и CSS-селектор.</p>
+    </div>
+    <div class="bem-tools">
+      <div class="legend">
+        <span><i style="border-color: var(--block)"></i>Блок</span>
+        <span><i style="border-color: var(--elem)"></i>Элемент</span>
+        <span><i style="border-color: var(--mod)"></i>Модификатор</span>
+      </div>
+      <label class="switch" for="inspectToggle"><input type="checkbox" id="inspectToggle" checked>Подсказки при наведении</label>
+    </div>
+    <div class="bem-layout">
+      <div class="frame">
+        <div class="frame__bar"><i></i><i></i><i></i><span>lenni.local / index.html</span></div>
+        <div class="site site--inspect" id="site">
+        <div class="page" data-hint="Блок всей страницы. В настоящем проекте этот класс стоит прямо на теге body: &lt;body class=&quot;page&quot;&gt;. Здесь он на div, потому что макет встроен в другую страницу.">
+
+          <header class="header" data-hint="Шапка сайта. Это отдельный блок: внутри лежат другие блоки (логотип, меню, кнопка).">
+            <a class="logo header__logo" href="#bem" data-hint="Микс: «logo» — самостоятельный блок (его можно повторить в футере), «header__logo» задаёт ему место в шапке.">
+              <span class="logo__mark" data-hint="Знак логотипа — элемент блока logo."></span>
+              <span class="logo__text">Lenni</span>
+            </a>
+            <nav class="nav header__nav" data-hint="Меню — отдельный блок nav, а header__nav говорит, где он стоит. Отступы и позицию задаём через header__nav, вид пунктов — через nav.">
+              <ul class="nav__list">
+                <li class="nav__item"><a class="nav__link nav__link--active" href="#about" data-hint="Модификатор nav__link--active выделяет текущий пункт. Модификатор всегда пишется вместе с основным классом.">О нас</a></li>
+                <li class="nav__item"><a class="nav__link" href="#events">Мероприятия</a></li>
+                <li class="nav__item"><a class="nav__link" href="#blog">Блог</a></li>
+                <li class="nav__item"><a class="nav__link" href="#contacts">Контакты</a></li>
+              </ul>
+            </nav>
+            <button class="button button--outline header__login" type="button" data-hint="Три класса сразу: блок button (общие стили всех кнопок), модификатор button--outline (кнопка с обводкой) и элемент header__login (место кнопки в шапке).">Войти</button>
+          </header>
+
+          <main class="main" data-hint="Блок main — общая обёртка контента, одинаковая для всех страниц сайта. Шапка и подвал лежат снаружи.">
+          <div class="home" data-hint="Блок главной страницы. Секции внутри — его элементы: home__hero, home__about и так далее. На странице «Афиша» здесь был бы другой блок, например afisha.">
+          <section class="home__hero hero" data-hint="Микс: home__hero — место первого экрана на главной, hero — его собственный вид. В БЭМ первый экран обычно называют hero или promo.">
+            <p class="hero__title">Творческое пространство</p>
+            <h1 class="hero__name" data-hint="Название сайта. На странице должен быть один h1. Тег можно сменить, класс при этом остаётся прежним.">Lenni</h1>
+            <p class="hero__subtitle">Встречи, мастер-классы и люди, с которыми интересно</p>
+            <div class="hero__features" data-hint="Обёртка для карточек внутри hero. Элементу можно дать имя по смыслу: features, list, items.">
+              <div class="feature hero__feature" data-hint="Микс: feature — блок карточки (её можно переиспользовать), hero__feature — её место внутри hero.">
+                <span class="feature__value">120+</span>
+                <span class="feature__text">мероприятий в год</span>
+              </div>
+              <div class="feature hero__feature">
+                <span class="feature__value">8</span>
+                <span class="feature__text">направлений</span>
+              </div>
+              <div class="feature hero__feature">
+                <span class="feature__value">3 000</span>
+                <span class="feature__text">участников</span>
+              </div>
+            </div>
+            <div class="hero__actions">
+              <a class="button button--primary" href="#events" data-hint="button--primary — главный вариант кнопки. Цвет и фон меняет модификатор, базовые стили лежат в .button.">Смотреть афишу</a>
+              <a class="button button--outline" href="#about">Узнать больше</a>
+            </div>
+          </section>
+
+          <section class="home__about about" id="about" data-hint="Микс: home__about отвечает за место секции на главной (отступы, граница сверху), about — за всё, что внутри «О нас». Если секцию перенести на другую страницу, about останется, а home__about поменяется.">
+            <h2 class="about__title" data-hint="Заголовок — элемент своей секции. Если заголовки всех секций выглядят одинаково, им дают общие стили через перечисление селекторов: .about__title, .events__title { … }.">О нас</h2>
+            <div class="about__inner">
+              <div class="ph about__image" data-hint="Картинка. Класс ph — блок-заглушка макета, about__image — элемент секции."></div>
+              <div class="about__content">
+                <p class="about__text">Lenni — площадка, где проходят лекции, творческие встречи и практикумы. Собираем людей вокруг интересных тем.</p>
+                <ul class="about__list" data-hint="Список внутри about. Пункты могут не получать класс, если их не нужно стилизовать отдельно.">
+                  <li>Камерные группы до 20 человек</li>
+                  <li>Ведущие-практики</li>
+                  <li>Записи встреч после события</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <section class="home__events events" id="events">
+            <h2 class="events__title">Мероприятия</h2>
+            <div class="events__list">
+              <article class="event-card event-card--featured" data-hint="Карточка — отдельный блок event-card, ведь она повторяется. Модификатор --featured выделяет главную карточку.">
+                <div class="ph event-card__image"></div>
+                <div class="event-card__body" data-hint="Элемент body. Помните: «элемент элемента» не бывает. Внутри body будет event-card__title, а не event-card__body__title.">
+                  <span class="event-card__date">12 ноября · 19:00</span>
+                  <h3 class="event-card__title">Лекция о городской фотографии</h3>
+                </div>
+              </article>
+              <article class="event-card">
+                <div class="ph event-card__image"></div>
+                <div class="event-card__body">
+                  <span class="event-card__date">16 ноября · 12:00</span>
+                  <h3 class="event-card__title">Мастер-класс по керамике</h3>
+                </div>
+              </article>
+              <article class="event-card">
+                <div class="ph event-card__image"></div>
+                <div class="event-card__body">
+                  <span class="event-card__date">23 ноября · 18:30</span>
+                  <h3 class="event-card__title">Вечер настольных игр</h3>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="home__blog blog" id="blog">
+            <h2 class="blog__title">Блог</h2>
+            <div class="blog__list">
+              <article class="post" data-hint="Статья блога — блок post. Его можно вставить и на другую страницу, и он не сломается.">
+                <div class="ph post__image"></div>
+                <span class="post__tag">Заметки</span>
+                <h3 class="post__title">Как мы готовим мастер-классы</h3>
+                <a class="post__link" href="#blog">Читать</a>
+              </article>
+              <article class="post">
+                <div class="ph post__image"></div>
+                <span class="post__tag">Интервью</span>
+                <h3 class="post__title">Пять вопросов ведущей лекций</h3>
+                <a class="post__link" href="#blog">Читать</a>
+              </article>
+              <article class="post">
+                <div class="ph post__image"></div>
+                <span class="post__tag">Итоги</span>
+                <h3 class="post__title">Чем запомнился октябрь</h3>
+                <a class="post__link" href="#blog">Читать</a>
+              </article>
+            </div>
+          </section>
+
+          <section class="home__contacts contacts" id="contacts">
+            <h2 class="contacts__title">Контакты</h2>
+            <div class="contacts__inner">
+              <ul class="contacts__list">
+                <li class="contacts__item"><span class="contacts__label">Адрес</span>ул. Примерная, 1</li>
+                <li class="contacts__item"><span class="contacts__label">Телефон</span>+7 000 000-00-00</li>
+                <li class="contacts__item"><span class="contacts__label">Почта</span>hello@lenni.example</li>
+              </ul>
+              <form class="form contacts__form" id="demoForm" data-hint="Форма — блок form, его удобно переиспользовать. contacts__form ставит её в сетку контактов.">
+                <label class="form__field">Имя<input class="form__input" id="f-name" type="text" placeholder="Полина"></label>
+                <label class="form__field">Сообщение<textarea class="form__input form__textarea" id="f-msg" placeholder="Хочу на мастер-класс" data-hint="Два элемента одного блока: form__input даёт общий вид полей, form__textarea добавляет высоту для длинного текста."></textarea></label>
+                <button class="button button--primary" type="submit">Отправить</button>
+              </form>
+            </div>
+          </section>
+
+          </div>
+          </main>
+
+          <footer class="footer">
+            <a class="logo footer__logo" href="#bem" data-hint="Тот же блок logo, что и в шапке, только с другим элементом-миксом. Ради такого переиспользования БЭМ и нужен."><span class="logo__mark"></span><span class="logo__text">Lenni</span></a>
+            <p class="footer__copy">© 2026 Lenni</p>
+            <ul class="footer__links">
+              <li class="footer__link-item"><a class="footer__link" href="#about">О нас</a></li>
+              <li class="footer__link-item"><a class="footer__link" href="#contacts">Контакты</a></li>
+            </ul>
+          </footer>
+        </div>
+        </div>
+      </div>
+
+      <aside class="inspector" id="inspector" aria-live="polite">
+        <div class="inspector__head">
+          <h2>Разбор класса</h2>
+          <button class="btn btn--small inspector__close" type="button" id="inspClose">Скрыть</button>
+        </div>
+        <div class="inspector__body" id="inspBody"></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ================= HTML ================= -->
+  <section data-view="html" hidden>
+    <div class="view-head"><span class="eyebrow">HTML</span><h1>Семантика и разметка</h1><p>Нажмите на часть страницы и посмотрите, какой тег здесь нужен и почему.</p></div>
+    <div class="widget">
+      <div class="widget__head"><div><h2>Карта страницы</h2><p>Из каких тегов собирается типичная страница</p></div></div>
+      <div class="widget__body">
+        <div class="sem">
+          <div class="sem__page" id="semPage"></div>
+          <div class="sem__info" id="semInfo"></div>
+        </div>
+      </div>
+    </div>
+    <div class="cards" data-cards="html"></div>
+  </section>
+
+  <!-- ================= CSS ================= -->
+  <section data-view="css" hidden>
+    <div class="view-head"><span class="eyebrow">CSS</span><h1>Раскладка: Flexbox и Grid</h1><p>Меняйте свойства и смотрите, как сдвигаются блоки. Готовый код можно скопировать.</p></div>
+    <div class="widget">
+      <div class="widget__head">
+        <div><h2>Песочница раскладки</h2><p>Пять блоков внутри контейнера</p></div>
+        <div class="seg" id="layoutMode"><button type="button" aria-pressed="true" data-mode="flex">Flexbox</button><button type="button" aria-pressed="false" data-mode="grid">Grid</button></div>
+      </div>
+      <div class="widget__body">
+        <div class="play">
+          <div class="play__controls" id="playControls"></div>
+          <div class="play__out">
+            <div class="stage" id="stage"></div>
+            <div class="explain" id="playExplain"></div>
+            <div class="codebox"><pre id="playCode"></pre><button class="btn btn--small" type="button" data-copy="#playCode">Скопировать</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="filter" id="cssFilter"></div>
+    <div class="cards" data-cards="css"></div>
+  </section>
+
+  <!-- ================= JS ================= -->
+  <section data-view="js" hidden>
+    <div class="view-head"><span class="eyebrow">JavaScript</span><h1>Работа со страницей (DOM)</h1><p>Нажимайте на команды слева: каждая выполняется на живом меню справа.</p></div>
+    <div class="widget">
+      <div class="widget__head"><div><h2>Песочница DOM</h2><p>Блок <code>.menu</code> из трёх пунктов</p></div><button class="btn btn--small" type="button" id="sandReset">Сбросить</button></div>
+      <div class="widget__body">
+        <div class="sand">
+          <div class="sand__actions" id="sandActions"></div>
+          <div class="sand__right">
+            <div class="demo" id="demo"></div>
+            <div class="codebox"><pre id="sandCode"></pre><button class="btn btn--small" type="button" data-copy="#sandCode">Скопировать</button></div>
+            <div class="log" id="sandLog"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cards" data-cards="js"></div>
+  </section>
+
+  <!-- ================= GIT ================= -->
+  <section data-view="git" hidden>
+    <div class="view-head"><span class="eyebrow">Git</span><h1>Путь изменений: от файла до GitHub</h1><p>Нажимайте команды по порядку и смотрите, куда переезжают файлы.</p></div>
+    <div class="widget">
+      <div class="widget__head"><div><h2>Симулятор</h2><p>Рабочая папка → индекс → коммит → GitHub</p></div><button class="btn btn--small" type="button" id="gitReset">Сначала</button></div>
+      <div class="widget__body">
+        <div class="git" id="gitZones"></div>
+        <div class="git__btns" id="gitBtns"></div>
+        <div class="term" id="term"></div>
+      </div>
+    </div>
+    <div class="widget">
+      <div class="widget__head"><div><h2>Что я хочу сделать?</h2><p>Выберите задачу, и появится команда</p></div></div>
+      <div class="widget__body ask">
+        <select id="gitAsk" aria-label="Задача"></select>
+        <div id="gitAnswer" style="display:grid; gap:10px"></div>
+      </div>
+    </div>
+    <div class="cards" data-cards="git"></div>
+  </section>
+</main>
+
+<div class="tag-label" id="tagLabel" hidden></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* very small highlighter: comments, strings, keywords */
+function hl(code, lang) {
+  let s = esc(code);
+  if (lang === 'git') return s.replace(/^(\s*)(#.*)$/gm, '$1<span class="tok-c">$2</span>').replace(/^(git|npm|cd|mkdir)\b/gm, '<span class="tok-k">$1</span>').replace(/(&quot;.*?&quot;)/g, '<span class="tok-s">$1</span>');
+  if (lang === 'html') return s.replace(/(&lt;!--.*?--&gt;)/g, '<span class="tok-c">$1</span>').replace(/(&lt;\/?)([a-z0-9-]+)/gi, '$1<span class="tok-k">$2</span>').replace(/(&quot;.*?&quot;)/g, '<span class="tok-s">$1</span>');
+  if (lang === 'css') return s.replace(/(\/\*.*?\*\/)/g, '<span class="tok-c">$1</span>').replace(/^(\s+)([a-z-]+)(:)/gm, '$1<span class="tok-k">$2</span>$3').replace(/^([^\s{][^{]*)(\{)/gm, '<span class="tok-p">$1</span>$2');
+  return s.replace(/(\/\/.*)$/gm, '<span class="tok-c">$1</span>').replace(/(&#39;|'|`)(.*?)\1/g, '<span class="tok-s">$1$2$1</span>').replace(/\b(const|let|function|return|if|else|for|of|await|async|new|true|false)\b/g, '<span class="tok-k">$1</span>');
+}
+function codebox(code, lang) {
+  const box = document.createElement('div');
+  box.className = 'codebox';
+  box.innerHTML = `<pre>${hl(code, lang)}</pre><button class="btn btn--small" type="button">Скопировать</button>`;
+  box.querySelector('button').addEventListener('click', e => copy(code, e.currentTarget));
+  return box;
+}
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('toast--show');
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('toast--show'), 1800);
+}
+function copy(text, btn) {
+  const done = () => { toast('Скопировано'); if (btn) { btn.textContent = 'Готово'; setTimeout(() => btn.textContent = 'Скопировать', 1200); } };
+  const fallback = () => {
+    const pre = btn && btn.parentElement.querySelector('pre');
+    if (pre) { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+    toast('Текст выделен, нажмите Ctrl+C');
+  };
+  try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-copy]');
+  if (b) copy($(b.dataset.copy).textContent, b);
+});
+
+/* ================= DATA ================= */
+const SHEETS = {
+  html: { name: 'HTML', badge: '</>', desc: 'Каркас страницы, семантические теги, формы и картинки.', lang: 'html', items: [
+    { t: 'Каркас документа', d: 'С этого начинается любой index.html. В VS Code его вставляет «!» и Tab.', tags: ['doctype', 'head', 'meta'], code:
+`<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lenni</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <script src="js/main.js" defer><\/script>
+</body>
+</html>` },
+    { t: 'Ссылки и якоря', d: 'Якорь ведёт к элементу с таким же id на странице. Внешние ссылки открываем в новой вкладке.', tags: ['a', 'href', 'якорь'], code:
+`<a href="#about">О нас</a>
+<section id="about">…</section>
+
+<a href="https://example.com" target="_blank" rel="noopener">Сайт</a>
+<a href="tel:+70000000000">Позвонить</a>
+<a href="mailto:hello@lenni.example">Написать</a>` },
+    { t: 'Картинки', d: 'alt обязателен: его читают скринридеры, и он виден, если картинка не загрузилась.', tags: ['img', 'alt', 'picture'], code:
+`<img src="img/hero.jpg" alt="Зал перед лекцией" width="800" height="600">
+
+<!-- разные картинки для разных экранов -->
+<picture>
+  <source media="(max-width: 600px)" srcset="img/hero-mobile.jpg">
+  <img src="img/hero.jpg" alt="Зал перед лекцией">
+</picture>` },
+    { t: 'Форма', d: 'У каждого поля есть label. Клик по подписи ставит курсор в поле.', tags: ['form', 'input', 'label', 'button'], code:
+`<form class="form" action="#" method="post">
+  <label class="form__field">
+    Имя
+    <input class="form__input" type="text" name="name" required>
+  </label>
+  <label class="form__field">
+    Почта
+    <input class="form__input" type="email" name="email">
+  </label>
+  <button class="button" type="submit">Отправить</button>
+</form>` },
+    { t: 'Списки', d: 'Меню — это тоже список: ul > li > a.', tags: ['ul', 'ol', 'li', 'nav'], code:
+`<nav class="nav">
+  <ul class="nav__list">
+    <li class="nav__item"><a class="nav__link" href="#about">О нас</a></li>
+    <li class="nav__item"><a class="nav__link" href="#blog">Блог</a></li>
+  </ul>
+</nav>
+
+<ol>  <!-- нумерованный -->
+  <li>Шаг первый</li>
+</ol>` },
+    { t: 'Кнопка или ссылка?', d: 'Ссылка куда-то ведёт. Кнопка что-то делает на месте: открывает меню, отправляет форму.', tags: ['button', 'a', 'type'], code:
+`<a class="button" href="#events">Смотреть афишу</a>   <!-- переход -->
+<button class="button" type="button">Открыть меню</button> <!-- действие -->
+<button class="button" type="submit">Отправить</button>    <!-- в форме -->` },
+  ]},
+  css: { name: 'CSS', badge: '{ }', desc: 'Песочница Flexbox и Grid, селекторы, адаптив, частые приёмы.', lang: 'css', items: [
+    { t: 'Сброс и box-sizing', d: 'Чтобы padding не раздувал ширину блока. Ставится в начале style.css.', tags: ['база', 'box-sizing'], cat: 'База', code:
+`*, *::before, *::after {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: "Onest", sans-serif;
+}
+img {
+  max-width: 100%;
+  display: block;
+}` },
+    { t: 'Селекторы по БЭМ', d: 'Один класс на правило, без вложенности и тегов. Тогда стили не перебивают друг друга.', tags: ['селектор', 'бэм', 'специфичность'], cat: 'База', code:
+`.card { }               /* блок */
+.card__title { }        /* элемент */
+.card--featured { }     /* модификатор блока */
+.card__title--big { }   /* модификатор элемента */
+
+/* так не надо: */
+.card .card__title { }
+div.card h3 { }` },
+    { t: 'Центрирование', d: 'Три способа поставить блок ровно по центру.', tags: ['центр', 'flex', 'grid', 'margin'], cat: 'Раскладка', code:
+`/* 1. grid — самый короткий */
+.box { display: grid; place-items: center; }
+
+/* 2. flex */
+.box { display: flex; justify-content: center; align-items: center; }
+
+/* 3. по горизонтали, для блока с шириной */
+.container { max-width: 1200px; margin: 0 auto; }` },
+    { t: 'Адаптивная сетка карточек', d: 'Колонок столько, сколько влезает. Медиазапросы не нужны.', tags: ['grid', 'auto-fit', 'minmax', 'адаптив'], cat: 'Раскладка', code:
+`.events__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}` },
+    { t: 'Медиазапросы', d: 'Сначала стили для телефона, потом расширяем для больших экранов.', tags: ['media', 'адаптив', 'breakpoint'], cat: 'Адаптив', code:
+`.about__inner { display: grid; gap: 16px; }
+
+@media (min-width: 768px) {
+  .about__inner { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 1200px) {
+  .about__inner { gap: 40px; }
+}` },
+    { t: 'Плавный размер шрифта', d: 'clamp(мин, желаемый, макс): заголовок растёт вместе с экраном.', tags: ['clamp', 'font-size', 'адаптив'], cat: 'Адаптив', code:
+`.hero__name {
+  font-size: clamp(40px, 8vw, 96px);
+}` },
+    { t: 'Ховер и переходы', d: 'transition пишем на обычном состоянии, а не на :hover.', tags: ['hover', 'transition'], cat: 'Эффекты', code:
+`.button {
+  transition: background-color .2s, transform .2s;
+}
+.button:hover {
+  background-color: #222;
+  transform: translateY(-2px);
+}` },
+    { t: 'Переменные', d: 'Цвета и отступы задаются один раз, дальше используются везде.', tags: ['var', 'переменные', 'custom properties'], cat: 'База', code:
+`:root {
+  --color-text: #1b2130;
+  --color-accent: #3d5afe;
+  --gap: 24px;
+}
+.button--primary {
+  background: var(--color-accent);
+}` },
+    { t: 'Позиционирование', d: 'absolute отсчитывается от ближайшего родителя с position: relative.', tags: ['position', 'absolute', 'sticky'], cat: 'Раскладка', code:
+`.event-card { position: relative; }
+.event-card__badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+.header { position: sticky; top: 0; z-index: 10; }` },
+  ]},
+  js: { name: 'JavaScript', badge: 'JS', desc: 'Песочница DOM: поиск элементов, классы-модификаторы, события.', lang: 'js', items: [
+    { t: 'Найти элементы', d: 'querySelector возвращает первый подходящий элемент, querySelectorAll — список всех.', tags: ['querySelector', 'dom'], code:
+`const menu = document.querySelector('.menu');
+const items = document.querySelectorAll('.menu__item');
+
+items.forEach((item) => {
+  console.log(item.textContent);
+});` },
+    { t: 'Классы и БЭМ-модификаторы', d: 'Состояние меняем модификатором: JS добавляет класс, CSS решает, как это выглядит.', tags: ['classList', 'toggle', 'модификатор'], code:
+`menu.classList.add('menu--open');
+menu.classList.remove('menu--open');
+menu.classList.toggle('menu--open');      // вкл/выкл
+menu.classList.contains('menu--open');    // true / false` },
+    { t: 'События', d: 'Обработчик клика. preventDefault отменяет стандартное действие, например отправку формы.', tags: ['addEventListener', 'click', 'submit'], code:
+`const button = document.querySelector('.header__burger');
+button.addEventListener('click', () => {
+  menu.classList.toggle('menu--open');
+});
+
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+});` },
+    { t: 'Бургер-меню целиком', d: 'Классическое задание из курса: кнопка открывает и закрывает меню.', tags: ['бургер', 'меню', 'toggle'], code:
+`const burger = document.querySelector('.header__burger');
+const nav = document.querySelector('.nav');
+
+burger.addEventListener('click', () => {
+  nav.classList.toggle('nav--open');
+  burger.classList.toggle('header__burger--active');
+});` },
+    { t: 'Создать и удалить элемент', d: 'Новый элемент создаётся в памяти и появляется на странице после append.', tags: ['createElement', 'append', 'remove'], code:
+`const li = document.createElement('li');
+li.className = 'menu__item';
+li.textContent = 'Новый пункт';
+list.append(li);
+
+li.remove();` },
+    { t: 'Загрузить данные', d: 'fetch возвращает промис. С await код читается сверху вниз.', tags: ['fetch', 'async', 'json'], code:
+`async function loadEvents() {
+  const response = await fetch('/api/events.json');
+  const events = await response.json();
+  return events;
+}` },
+  ]},
+  git: { name: 'Git', badge: 'git', desc: 'Симулятор коммитов и пуша, подбор команды под задачу.', lang: 'git', items: [
+    { t: 'Первый раз на компьютере', d: 'Один раз указываем имя и почту, они попадут в каждый коммит.', tags: ['config', 'настройка'], code:
+`git config --global user.name "Полина"
+git config --global user.email "polina@example.com"` },
+    { t: 'Начать проект', d: 'init создаёт новый репозиторий, clone скачивает готовый.', tags: ['init', 'clone'], code:
+`git init
+git remote add origin https://github.com/polina/lenni.git
+
+# или скачать существующий
+git clone https://github.com/polina/lenni.git` },
+    { t: 'Сохранить и отправить', d: 'Три команды, которые нужны каждый день.', tags: ['add', 'commit', 'push'], code:
+`git status                  # что изменилось
+git add .                   # подготовить все файлы
+git commit -m "Сверстала шапку"
+git push                    # отправить на GitHub` },
+    { t: 'Ветки', d: 'В ветке работа идёт отдельно и не ломает основную версию.', tags: ['branch', 'switch', 'merge'], code:
+`git switch -c feature/header   # создать и перейти
+git switch main                 # вернуться
+git merge feature/header        # влить ветку в main
+git branch                      # список веток` },
+    { t: 'Посмотреть историю', d: 'Короткий список коммитов и что поменялось в файлах.', tags: ['log', 'diff'], code:
+`git log --oneline
+git diff                # несохранённые изменения
+git diff --staged       # то, что уже в git add` },
+    { t: 'Отменить', d: 'Как отменить, зависит от того, на каком шаге файл.', tags: ['restore', 'reset', 'отмена'], code:
+`git restore index.html           # вернуть файл как в коммите
+git restore --staged index.html  # убрать из git add
+git commit --amend -m "Новый текст"  # поправить последний коммит` },
+    { t: '.gitignore', d: 'Файлы, которые не нужно класть в репозиторий.', tags: ['gitignore', 'node_modules'], code:
+`node_modules/
+.DS_Store
+.idea/
+.vscode/
+dist/` },
+  ]},
+};
+const BEM_CARD = { name: 'БЭМ на макете', badge: 'B--M', desc: 'Каркас лендинга: нажмите на любую часть, и появится её класс с разбором.' };
+
+/* ================= ROUTING ================= */
+const VIEWS = ['home', 'bem', 'html', 'css', 'js', 'git'];
+function show(view, focusCard) {
+  if (!VIEWS.includes(view)) view = 'home';
+  $$('[data-view]').forEach(v => v.hidden = v.dataset.view !== view);
+  $$('.bar__tab').forEach(t => t.dataset.go === view ? t.setAttribute('aria-current', 'page') : t.removeAttribute('aria-current'));
+  try { history.replaceState(null, '', view === 'home' ? location.pathname : '#' + view); } catch (e) {}
+  if (focusCard) {
+    const el = document.getElementById(focusCard);
+    if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.remove('cheat--flash'); void el.offsetWidth; el.classList.add('cheat--flash'); }
+  } else window.scrollTo({ top: 0 });
+  if (view === 'bem') setTimeout(() => picked && placeNothing(), 0);
+}
+document.addEventListener('click', e => {
+  const g = e.target.closest('[data-go]');
+  if (!g) return;
+  e.preventDefault();
+  show(g.dataset.go);
+});
+
+/* ================= HOME ================= */
+const choice = $('#choice');
+[['bem', BEM_CARD], ...Object.entries(SHEETS)].forEach(([key, s]) => {
+  const b = document.createElement('button');
+  b.className = 'choice__card'; b.type = 'button'; b.dataset.go = key;
+  const n = s.items ? `${s.items.length} фрагментов кода` : '25 подсказок';
+  const live = { bem: 'интерактивный макет', html: 'карта тегов', css: 'песочница flex/grid', js: 'песочница DOM', git: 'симулятор' }[key];
+  b.innerHTML = `<span class="choice__badge">${esc(s.badge)}</span><h2>${esc(s.name)}</h2><p>${esc(s.desc)}</p><span class="choice__meta"><span class="chip">${live}</span><span class="chip">${n}</span></span>`;
+  choice.append(b);
+});
+
+const INDEX = [];
+Object.entries(SHEETS).forEach(([key, s]) => s.items.forEach((it, i) => INDEX.push({ key, id: `${key}-${i}`, it, hay: (it.t + ' ' + it.d + ' ' + it.tags.join(' ') + ' ' + it.code).toLowerCase() })));
+$('#q').addEventListener('input', e => {
+  const q = e.target.value.trim().toLowerCase();
+  const box = $('#results');
+  box.innerHTML = '';
+  box.hidden = !q;
+  choice.hidden = !!q;
+  if (!q) return;
+  const hits = INDEX.filter(x => q.split(/\s+/).every(w => x.hay.includes(w))).slice(0, 12);
+  if (!hits.length) { box.innerHTML = '<p style="color:var(--muted)">Ничего не нашлось. Попробуйте другое слово, например «flex» или «commit».</p>'; return; }
+  hits.forEach(h => {
+    const b = document.createElement('button');
+    b.className = 'results__item'; b.type = 'button';
+    b.innerHTML = `<span class="results__topic">${esc(SHEETS[h.key].name)}</span><span><b>${esc(h.it.t)}</b><small>${esc(h.it.d)}</small></span>`;
+    b.addEventListener('click', () => show(h.key, h.id));
+    box.append(b);
+  });
+});
+
+/* ================= CHEAT CARDS ================= */
+function renderCards(key, filter) {
+  const s = SHEETS[key];
+  const box = $(`[data-cards="${key}"]`);
+  box.innerHTML = '';
+  s.items.forEach((it, i) => {
+    if (filter && filter !== 'Все' && it.cat !== filter) return;
+    const c = document.createElement('article');
+    c.className = 'cheat'; c.id = `${key}-${i}`;
+    c.innerHTML = `<h3>${esc(it.t)}</h3><p>${esc(it.d)}</p>`;
+    c.append(codebox(it.code, s.lang));
+    box.append(c);
+  });
+}
+Object.keys(SHEETS).forEach(k => renderCards(k));
+const cats = ['Все', ...new Set(SHEETS.css.items.map(i => i.cat))];
+cats.forEach(c => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.textContent = c; b.setAttribute('aria-pressed', c === 'Все');
+  b.addEventListener('click', () => { $$('#cssFilter button').forEach(x => x.setAttribute('aria-pressed', x === b)); renderCards('css', c); });
+  $('#cssFilter').append(b);
+});
+
+/* ================= HTML semantic map ================= */
+const SEM = {
+  header: { why: 'Шапка страницы или секции: логотип, меню, кнопка входа.', use: 'Можно использовать несколько раз, например в article.', code: '<header class="header">\n  <a class="logo" href="/">Lenni</a>\n  <nav class="nav">…</nav>\n</header>' },
+  nav: { why: 'Главная навигация: меню со ссылками по сайту.', use: 'Не для каждой группы ссылок, а для основной навигации.', code: '<nav class="nav">\n  <ul class="nav__list">\n    <li class="nav__item"><a class="nav__link" href="#about">О нас</a></li>\n  </ul>\n</nav>' },
+  main: { why: 'Основное содержимое. На странице один main.', use: 'Шапка и подвал остаются снаружи. Внутри main удобно положить обёртку страницы, а в неё секции.', code: '<body class="page">\n  <header class="header">…</header>\n  <main class="main">\n    <div class="home">\n      <section class="home__hero hero">…</section>\n      <section class="home__about about">…</section>\n    </div>\n  </main>\n  <footer class="footer">…</footer>\n</body>' },
+  section: { why: 'Смысловой раздел со своим заголовком: «О нас», «Мероприятия», «Контакты».', use: 'Если у части нет заголовка, скорее всего, это просто div.', code: '<section class="home__about about" id="about">\n  <h2 class="about__title">О нас</h2>\n  …\n</section>' },
+  article: { why: 'Самостоятельная единица, которую можно унести на другую страницу: пост, карточка события, отзыв.', use: 'Карточки в «Блоге» и «Мероприятиях» — это article.', code: '<article class="post">\n  <img class="post__image" src="…" alt="…">\n  <h3 class="post__title">Заголовок</h3>\n</article>' },
+  aside: { why: 'Дополнительное содержимое сбоку: виджеты, реклама, связанные ссылки.', use: 'Если убрать aside, основной смысл страницы не пострадает.', code: '<aside class="sidebar">\n  <h2 class="sidebar__title">Популярное</h2>\n</aside>' },
+  footer: { why: 'Подвал: копирайт, контакты, ссылки на соцсети.', use: 'Как и header, бывает у страницы и у article.', code: '<footer class="footer">\n  <p class="footer__copy">© 2026 Lenni</p>\n</footer>' },
+  h1: { why: 'Главный заголовок страницы. Он один, дальше идут h2 для секций и h3 для карточек.', use: 'Уровни не пропускаем: после h2 идёт h3, а не h5.', code: '<h1 class="hero__name">Lenni</h1>\n<h2 class="about__title">О нас</h2>\n<h3 class="event-card__title">Лекция</h3>' },
+};
+const semPage = $('#semPage');
+function semBtn(tag, area, label) {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'sem__tag'; b.dataset.tag = tag; b.textContent = label || `<${tag}>`;
+  if (area) b.style.gridArea = area;
+  b.addEventListener('click', e => { e.stopPropagation(); semPick(tag); });
+  return b;
+}
+semPage.append(semBtn('header', 'h'), semBtn('nav', 'n'));
+const semMain = document.createElement('div');
+semMain.className = 'sem__main';
+semMain.append(semBtn('main', null, '<main>'), semBtn('h1'), semBtn('section', null, '<section> «О нас»'));
+const art = document.createElement('div'); art.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:6px';
+art.append(semBtn('article', null, '<article>'), semBtn('article', null, '<article>'));
+semMain.append(art, semBtn('section', null, '<section> «Контакты»'));
+semPage.append(semMain, semBtn('aside', 'a'), semBtn('footer', 'f'));
+function semPick(tag) {
+  const d = SEM[tag];
+  $$('.sem__tag').forEach(b => b.setAttribute('aria-pressed', b.dataset.tag === tag));
+  const info = $('#semInfo');
+  info.innerHTML = `<h3>&lt;${tag}&gt;</h3><p>${esc(d.why)}</p><p class="explain">${esc(d.use)}</p>`;
+  info.append(codebox(d.code, 'html'));
+}
+semPick('section');
+
+/* ================= CSS playground ================= */
+const FLEX = {
+  'flex-direction': { opts: ['row', 'column', 'row-reverse'], def: 'row', why: { row: 'блоки идут в строку', column: 'блоки встают в столбик', 'row-reverse': 'строка в обратном порядке' } },
+  'justify-content': { opts: ['flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly'], def: 'flex-start', why: { 'flex-start': 'прижаты к началу главной оси', center: 'собраны по центру главной оси', 'flex-end': 'прижаты к концу', 'space-between': 'крайние у краёв, остальное место поровну между ними', 'space-around': 'одинаковые поля вокруг каждого', 'space-evenly': 'все промежутки одинаковые' } },
+  'align-items': { opts: ['stretch', 'flex-start', 'center', 'flex-end', 'baseline'], def: 'stretch', why: { stretch: 'растянуты по поперечной оси', 'flex-start': 'прижаты к началу поперечной оси', center: 'по центру поперёк', 'flex-end': 'прижаты к концу поперёк', baseline: 'выровнены по линии текста' } },
+  'flex-wrap': { opts: ['nowrap', 'wrap'], def: 'nowrap', why: { nowrap: 'всё в одну линию, даже если тесно', wrap: 'переносятся на новую строку' } },
+};
+const GRID = {
+  'grid-template-columns': { opts: ['repeat(3, 1fr)', '1fr 2fr', '200px 1fr', 'repeat(auto-fit, minmax(120px, 1fr))'], def: 'repeat(3, 1fr)', why: { 'repeat(3, 1fr)': 'три равные колонки', '1fr 2fr': 'вторая колонка вдвое шире первой', '200px 1fr': 'фиксированная колонка и резиновая', 'repeat(auto-fit, minmax(120px, 1fr))': 'колонок столько, сколько влезает (адаптив без медиазапросов)' } },
+  'justify-items': { opts: ['stretch', 'start', 'center', 'end'], def: 'stretch', why: { stretch: 'ячейки заполнены по ширине', start: 'прижаты влево в ячейке', center: 'по центру ячейки', end: 'прижаты вправо' } },
+  'align-items': { opts: ['stretch', 'start', 'center', 'end'], def: 'stretch', why: { stretch: 'растянуты по высоте строки', start: 'прижаты к верху', center: 'по центру строки', end: 'прижаты к низу' } },
+};
+let mode = 'flex';
+const state = { flex: {}, grid: {} };
+Object.entries(FLEX).forEach(([k, v]) => state.flex[k] = v.def);
+Object.entries(GRID).forEach(([k, v]) => state.grid[k] = v.def);
+state.gap = 12;
+const stage = $('#stage');
+for (let i = 1; i <= 5; i++) { const d = document.createElement('div'); d.className = 'stage__item'; d.textContent = i; stage.append(d); }
+function renderControls() {
+  const box = $('#playControls'); box.innerHTML = '';
+  const props = mode === 'flex' ? FLEX : GRID;
+  Object.entries(props).forEach(([k, v]) => {
+    const id = `pc-${mode}-${k}`;
+    const l = document.createElement('label'); l.htmlFor = id;
+    l.innerHTML = `${k}<select id="${id}">${v.opts.map(o => `<option${o === state[mode][k] ? ' selected' : ''}>${o}</option>`).join('')}</select>`;
+    l.querySelector('select').addEventListener('change', e => { state[mode][k] = e.target.value; applyPlay(k); });
+    box.append(l);
+  });
+  const g = document.createElement('label'); g.htmlFor = 'pc-gap';
+  g.innerHTML = `gap: <span id="gapVal">${state.gap}px</span><input id="pc-gap" type="range" min="0" max="40" value="${state.gap}">`;
+  g.querySelector('input').addEventListener('input', e => { state.gap = +e.target.value; $('#gapVal').textContent = state.gap + 'px'; applyPlay('gap'); });
+  box.append(g);
+}
+function applyPlay(changed) {
+  const props = mode === 'flex' ? FLEX : GRID;
+  stage.removeAttribute('style');
+  stage.style.display = mode;
+  stage.style.gap = state.gap + 'px';
+  Object.keys(props).forEach(k => stage.style.setProperty(k, state[mode][k]));
+  $$('.stage__item', stage).forEach(it => it.style.width = (mode === 'flex' && state.flex['flex-wrap'] === 'wrap') ? '30%' : '');
+  const lines = [`.container {`, `  display: ${mode};`, ...Object.keys(props).filter(k => state[mode][k] !== props[k].def).map(k => `  ${k}: ${state[mode][k]};`), `  gap: ${state.gap}px;`, `}`];
+  $('#playCode').innerHTML = hl(lines.join('\n'), 'css');
+  if (changed === 'gap') {
+    const spread = mode === 'flex' && state.flex['justify-content'].startsWith('space') && state.flex['flex-wrap'] === 'nowrap';
+    $('#playExplain').innerHTML = `<b>gap: ${state.gap}px</b> — расстояние между соседними блоками, у краёв контейнера отступа нет.` + (spread ? ` Сейчас разницы почти не видно: <b>justify-content: ${esc(state.flex['justify-content'])}</b> уже раздаёт свободное место между блоками, и gap становится лишь минимальным промежутком. Поставьте flex-start, чтобы увидеть gap в деле.` : '');
+    return;
+  }
+  const k = changed && props[changed] ? changed : Object.keys(props)[mode === 'flex' ? 1 : 0];
+  $('#playExplain').innerHTML = `<b>${k}: ${esc(state[mode][k])}</b> — ${esc(props[k].why[state[mode][k]])}.` + (mode === 'flex' ? ` Главная ось сейчас ${state.flex['flex-direction'].startsWith('column') ? 'вертикальная' : 'горизонтальная'}.` : '');
+}
+$$('#layoutMode button').forEach(b => b.addEventListener('click', () => {
+  mode = b.dataset.mode;
+  $$('#layoutMode button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  renderControls(); applyPlay();
+}));
+state.flex['align-items'] = 'center';
+renderControls(); applyPlay('justify-content');
+
+/* ================= JS sandbox ================= */
+const demo = $('#demo');
+const DEMO_HTML = `<div class="menu"><div class="menu__title">Меню</div><ul class="menu__list"><li class="menu__item">О нас</li><li class="menu__item">Мероприятия</li><li class="menu__item">Блог</li></ul></div>`;
+const log = msg => { const l = $('#sandLog'); const d = document.createElement('div'); d.textContent = '> ' + msg; l.append(d); l.scrollTop = l.scrollHeight; };
+const ACTIONS = [
+  { t: 'Открыть / закрыть меню', code: `const menu = document.querySelector('.menu');\nmenu.classList.toggle('menu--open');`, run: r => { const m = $('.menu', r); m.classList.toggle('menu--open'); log(`menu.className = "${m.className}"`); } },
+  { t: 'Тёмная тема меню', code: `menu.classList.toggle('menu--dark');`, run: r => { const m = $('.menu', r); m.classList.toggle('menu--dark'); log(`menu--dark: ${m.classList.contains('menu--dark')}`); } },
+  { t: 'Сменить заголовок', code: `const title = document.querySelector('.menu__title');\ntitle.textContent = 'Навигация';`, run: r => { $('.menu__title', r).textContent = 'Навигация'; log(`title.textContent = "Навигация"`); } },
+  { t: 'Посчитать пункты', code: `const items = document.querySelectorAll('.menu__item');\nconsole.log(items.length);`, run: r => log(`items.length = ${$$('.menu__item', r).length}`) },
+  { t: 'Добавить пункт', code: `const li = document.createElement('li');\nli.className = 'menu__item';\nli.textContent = 'Контакты';\ndocument.querySelector('.menu__list').append(li);`, run: r => { const m = $('.menu', r); const li = document.createElement('li'); li.className = 'menu__item'; li.textContent = 'Контакты'; $('.menu__list', r).append(li); m.classList.add('menu--open'); log('добавлен <li class="menu__item">Контакты</li>'); } },
+  { t: 'Подсветить пункт по клику', code: `items.forEach((item) => {\n  item.addEventListener('click', () => {\n    items.forEach((i) => i.classList.remove('menu__item--active'));\n    item.classList.add('menu__item--active');\n  });\n});`, run: r => { $('.menu', r).classList.add('menu--open'); $$('.menu__item', r).forEach(it => it.onclick = () => { $$('.menu__item', r).forEach(i => i.classList.remove('menu__item--active')); it.classList.add('menu__item--active'); log(`клик: «${it.textContent}» → menu__item--active`); }); log('обработчики повешены, нажмите на пункт меню'); } },
+  { t: 'Удалить последний пункт', code: `const items = document.querySelectorAll('.menu__item');\nitems[items.length - 1].remove();`, run: r => { const it = $$('.menu__item', r); if (it.length) { const t = it[it.length - 1].textContent; it[it.length - 1].remove(); log(`удалён «${t}»`); } else log('пунктов не осталось'); } },
+];
+function sandReset() { demo.innerHTML = DEMO_HTML; $('#sandLog').innerHTML = ''; log('меню на месте, выберите команду слева'); }
+ACTIONS.forEach((a, i) => {
+  const b = document.createElement('button');
+  b.className = 'sand__action'; b.type = 'button';
+  b.innerHTML = `<b>${esc(a.t)}</b><code>${esc(a.code.split('\n').pop())}</code>`;
+  b.addEventListener('click', () => { $('#sandCode').innerHTML = hl(a.code, 'js'); a.run(demo); });
+  $('#sandActions').append(b);
+});
+$('#sandReset').addEventListener('click', sandReset);
+sandReset();
+$('#sandCode').innerHTML = hl(ACTIONS[0].code, 'js');
+ACTIONS[0].run(demo);
+
+/* ================= GIT simulator ================= */
+const Z = [['work', 'Рабочая папка', 'файлы на компьютере'], ['stage', 'Индекс', 'подготовлено к коммиту'], ['local', 'Локальный репозиторий', 'коммиты на компьютере'], ['remote', 'GitHub', 'origin/main']];
+let G;
+function gitReset() {
+  G = { work: [], stage: [], local: [], remote: ['init'], n: 0, hot: null, step: 0 };
+  $('#term').innerHTML = '<span class="tok-c"># репозиторий склонирован, нажмите «Изменить файлы»</span>';
+  renderGit();
+}
+const FILES = ['index.html', 'style.css', 'main.js'];
+const MSGS = ['Сверстала шапку', 'Добавила hero', 'Бургер-меню', 'Секция «О нас»', 'Адаптив'];
+const STEPS = [
+  { cmd: 'Изменить файлы', ok: () => true, run: () => { const f = FILES.filter(x => !G.work.includes(x)).slice(0, 2); if (!f.length) return '<span class="tok-c"># все файлы уже изменены</span>'; G.work.push(...f); G.hot = 'work'; return `<span class="tok-c"># редактируем ${f.join(', ')} в VS Code</span>`; } },
+  { cmd: 'git status', ok: () => true, run: () => `$ git status\n${G.work.length ? 'Changes not staged:\n  ' + G.work.map(f => '<b>изменён:</b> ' + f).join('\n  ') : ''}${G.stage.length ? '\nChanges to be committed:\n  ' + G.stage.join('\n  ') : ''}${!G.work.length && !G.stage.length ? 'nothing to commit, working tree clean' : ''}` },
+  { cmd: 'git add .', ok: () => G.work.length, no: 'Нечего добавлять: сначала измените файлы', run: () => { G.stage.push(...G.work); G.work = []; G.hot = 'stage'; return `$ git add .\n<span class="tok-c"># файлы в индексе и ждут коммита</span>`; } },
+  { cmd: 'git commit -m "…"', ok: () => G.stage.length, no: 'Индекс пуст: сначала git add', run: () => { const m = MSGS[G.n++ % MSGS.length]; G.local.push(m); G.stage = []; G.hot = 'local'; return `$ git commit -m "${m}"\n<b>[main ${Math.random().toString(16).slice(2, 9)}]</b> ${m}`; } },
+  { cmd: 'git push', ok: () => G.local.length, no: 'Нечего отправлять: нет новых коммитов', run: () => { const c = G.local.length; G.remote.push(...G.local); G.local = []; G.hot = 'remote'; return `$ git push\n<b>To github.com:polina/lenni.git</b>\n<span class="tok-c"># отправлено коммитов: ${c}</span>`; } },
+];
+function renderGit() {
+  $('#gitZones').innerHTML = Z.map(([k, t, s]) => {
+    const list = k === 'remote' ? G.remote.slice(-4) : G[k];
+    const cls = k === 'work' ? 'file--changed' : (k === 'local' || k === 'remote') ? 'file--commit' : '';
+    return `<div class="git__zone${G.hot === k ? ' git__zone--hot' : ''}"><h3>${t}</h3><small>${s}</small><div class="git__files">${list.map(f => `<span class="file ${cls}">${esc(f)}</span>`).join('')}</div></div>`;
+  }).join('');
+  $('#gitBtns').innerHTML = '';
+  STEPS.forEach(s => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn mono' + (s.ok() && s.cmd !== 'git status' && s.cmd !== 'Изменить файлы' ? ' btn--primary' : '');
+    b.textContent = s.cmd;
+    b.addEventListener('click', () => {
+      if (!s.ok()) { toast(s.no); return; }
+      const out = s.run();
+      const t = $('#term'); t.innerHTML += '\n' + out; t.innerHTML = t.innerHTML.replace(/^\n/, ''); t.style.whiteSpace = 'pre-wrap'; t.scrollTop = t.scrollHeight;
+      renderGit();
+    });
+    $('#gitBtns').append(b);
+  });
+}
+$('#gitReset').addEventListener('click', gitReset);
+gitReset();
+$('#term').style.whiteSpace = 'pre-wrap';
+
+const ASK = [
+  ['Сохранить изменения и отправить на GitHub', 'git add .\ngit commit -m "Что сделала"\ngit push', 'Делается после каждого законченного кусочка работы.'],
+  ['Забрать свежие изменения с GitHub', 'git pull', 'Если работаете с двух компьютеров или в команде, делайте это перед началом работы.'],
+  ['Скачать проект с GitHub в первый раз', 'git clone https://github.com/user/repo.git\ncd repo', 'Создаст папку с проектом и всей историей.'],
+  ['Залить новую локальную папку на GitHub', 'git init\ngit add .\ngit commit -m "Первый коммит"\ngit branch -M main\ngit remote add origin https://github.com/user/repo.git\ngit push -u origin main', 'Сначала создайте пустой репозиторий на github.com, без README.'],
+  ['Отменить изменения в файле (ещё не add)', 'git restore index.html', 'Файл вернётся к состоянию последнего коммита. Изменения пропадут.'],
+  ['Убрать файл из git add', 'git restore --staged index.html', 'Изменения в файле останутся, он просто выйдет из индекса.'],
+  ['Исправить сообщение последнего коммита', 'git commit --amend -m "Правильный текст"', 'Только если коммит ещё не отправлен через push.'],
+  ['Сделать отдельную ветку под задачу', 'git switch -c feature/footer\n# ...работа и коммиты...\ngit push -u origin feature/footer', 'Потом на GitHub откройте Pull Request.'],
+  ['Включить GitHub Pages для сайта', '# Settings → Pages → Branch: main → / (root) → Save\n# сайт появится по адресу user.github.io/repo', 'index.html должен лежать в корне репозитория.'],
+];
+$('#gitAsk').innerHTML = ASK.map((a, i) => `<option value="${i}">${esc(a[0])}</option>`).join('');
+function askRender() { const a = ASK[+$('#gitAsk').value]; const box = $('#gitAnswer'); box.innerHTML = ''; box.append(codebox(a[1], 'git')); const p = document.createElement('p'); p.className = 'explain'; p.textContent = a[2]; box.append(p); }
+$('#gitAsk').addEventListener('change', askRender);
+askRender();
+
+/* ================= BEM inspector ================= */
+const site = $('#site');
+const label = $('#tagLabel');
+let inspectHover = true, picked = null, hovered = null;
+$$('[class]', site).forEach(el => el.setAttribute('data-bem', ''));
+site.removeAttribute('data-bem');
+
+function parse(cls) {
+  const [base, mk] = cls.split('--');
+  if (base.includes('__')) {
+    const [block, elem] = base.split('__');
+    return { cls, block, elem, mk, kind: mk ? 'emod' : 'elem' };
+  }
+  return { cls, block: base, mk, kind: mk ? 'bmod' : 'block' };
+}
+const KIND = {
+  block: ['Блок', 'var(--block)', p => `Самостоятельная часть интерфейса «${p.block}». Её можно перенести в другое место страницы, и она будет выглядеть так же.`],
+  elem: ['Элемент', 'var(--elem)', p => `Часть блока «${p.block}», отдельно от него не используется. Пишется через два подчёркивания: ${p.block}__${p.elem}.`],
+  bmod: ['Модификатор блока', 'var(--mod)', p => `Меняет вид блока ${p.block} (вариант «${p.mk}»). Пишется через два дефиса и только вместе с основным классом ${p.block}.`],
+  emod: ['Модификатор элемента', 'var(--mod)', p => `Меняет вид элемента ${p.block}__${p.elem} (вариант «${p.mk}»). Пишется через два дефиса, основной класс элемента остаётся рядом.`],
+};
+const colorOf = el => { const ps = [...el.classList].map(parse); return ps.some(p => p.kind === 'block') ? 'var(--block)' : ps.some(p => p.kind === 'elem') ? 'var(--elem)' : 'var(--mod)'; };
+function anatomy(p) {
+  const m = p.mk ? `--<span class="a-m">${p.mk}</span>` : '';
+  if (p.kind === 'block' || p.kind === 'bmod') return `<span class="a-b">${p.block}</span>${m}`;
+  return `<span class="a-b">${p.block}</span>__<span class="a-e">${p.elem}</span>${m}`;
+}
+function sketch(el) {
+  const tag = el.tagName.toLowerCase();
+  const open = `<${tag} class="${el.className}">`;
+  const kids = [...el.children].filter(c => c.className);
+  if (!kids.length) { const t = el.textContent.trim().replace(/\s+/g, ' '); return `${open}${t.length > 34 ? t.slice(0, 34) + '…' : t}</${tag}>`; }
+  const lines = kids.slice(0, 5).map(c => `  <${c.tagName.toLowerCase()} class="${c.className}">…</${c.tagName.toLowerCase()}>`);
+  if (kids.length > 5) lines.push('  …');
+  return [open, ...lines, `</${tag}>`].join('\n');
+}
+function chain(el) { const out = []; let n = el; while (n && n !== site) { if (n.classList && n.classList.length) out.unshift(n); n = n.parentElement; } return out; }
+function generic(el, ps) {
+  const blocks = [...new Set(ps.map(p => p.block))];
+  if (blocks.length > 1) {
+    const b = ps.find(p => p.kind === 'block'), e = ps.find(p => p.kind === 'elem');
+    if (b && e) return `Это микс: на одном теге стоят блок «${b.block}» и элемент «${e.cls}». Внешний вид задаёт .${b.block}, а положение внутри ${e.block} (отступы, ширина) — .${e.cls}.`;
+  }
+  const p = ps[0];
+  if (p.kind === 'elem') return `Элемент блока ${p.block}. Тег <${el.tagName.toLowerCase()}> можно поменять, класс останется прежним: БЭМ не привязан к тегам.`;
+  return KIND[p.kind][2](p);
+}
+function inspect(el) {
+  if (picked) picked.removeAttribute('data-bem-picked');
+  picked = el;
+  el.setAttribute('data-bem-picked', '');
+  el.style.setProperty('--hl', colorOf(el));
+  const ps = [...el.classList].map(parse);
+  const body = $('#inspBody');
+  const crumbs = chain(el);
+  const css = ps.map(p => `.${p.cls} {\n  /* ${KIND[p.kind][0].toLowerCase()} */\n}`).join('\n');
+  body.innerHTML = `
+    <div><h4>Путь</h4><div class="crumbs">${crumbs.map((c, i) => `<button type="button" data-i="${i}">${c.classList[0]}</button>`).join('<span>›</span>')}</div></div>
+    <div><h4>Классы на элементе · &lt;${el.tagName.toLowerCase()}&gt;</h4><div class="parts">${ps.map(p => `<div class="part" style="--c:${KIND[p.kind][1]}"><span class="part__kind">${KIND[p.kind][0]}</span><span class="part__name anatomy">${anatomy(p)}</span><span class="part__desc">${esc(KIND[p.kind][2](p))}</span></div>`).join('')}</div></div>
+    <div><h4>Подсказка</h4><p class="hint">${esc(el.dataset.hint || generic(el, ps))}</p></div>
+    <div><h4>Разметка</h4><div id="inspHtml"></div></div>
+    <div><h4>Селекторы в CSS</h4><div id="inspCss"></div></div>`;
+  $('#inspHtml').append(codebox(sketch(el), 'html'));
+  $('#inspCss').append(codebox(css, 'css'));
+  $$('.crumbs button', body).forEach(b => b.addEventListener('click', () => inspect(crumbs[+b.dataset.i])));
+  $('#inspector').classList.remove('inspector--hidden');
+}
+function target(e) { const t = e.target.closest('[data-bem]'); return t && site.contains(t) ? t : null; }
+function placeNothing() { label.hidden = true; if (hovered) hovered.removeAttribute('data-bem-hover'); hovered = null; }
+site.addEventListener('mouseover', e => {
+  if (!inspectHover) return;
+  const t = target(e); if (!t || t === hovered) return;
+  if (hovered) hovered.removeAttribute('data-bem-hover');
+  hovered = t; t.setAttribute('data-bem-hover', ''); t.style.setProperty('--hl', colorOf(t));
+  const r = t.getBoundingClientRect();
+  label.textContent = '.' + [...t.classList].join(' .');
+  label.style.setProperty('--hl', colorOf(t));
+  label.style.left = Math.max(4, Math.min(r.left, innerWidth - 260)) + 'px';
+  label.style.top = Math.max(70, r.top - 4) + 'px';
+  label.hidden = false;
+});
+site.addEventListener('mouseleave', placeNothing);
+addEventListener('scroll', placeNothing, { passive: true });
+site.addEventListener('click', e => {
+  const t = target(e); if (!t) return;
+  e.preventDefault(); e.stopPropagation();
+  inspect(t);
+});
+site.addEventListener('submit', e => e.preventDefault());
+$('#inspectToggle').addEventListener('change', e => { inspectHover = e.target.checked; site.classList.toggle('site--inspect', inspectHover); if (!inspectHover) placeNothing(); });
+$('#inspClose').addEventListener('click', () => $('#inspector').classList.add('inspector--hidden'));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') $('#inspector').classList.add('inspector--hidden'); });
+inspect($('.header__login', site));
+
+/* start */
+const startHash = (location.hash || '').slice(1);
+show(VIEWS.includes(startHash) ? startHash : 'home');
+})();
+</script>
+
+</body>
+</html>
