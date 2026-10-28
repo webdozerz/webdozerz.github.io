@@ -574,7 +574,7 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
               <span class="logo__text">Lenni</span>
             </a>
             <nav class="nav header__nav" data-hint="Меню — отдельный блок nav, а header__nav говорит, где он стоит. Отступы и позицию задаём через header__nav, вид пунктов — через nav.">
-              <ul class="nav__list">
+              <ul class="nav__list" data-hint="Меню свёрстано списком: nav → ul → li → a. Так скринридер скажет «список, 4 пункта», а в пункт легко добавить подменю. Можно и проще — ссылки прямо в nav, без ul и li: &lt;nav class=&quot;nav&quot;&gt;&lt;a class=&quot;nav__link&quot;&gt;…&lt;/a&gt;&lt;/nav&gt;. Оба варианта правильные.">
                 <li class="nav__item"><a class="nav__link nav__link--active" href="#about" data-hint="Модификатор nav__link--active выделяет текущий пункт. Модификатор всегда пишется вместе с основным классом.">О нас</a></li>
                 <li class="nav__item"><a class="nav__link" href="#events">Мероприятия</a></li>
                 <li class="nav__item"><a class="nav__link" href="#blog">Блог</a></li>
@@ -1000,15 +1000,22 @@ const SHEETS = {
   </label>
   <button class="button" type="submit">Отправить</button>
 </form>` },
-    { t: 'Списки', d: 'Меню — это тоже список: ul > li > a.', tags: ['ul', 'ol', 'li', 'nav'], code:
-`<nav class="nav">
+    { t: 'Меню: списком или ссылками', d: 'Оба варианта правильные. Список (nav → ul → li → a) — классика: скринридер объявит число пунктов, легко добавить подменю. Для короткого меню можно ставить ссылки прямо в nav.', tags: ['ul', 'ol', 'li', 'nav'], code:
+`<!-- вариант 1: списком -->
+<nav class="nav">
   <ul class="nav__list">
     <li class="nav__item"><a class="nav__link" href="#about">О нас</a></li>
     <li class="nav__item"><a class="nav__link" href="#blog">Блог</a></li>
   </ul>
 </nav>
 
-<ol>  <!-- нумерованный -->
+<!-- вариант 2: просто ссылки -->
+<nav class="nav">
+  <a class="nav__link" href="#about">О нас</a>
+  <a class="nav__link" href="#blog">Блог</a>
+</nav>
+
+<ol>  <!-- нумерованный список, для шагов и инструкций -->
   <li>Шаг первый</li>
 </ol>` },
     { t: 'Кнопка или ссылка?', d: 'Ссылка куда-то ведёт. Кнопка что-то делает на месте: открывает меню, отправляет форму.', tags: ['button', 'a', 'type'], code:
@@ -1784,7 +1791,13 @@ function sketch(el) {
   const open = `<${tag} class="${el.className}">`;
   const kids = [...el.children].filter(c => c.className);
   if (!kids.length) { const t = el.textContent.trim().replace(/\s+/g, ' '); return `${open}${t.length > 34 ? t.slice(0, 34) + '…' : t}</${tag}>`; }
-  const lines = kids.slice(0, 5).map(c => `  <${c.tagName.toLowerCase()} class="${c.className}">…</${c.tagName.toLowerCase()}>`);
+  const inner = c => {
+    const g = [...c.children].filter(x => x.className);
+    if (g.length !== 1 || g[0].children.length) return '…';
+    const tg = g[0].tagName.toLowerCase(), tx = g[0].textContent.trim();
+    return `<${tg} class="${g[0].className}">${tx.length > 16 ? tx.slice(0, 16) + '…' : tx}</${tg}>`;
+  };
+  const lines = kids.slice(0, 5).map(c => `  <${c.tagName.toLowerCase()} class="${c.className}">${inner(c)}</${c.tagName.toLowerCase()}>`);
   if (kids.length > 5) lines.push('  …');
   return [open, ...lines, `</${tag}>`].join('\n');
 }
