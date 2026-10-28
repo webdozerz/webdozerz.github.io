@@ -190,7 +190,7 @@ main { padding-block: 28px 80px; }
 .switch input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--surface); transition: transform .2s; }
 .switch input:checked { background: var(--accent); }
 .switch input:checked::after { transform: translateX(18px); }
-.bem-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 18px; align-items: start; }
+.bem-layout { display: grid; grid-template-columns: minmax(0, 1fr) clamp(380px, 34vw, 480px); gap: 18px; align-items: start; }
 .frame { background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; border: 1px solid var(--line); }
 .frame__bar { display: flex; align-items: center; gap: 6px; padding: 9px 12px; border-bottom: 1px solid var(--line); background: var(--surface-2); font: 12px var(--f-mono); color: var(--muted); }
 .frame__bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
@@ -267,7 +267,9 @@ main { padding-block: 28px 80px; }
 .inspector__head { padding: 12px 16px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .inspector__head h2 { font-size: 15px; }
 .inspector__close { display: none; }
-.inspector__body { padding: 14px 16px; display: grid; gap: 14px; overflow: auto; align-content: start; }
+.inspector__body { padding: 14px 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; overflow-y: auto; overflow-x: hidden; align-content: start; }
+.inspector__body > * { min-width: 0; }
+.inspector .codebox pre { white-space: pre-wrap; overflow-wrap: anywhere; padding-top: 38px; }
 .crumbs { display: flex; flex-wrap: wrap; gap: 4px; font: 12px var(--f-mono); color: var(--muted); }
 .crumbs button { border: 0; background: var(--surface-2); padding: 2px 6px; border-radius: 5px; cursor: pointer; font: inherit; color: inherit; }
 .crumbs button:hover { color: var(--ink); }
@@ -287,7 +289,7 @@ main { padding-block: 28px 80px; }
 .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); background: var(--ink); color: var(--surface); padding: 10px 16px; border-radius: 10px; font-size: 14px; opacity: 0; transition: all .25s; pointer-events: none; z-index: 40; }
 .toast--show { opacity: 1; transform: translate(-50%, 0); }
 
-@media (max-width: 1040px) {
+@media (max-width: 1100px) {
   .bem-layout { grid-template-columns: minmax(0, 1fr); }
   .inspector { position: fixed; top: auto; left: 0; right: 0; bottom: 0; max-height: 48vh; border-radius: 16px 16px 0 0; z-index: 25; padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); transition: transform .25s; }
   .inspector--hidden { transform: translateY(110%); }
