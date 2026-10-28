@@ -1305,8 +1305,8 @@ ACTIONS[0].run(demo);
 const Z = [['work', 'Рабочая папка', 'файлы на компьютере'], ['stage', 'Индекс', 'подготовлено к коммиту'], ['local', 'Локальный репозиторий', 'коммиты на компьютере'], ['remote', 'GitHub', 'origin/main']];
 let G;
 function gitReset() {
-  G = { work: ['index.html', 'style.css'], stage: [], local: [], remote: ['init'], n: 0, hot: 'work', step: 0 };
-  $('#term').innerHTML = '<span class="tok-c"># вы поменяли index.html и style.css. Сохраним это в Git: нажмите подсвеченную команду</span>';
+  G = { work: [], stage: [], local: [], remote: ['init'], n: 0, hot: null, step: 0 };
+  $('#term').innerHTML = '<span class="tok-c"># проект только что скачан с GitHub, изменений пока нет. Нажмите подсвеченную кнопку «Изменить файлы»</span>';
   renderGit();
 }
 const FILES = ['index.html', 'style.css', 'main.js'];
