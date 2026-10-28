@@ -403,6 +403,22 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
 .stage { background-color: var(--surface); border-radius: 4px; }
 .stage__item { border-radius: 4px; color: #fff; }
 
+/* ---------- selector sandbox ---------- */
+.pick { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 18px; }
+.pick__sels { display: flex; flex-wrap: wrap; gap: 6px; align-content: start; }
+.pick__sels button { border: 1px solid var(--line); background: var(--surface); padding: 5px 9px; border-radius: 4px; font: 500 13px var(--f-mono); cursor: pointer; }
+.pick__sels button:hover { border-color: var(--accent); }
+.pick__sels button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pick__out { display: grid; gap: 12px; min-width: 0; }
+.pick__list { list-style: none; margin: 0; padding: 12px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; border: 2px dashed var(--line); border-radius: 4px; background: var(--surface); }
+.pick__item { padding: 12px 10px; border-radius: 4px; background: var(--surface-2); border: 2px solid transparent; font: 600 13px var(--f-mono); color: var(--muted); text-align: center; transition: all .2s; }
+.pick__item--hit { background: color-mix(in srgb, var(--accent) 16%, var(--surface)); border-color: var(--accent); color: var(--ink); }
+.pick__list--hover .pick__item:hover { background: color-mix(in srgb, var(--accent) 16%, var(--surface)); border-color: var(--accent); color: var(--ink); }
+.pick__list--hover .pick__item { cursor: pointer; }
+.pick__list--before .pick__item::before { content: "→ "; color: var(--accent); }
+.pick__list--after .pick__item::after { content: " ✓"; color: var(--accent); }
+@media (max-width: 760px) { .pick { grid-template-columns: minmax(0, 1fr); } .pick__list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
 /* ---------- Git ---------- */
 .git__zone { position: relative; border-radius: 4px; }
 .git__zone + .git__zone::before { content: "→"; position: absolute; left: -10px; top: 50%; transform: translate(-50%, -50%); color: var(--muted); font-weight: 700; }
@@ -441,11 +457,11 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
     <a class="bar__logo" href="#" data-go="home"><span>{ }</span>Шпора</a>
     <nav class="bar__tabs" aria-label="Шпаргалки">
       <a class="bar__tab" href="#" data-go="home">Все</a>
+      <a class="bar__tab" href="#git" data-go="git">Git</a>
       <a class="bar__tab" href="#html" data-go="html">HTML</a>
       <a class="bar__tab" href="#css" data-go="css">CSS</a>
       <a class="bar__tab" href="#bem" data-go="bem">БЭМ</a>
       <a class="bar__tab" href="#js" data-go="js">JavaScript</a>
-      <a class="bar__tab" href="#git" data-go="git">Git</a>
     </nav>
   </div>
 </header>
@@ -654,7 +670,7 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
 
   <!-- ================= CSS ================= -->
   <section data-view="css" hidden>
-    <div class="view-head"><span class="eyebrow">CSS</span><h1>Раскладка: Flexbox и Grid</h1><p>Меняйте свойства и смотрите, как сдвигаются блоки. Готовый код можно скопировать.</p></div>
+    <div class="view-head"><span class="eyebrow">CSS</span><h1>Раскладка и селекторы</h1><p>Двигайте блоки во Flexbox и Grid, проверяйте, какие элементы выбирают псевдоклассы. Готовый код можно скопировать.</p></div>
     <div class="widget" data-frame="Frame · Песочница раскладки">
       <div class="widget__head">
         <div><h2>Песочница раскладки</h2><p>Пять блоков внутри контейнера</p></div>
@@ -667,6 +683,19 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
             <div class="stage" id="stage"></div>
             <div class="explain" id="playExplain"></div>
             <div class="codebox"><span class="codebox__lang">CSS</span><pre id="playCode"></pre><button class="btn btn--small" type="button" data-copy="#playCode">Скопировать</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="widget" data-frame="Frame · Песочница селекторов">
+      <div class="widget__head"><div><h2>Какие элементы выберет селектор?</h2><p>Восемь пунктов <code>.nav__item</code>, как в меню</p></div></div>
+      <div class="widget__body">
+        <div class="pick">
+          <div class="pick__sels" id="pickSels" role="group" aria-label="Селектор"></div>
+          <div class="pick__out">
+            <ul class="pick__list" id="pickList"></ul>
+            <div class="explain" id="pickExplain"></div>
+            <div class="codebox"><span class="codebox__lang">CSS</span><pre id="pickCode"></pre><button class="btn btn--small" type="button" data-copy="#pickCode">Скопировать</button></div>
           </div>
         </div>
       </div>
@@ -819,7 +848,7 @@ const SHEETS = {
 <button class="button" type="button">Открыть меню</button> <!-- действие -->
 <button class="button" type="submit">Отправить</button>    <!-- в форме -->` },
   ]},
-  css: { name: 'CSS', badge: '{ }', desc: 'Песочница Flexbox и Grid, селекторы, адаптив, частые приёмы.', lang: 'css', items: [
+  css: { name: 'CSS', badge: '{ }', desc: 'Flexbox и Grid, псевдоклассы и псевдоэлементы, адаптив, частые приёмы.', lang: 'css', items: [
     { t: 'Сброс и box-sizing', d: 'Чтобы padding не раздувал ширину блока. Ставится в начале style.css.', tags: ['база', 'box-sizing'], cat: 'База', code:
 `*, *::before, *::after {
   box-sizing: border-box;
@@ -877,6 +906,77 @@ div.card h3 { }` },
   background-color: #222;
   transform: translateY(-2px);
 }` },
+    { t: 'Что такое псевдокласс', d: 'Псевдокласс выбирает элемент в особом состоянии или на особом месте. Пишется через одно двоеточие сразу после селектора, без пробела.', tags: ['псевдокласс', 'pseudo-class', 'двоеточие'], cat: 'Псевдо', code:
+`.button:hover { }        /* навели мышку */
+.nav__link:first-child { } /* первый среди соседей */
+
+/* без пробела! с пробелом это уже другой селектор: */
+.button :hover { }       /* любой элемент ВНУТРИ кнопки под мышкой */` },
+    { t: 'Состояния: hover, focus, active', d: 'Браузер сам знает, когда на элемент навели, нажали или перешли с клавиатуры. Для этого не нужен ни JS, ни модификатор.', tags: ['hover', 'focus', 'focus-visible', 'active', 'disabled'], cat: 'Псевдо', code:
+`.button:hover { background: #222; }         /* мышка над кнопкой */
+.button:active { transform: scale(0.97); }  /* в момент нажатия */
+.button:focus-visible {                      /* фокус с клавиатуры (Tab) */
+  outline: 2px solid #3d5afe;
+  outline-offset: 2px;
+}
+.button:disabled { opacity: 0.5; cursor: not-allowed; }
+.form__input:focus { border-color: #3d5afe; }` },
+    { t: 'Псевдокласс или модификатор?', d: 'Если состояние браузер знает сам (наведение, фокус, чекбокс отмечен), берём псевдокласс. Если состояние придумали мы и включаем через JS (меню открыто, пункт активный), берём БЭМ-модификатор.', tags: ['модификатор', 'бэм', 'hover', 'checked'], cat: 'Псевдо', code:
+`/* браузер знает сам → псевдокласс */
+.nav__link:hover { color: #1b2130; }
+.form__checkbox:checked { background: #3d5afe; }
+
+/* придумали мы, включает JS → модификатор */
+.nav__link--active { border-bottom: 2px solid; }
+.menu--open { display: block; }` },
+    { t: 'По порядку: first, last, nth-child', d: 'Выбирают элемент по месту среди соседей. Удобно убрать лишний отступ у последнего пункта или раскрасить строки через одну. Попробуйте в песочнице выше.', tags: ['first-child', 'last-child', 'nth-child', 'odd', 'even'], cat: 'Псевдо', code:
+`.nav__item:first-child { }        /* первый */
+.nav__item:last-child { }         /* последний */
+.nav__item:nth-child(2) { }       /* второй */
+.nav__item:nth-child(odd) { }     /* нечётные: 1, 3, 5 */
+.nav__item:nth-child(even) { }    /* чётные: 2, 4, 6 */
+.nav__item:nth-child(3n) { }      /* каждый третий */
+
+/* частый приём: линия между пунктами, но не над первым */
+.contacts__item:not(:first-child) {
+  border-top: 1px solid #cfd5e0;
+}` },
+    { t: 'Псевдоэлементы ::before и ::after', d: 'Добавляют «виртуальный» элемент в начало или конец тега, без лишней разметки. Пишутся через два двоеточия. Без свойства content не появятся вовсе.', tags: ['before', 'after', 'content', 'псевдоэлемент', 'pseudo-element'], cat: 'Псевдо', code:
+`.post__tag::before {
+  content: "#";          /* обязательно, даже пустое: content: ""; */
+  margin-right: 2px;
+}
+
+/* декоративная полоска под заголовком */
+.section-title::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 3px;
+  margin-top: 8px;
+  background: #3d5afe;
+}` },
+    { t: 'Иконка через ::before', d: 'Частое задание на курсе: значок перед пунктом списка или ссылкой. Родителю нужен position: relative, если иконку ставим абсолютно.', tags: ['before', 'иконка', 'icon', 'position'], cat: 'Псевдо', code:
+`.about__list li {
+  position: relative;
+  padding-left: 24px;
+  list-style: none;
+}
+.about__list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3d5afe;
+}` },
+    { t: 'Другие псевдоэлементы', d: 'Стилизуют части, до которых классом не дотянуться: подсказку в поле, выделенный текст, маркер списка, первую букву.', tags: ['placeholder', 'selection', 'marker', 'first-letter'], cat: 'Псевдо', code:
+`.form__input::placeholder { color: #9aa3b4; }  /* серый текст-подсказка */
+::selection { background: #ffe08a; }           /* выделенный мышкой текст */
+.about__list li::marker { color: #3d5afe; }     /* точка списка */
+.about__text::first-letter { font-size: 2em; }  /* буквица */` },
     { t: 'Переменные', d: 'Цвета и отступы задаются один раз, дальше используются везде.', tags: ['var', 'переменные', 'custom properties'], cat: 'База', code:
 `:root {
   --color-text: #1b2130;
@@ -999,7 +1099,7 @@ document.addEventListener('click', e => {
 
 /* ================= HOME ================= */
 const choice = $('#choice');
-const ORDER = ['html', 'css', 'bem', 'js', 'git'];
+const ORDER = ['git', 'html', 'css', 'bem', 'js'];
 const LIVE = { bem: 'кликабельный макет', html: 'карта тегов', css: 'песочница flex и grid', js: 'живое меню', git: 'симулятор коммитов' };
 const DONE_KEY = 'shpora-done';
 let done = [];
@@ -1007,7 +1107,7 @@ try { done = JSON.parse(localStorage.getItem(DONE_KEY) || '[]'); } catch (e) { d
 function saveDone() { try { localStorage.setItem(DONE_KEY, JSON.stringify(done)); } catch (e) {} }
 function renderProgress() {
   $('#progressFill').style.width = (done.length / ORDER.length * 100) + '%';
-  $('#progressText').textContent = done.length ? `Изучено ${done.length} из ${ORDER.length}` : 'Начните с HTML и идите по порядку';
+  $('#progressText').textContent = done.length ? `Изучено ${done.length} из ${ORDER.length}` : 'Начните с Git и идите по порядку';
   $$('.route__step').forEach(li => li.classList.toggle('route__step--done', done.includes(li.dataset.topic)));
 }
 ORDER.forEach((key, i) => {
@@ -1165,6 +1265,38 @@ $$('#layoutMode button').forEach(b => b.addEventListener('click', () => {
 }));
 state.flex['align-items'] = 'center';
 renderControls(); applyPlay('justify-content');
+
+/* ================= selector sandbox ================= */
+const PICK = [
+  { s: ':first-child', d: 'Первый пункт среди соседей.' },
+  { s: ':last-child', d: 'Последний пункт.' },
+  { s: ':nth-child(3)', d: 'Третий по счёту. Счёт идёт с единицы, а не с нуля.' },
+  { s: ':nth-child(odd)', d: 'Нечётные: 1, 3, 5, 7. Так делают «зебру» в таблицах.' },
+  { s: ':nth-child(even)', d: 'Чётные: 2, 4, 6, 8.' },
+  { s: ':nth-child(3n)', d: 'Каждый третий: 3, 6. Формула 3n значит 3×1, 3×2 и так далее.' },
+  { s: ':nth-child(n+5)', d: 'Все, начиная с пятого.' },
+  { s: ':not(:last-child)', d: 'Все, кроме последнего. Удобно, чтобы поставить разделитель между пунктами, но не после последнего.' },
+  { s: ':hover', d: 'Наведите мышку на любой пункт: подсветится тот, что под курсором. Это состояние, его браузер отслеживает сам.', live: 'hover' },
+  { s: '::before', d: 'Псевдоэлемент: перед текстом каждого пункта появилась стрелка. В разметке её нет, её добавил CSS через content.', live: 'before', css: 'content: "→ ";' },
+  { s: '::after', d: 'То же самое, но в конце: галочка после текста.', live: 'after', css: 'content: " ✓";' },
+];
+const pickList = $('#pickList');
+for (let i = 1; i <= 8; i++) { const li = document.createElement('li'); li.className = 'pick__item'; li.textContent = 'пункт ' + i; pickList.append(li); }
+function pickApply(p) {
+  pickList.className = 'pick__list' + (p.live ? ` pick__list--${p.live}` : '');
+  const items = $$('.pick__item', pickList);
+  items.forEach(li => li.classList.toggle('pick__item--hit', !p.live && li.matches(p.s)));
+  const n = p.live ? null : items.filter(li => li.matches(p.s)).length;
+  $('#pickExplain').innerHTML = `<b>.nav__item${esc(p.s)}</b> — ${esc(p.d)}` + (n !== null ? ` Выбрано: ${n} из 8.` : '');
+  $('#pickCode').innerHTML = hl(`.nav__item${p.s} {\n  ${p.css || 'background: #e8edff;'}\n}`, 'css');
+}
+PICK.forEach((p, i) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.textContent = p.s; b.setAttribute('aria-pressed', i === 3);
+  b.addEventListener('click', () => { $$('#pickSels button').forEach(x => x.setAttribute('aria-pressed', x === b)); pickApply(p); });
+  $('#pickSels').append(b);
+});
+pickApply(PICK[3]);
 
 /* ================= JS sandbox ================= */
 const demo = $('#demo');
