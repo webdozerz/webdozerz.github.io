@@ -277,7 +277,10 @@ main { padding-block: 28px 80px; }
 .part { border-left: 3px solid var(--c); padding: 6px 10px; background: color-mix(in srgb, var(--c) 8%, transparent); border-radius: 0 8px 8px 0; display: grid; gap: 2px; }
 .part__name { font: 600 14px var(--f-mono); word-break: break-all; }
 .part__kind { font-size: 12px; font-weight: 700; color: var(--c); text-transform: uppercase; letter-spacing: .05em; }
-.part__desc { font-size: 13px; color: var(--muted); }
+.part__desc { font-size: 12px; color: var(--muted); }
+.part__does { font-size: 14px; }
+.why { margin: 0 0 8px; padding-left: 18px; display: grid; gap: 6px; }
+.why b { font-weight: 600; font-size: 13px; }
 .anatomy { font: 600 15px var(--f-mono); word-break: break-all; line-height: 1.8; }
 .anatomy span { padding: 1px 3px; border-radius: 4px; }
 .anatomy .a-b { background: color-mix(in srgb, var(--block) 18%, transparent); color: var(--block); }
@@ -1148,6 +1151,108 @@ function generic(el, ps) {
   if (p.kind === 'elem') return `Элемент блока ${p.block}. Тег <${el.tagName.toLowerCase()}> можно поменять, класс останется прежним: БЭМ не привязан к тегам.`;
   return KIND[p.kind][2](p);
 }
+/* what each class is responsible for, in plain words, plus a sample of the CSS that goes into it */
+const INFO = {
+  'page': ['Общие настройки всей страницы: шрифт, цвет текста, фон. Всё, что должно действовать везде.', 'font-family: "Onest", sans-serif;\ncolor: #1b2130;\nbackground: #fff;'],
+  'header': ['Внешний вид шапки: расположение логотипа, меню и кнопки в одну строку, внутренние отступы, линия снизу.', 'display: flex;\njustify-content: space-between;\nalign-items: center;\npadding: 14px 40px;'],
+  'logo': ['Как выглядит сам логотип: размер, шрифт, расстояние между значком и текстом. Эти стили одинаковые и в шапке, и в подвале.', 'display: flex;\nalign-items: center;\ngap: 8px;\nfont-size: 18px;\nfont-weight: 800;'],
+  'header__logo': ['Где логотип стоит именно в шапке: внешние отступы, сжимается ли он, порядок. Сам логотип этот класс не меняет.', 'flex-shrink: 0;\nmargin-right: 24px;'],
+  'footer__logo': ['Где логотип стоит именно в подвале: внешние отступы, выравнивание. Размер и шрифт уже заданы в .logo.', 'margin-bottom: 8px;'],
+  'logo__mark': ['Значок логотипа: его размер, форма, цвет.', 'width: 26px;\nheight: 26px;\nborder-radius: 50%;'],
+  'logo__text': ['Надпись логотипа. Отдельный класс нужен, если текст надо стилизовать отдельно от значка, например спрятать на телефоне.', 'letter-spacing: -0.01em;'],
+  'nav': ['Внешний вид меню. Сейчас почти всё лежит в его элементах, но класс блока нужен, чтобы меню можно было вставить в другое место.', 'font-size: 15px;'],
+  'header__nav': ['Где меню стоит в шапке: отступы от логотипа и кнопки, растягивается ли оно на свободное место.', 'margin-left: auto;\nmargin-right: 24px;'],
+  'nav__list': ['Список пунктов меню: убираем точки у списка и ставим пункты в строку.', 'display: flex;\ngap: 20px;\nlist-style: none;\nmargin: 0;\npadding: 0;'],
+  'nav__item': ['Один пункт списка (тег li). Часто стилей нет, но класс ставят, чтобы потом можно было, например, добавить разделитель.', '/* обычно пусто */'],
+  'nav__link': ['Как выглядит ссылка меню: цвет, убранное подчёркивание, отступы, эффект при наведении.', 'color: #5b6476;\ntext-decoration: none;\npadding: 4px 0;'],
+  'nav__link--active': ['Только то, что отличает текущий пункт от остальных: другой цвет и подчёркивание. Остальное берётся из .nav__link.', 'color: #1b2130;\nborder-bottom: 2px solid currentColor;'],
+  'button': ['Общий вид всех кнопок на сайте: размер, отступы, скругление, шрифт. Пишется один раз, используется везде.', 'display: inline-flex;\npadding: 10px 20px;\nborder: 2px solid #1b2130;\nborder-radius: 8px;\nfont-weight: 700;'],
+  'button--primary': ['Только отличие главной кнопки: заливка и цвет текста. Размер и скругление уже есть в .button.', 'background: #1b2130;\ncolor: #fff;'],
+  'button--outline': ['Только отличие кнопки с обводкой: прозрачный фон. Всё остальное приходит из .button.', 'background: transparent;\ncolor: #1b2130;'],
+  'header__login': ['Как кнопка «Войти» встроена в шапку: она чуть меньше обычной и не сжимается. Это касается только шапки, поэтому не в .button.', 'padding: 6px 14px;\nfont-size: 13px;\nflex-shrink: 0;'],
+  'main': ['Общая обёртка контента на всех страницах сайта: например, растягивается на всю высоту, чтобы подвал был внизу.', 'flex-grow: 1;'],
+  'home': ['Главная страница целиком. Отвечает за то, как секции идут друг за другом.', 'display: grid;'],
+  'home__hero': ['Место первого экрана на главной: отступ снизу, ширина. Если hero появится на другой странице, этот класс там будет другим.', 'margin-bottom: 0;'],
+  'hero': ['Внешний вид первого экрана: фон, внутренние отступы, выравнивание текста по центру.', 'display: grid;\njustify-items: center;\ntext-align: center;\npadding: 64px 40px;\nbackground: #f3f5f9;'],
+  'hero__title': ['Маленькая надпись над названием: размер, заглавные буквы, разрядка.', 'font-size: 15px;\ntext-transform: uppercase;\nletter-spacing: 0.14em;'],
+  'hero__name': ['Крупное название сайта: большой размер шрифта и плотный межстрочный интервал.', 'font-size: clamp(42px, 9vw, 96px);\nfont-weight: 800;\nline-height: 1;'],
+  'hero__subtitle': ['Описание под названием: размер и ограничение ширины, чтобы строка не была слишком длинной.', 'font-size: 26px;\nmax-width: 26ch;'],
+  'hero__features': ['Обёртка, которая выстраивает карточки с цифрами в ряд. Отвечает только за сетку, а не за вид карточек.', 'display: grid;\ngrid-template-columns: repeat(3, 1fr);\ngap: 12px;'],
+  'feature': ['Как выглядит одна карточка с цифрой: рамка, фон, внутренние отступы. Такую карточку можно поставить и в другую секцию.', 'padding: 14px;\nborder: 1px solid #cfd5e0;\nborder-radius: 10px;'],
+  'hero__feature': ['Что нужно карточке именно внутри hero: например, выравнивание текста влево, ведь весь hero выровнен по центру.', 'text-align: left;'],
+  'feature__value': ['Крупная цифра в карточке.', 'font-size: 22px;\nfont-weight: 800;'],
+  'feature__text': ['Подпись под цифрой: мельче и серее.', 'font-size: 13px;\ncolor: #5b6476;'],
+  'hero__actions': ['Ряд кнопок: ставит их рядом и задаёт расстояние между ними. Вид самих кнопок задаёт .button.', 'display: flex;\ngap: 10px;\nflex-wrap: wrap;'],
+  'home__about': ['Место секции «О нас» на главной: внутренние отступы и линия сверху. Это раскладка страницы, а не вид секции.', 'padding: 52px 40px;\nborder-top: 1px solid #cfd5e0;'],
+  'about': ['Внешний вид самой секции «О нас»: расстояние между заголовком и содержимым.', 'display: grid;\ngap: 20px;'],
+  'about__title': ['Заголовок секции: размер и жирность.', 'font-size: 30px;\nfont-weight: 800;'],
+  'about__inner': ['Делит секцию на две колонки: картинка слева, текст справа.', 'display: grid;\ngrid-template-columns: 1fr 1fr;\ngap: 24px;'],
+  'ph': ['Заглушка картинки, как на макете в Pixso. В настоящем проекте здесь будет тег img, а класс ph не нужен.', 'background: #eef1f6;'],
+  'about__image': ['Размер и пропорции картинки в секции «О нас».', 'aspect-ratio: 4 / 3;\nwidth: 100%;'],
+  'about__content': ['Колонка с текстом: расстояние между абзацем и списком.', 'display: grid;\ngap: 12px;'],
+  'about__text': ['Абзац текста: цвет и размер.', 'color: #5b6476;'],
+  'about__list': ['Список преимуществ: отступ слева под точки, расстояние между пунктами.', 'display: grid;\ngap: 6px;\npadding-left: 18px;'],
+  'home__events': ['Место секции «Мероприятия» на главной: отступы и линия сверху, как у остальных секций.', 'padding: 52px 40px;\nborder-top: 1px solid #cfd5e0;'],
+  'events': ['Внешний вид секции «Мероприятия»: расстояние между заголовком и карточками.', 'display: grid;\ngap: 20px;'],
+  'events__title': ['Заголовок секции. Если у всех секций заголовки одинаковые, пишут общее правило: .about__title, .events__title { … }.', 'font-size: 30px;\nfont-weight: 800;'],
+  'events__list': ['Сетка карточек: сколько колонок и расстояние между ними. Вид самих карточек задаёт .event-card.', 'display: grid;\ngrid-template-columns: repeat(auto-fill, minmax(190px, 1fr));\ngap: 14px;'],
+  'event-card': ['Как выглядит одна карточка мероприятия: рамка, скругление. Карточки повторяются, поэтому это отдельный блок.', 'border: 1px solid #cfd5e0;\nborder-radius: 10px;\noverflow: hidden;'],
+  'event-card--featured': ['Только отличие выделенной карточки: толстая тёмная рамка. Всё остальное приходит из .event-card.', 'border: 2px solid #1b2130;'],
+  'event-card__image': ['Картинка карточки: пропорции.', 'aspect-ratio: 16 / 10;\nwidth: 100%;'],
+  'event-card__body': ['Текстовая часть карточки: внутренние отступы и расстояние между датой и названием.', 'display: grid;\ngap: 6px;\npadding: 12px;'],
+  'event-card__date': ['Дата: мелкий серый шрифт.', 'font-size: 12px;\ncolor: #5b6476;'],
+  'event-card__title': ['Название мероприятия.', 'font-size: 15px;\nfont-weight: 700;'],
+  'home__blog': ['Место секции «Блог» на главной: отступы и линия сверху.', 'padding: 52px 40px;\nborder-top: 1px solid #cfd5e0;'],
+  'blog': ['Внешний вид секции «Блог»: расстояние между заголовком и статьями.', 'display: grid;\ngap: 20px;'],
+  'blog__title': ['Заголовок секции «Блог».', 'font-size: 30px;\nfont-weight: 800;'],
+  'blog__list': ['Сетка статей: колонки и промежутки.', 'display: grid;\ngrid-template-columns: repeat(3, 1fr);\ngap: 14px;'],
+  'post': ['Одна статья в списке: расстояние между картинкой, тегом, заголовком и ссылкой.', 'display: grid;\ngap: 8px;'],
+  'post__image': ['Картинка статьи: пропорции и скругление.', 'aspect-ratio: 3 / 2;\nborder-radius: 8px;'],
+  'post__tag': ['Рубрика над заголовком: мелкие заглавные буквы.', 'font-size: 11px;\ntext-transform: uppercase;'],
+  'post__title': ['Заголовок статьи.', 'font-weight: 700;'],
+  'post__link': ['Ссылка «Читать».', 'font-weight: 600;\ncolor: #3d5afe;'],
+  'home__contacts': ['Место секции «Контакты» на главной: отступы и линия сверху.', 'padding: 52px 40px;\nborder-top: 1px solid #cfd5e0;'],
+  'contacts': ['Внешний вид секции «Контакты»: расстояние между заголовком и содержимым.', 'display: grid;\ngap: 20px;'],
+  'contacts__title': ['Заголовок секции «Контакты».', 'font-size: 30px;\nfont-weight: 800;'],
+  'contacts__inner': ['Две колонки: слева контакты, справа форма.', 'display: grid;\ngrid-template-columns: 1fr 1fr;\ngap: 24px;'],
+  'contacts__list': ['Список контактов: без точек, с расстоянием между пунктами.', 'display: grid;\ngap: 10px;\nlist-style: none;\npadding: 0;'],
+  'contacts__item': ['Один контакт: подпись сверху, значение снизу.', 'display: grid;\ngap: 2px;'],
+  'contacts__label': ['Подпись «Адрес», «Телефон»: мелкий серый текст.', 'font-size: 12px;\ncolor: #5b6476;'],
+  'form': ['Как выглядит форма вообще: расстояние между полями. Такую же форму можно поставить на другую страницу.', 'display: grid;\ngap: 10px;'],
+  'contacts__form': ['Где форма стоит в секции контактов: например, ограничение ширины. Вид формы при этом не меняется.', 'max-width: 480px;'],
+  'form__field': ['Поле с подписью (тег label): подпись над полем ввода.', 'display: grid;\ngap: 4px;\nfont-size: 13px;'],
+  'form__input': ['Общий вид всех полей ввода: рамка, скругление, отступы внутри.', 'width: 100%;\npadding: 9px 11px;\nborder: 1.5px solid #cfd5e0;\nborder-radius: 8px;'],
+  'form__textarea': ['Только то, чем поле для сообщения отличается от обычного: оно выше и растягивается по высоте.', 'min-height: 80px;\nresize: vertical;'],
+  'footer': ['Внешний вид подвала: тёмный фон, светлый текст, раскладка в строку.', 'display: flex;\njustify-content: space-between;\nalign-items: center;\npadding: 20px 40px;\nbackground: #1b2130;\ncolor: #fff;'],
+  'footer__copy': ['Строка с копирайтом: мелкий полупрозрачный текст.', 'font-size: 13px;\nopacity: 0.7;'],
+  'footer__links': ['Список ссылок в подвале: в строку, без точек.', 'display: flex;\ngap: 14px;\nlist-style: none;\npadding: 0;'],
+  'footer__link-item': ['Пункт списка ссылок. Имя из двух слов пишется через дефис: link-item.', '/* обычно пусто */'],
+  'footer__link': ['Ссылка в подвале: цвет наследуется от подвала, подчёркивание убрано.', 'color: inherit;\ntext-decoration: none;'],
+};
+const ROLE = {
+  block: 'отвечает за то, как элемент выглядит сам по себе: размеры, шрифт, цвета, внутренние отступы',
+  elem: 'отвечает за то, где элемент стоит внутри родителя: внешние отступы, ширина, выравнивание',
+  bmod: 'добавляет только отличия этого варианта, всё остальное берётся из основного класса',
+  emod: 'добавляет только отличия этого варианта, всё остальное берётся из основного класса',
+};
+function whyMany(ps) {
+  if (ps.length < 2) return '';
+  const n = ps.length;
+  const word = n === 2 ? 'два класса' : n === 3 ? 'три класса' : `${n} классов`;
+  const hasMix = new Set(ps.map(p => p.block)).size > 1;
+  const hasMod = ps.some(p => p.mk);
+  const role = (p, i) => {
+    if (p.kind === 'elem' && !hasMix) return i === 0 ? 'задаёт общий вид, одинаковый для всех похожих элементов' : 'добавляет то, что нужно только этому элементу';
+    return ROLE[p.kind];
+  };
+  const rows = ps.map((p, i) => `<li><b class="mono">.${esc(p.cls)}</b> ${esc(role(p, i))}.</li>`).join('');
+  const tail = hasMix
+    ? 'Так один и тот же блок можно поставить в разные места: внешний вид остаётся в классе блока, а положение (отступы, ширина, выравнивание) задаёт класс родителя. Если бы всё лежало в одном классе, при переносе пришлось бы копировать стили.'
+    : hasMod
+      ? 'Основной класс хранит общие стили, а модификатор добавляет только отличия. Поэтому модификатор никогда не пишут без основного класса.'
+      : 'Общие стили пишутся один раз в первом классе, а второй добавляет только особенности. Так не приходится повторять одно и то же.';
+  return `<div><h4>Почему здесь ${word}</h4><div class="hint"><ul class="why">${rows}</ul><p>${tail}</p></div></div>`;
+}
 function inspect(el) {
   if (picked) picked.removeAttribute('data-bem-picked');
   picked = el;
@@ -1156,13 +1261,17 @@ function inspect(el) {
   const ps = [...el.classList].map(parse);
   const body = $('#inspBody');
   const crumbs = chain(el);
-  const css = ps.map(p => `.${p.cls} {\n  /* ${KIND[p.kind][0].toLowerCase()} */\n}`).join('\n');
+  const css = ps.map(p => {
+    const props = (INFO[p.cls] || [, '/* стили */'])[1].split('\n').map(l => '  ' + l).join('\n');
+    return `/* ${KIND[p.kind][0].toLowerCase()} */\n.${p.cls} {\n${props}\n}`;
+  }).join('\n\n');
   body.innerHTML = `
     <div><h4>Путь</h4><div class="crumbs">${crumbs.map((c, i) => `<button type="button" data-i="${i}">${c.classList[0]}</button>`).join('<span>›</span>')}</div></div>
-    <div><h4>Классы на элементе · &lt;${el.tagName.toLowerCase()}&gt;</h4><div class="parts">${ps.map(p => `<div class="part" style="--c:${KIND[p.kind][1]}"><span class="part__kind">${KIND[p.kind][0]}</span><span class="part__name anatomy">${anatomy(p)}</span><span class="part__desc">${esc(KIND[p.kind][2](p))}</span></div>`).join('')}</div></div>
-    <div><h4>Подсказка</h4><p class="hint">${esc(el.dataset.hint || generic(el, ps))}</p></div>
+    <div><h4>Классы на элементе · &lt;${el.tagName.toLowerCase()}&gt;</h4><div class="parts">${ps.map(p => `<div class="part" style="--c:${KIND[p.kind][1]}"><span class="part__kind">${KIND[p.kind][0]}</span><span class="part__name anatomy">${anatomy(p)}</span>${INFO[p.cls] ? `<span class="part__does"><b>Что пишем в этом классе:</b> ${esc(INFO[p.cls][0])}</span>` : ''}<span class="part__desc">${esc(KIND[p.kind][2](p))}</span></div>`).join('')}</div></div>
+    ${whyMany(ps)}
+    <div><h4>Коротко</h4><p class="hint">${esc(el.dataset.hint || generic(el, ps))}</p></div>
     <div><h4>Разметка</h4><div id="inspHtml"></div></div>
-    <div><h4>Селекторы в CSS</h4><div id="inspCss"></div></div>`;
+    <div><h4>Пример CSS для этих классов</h4><div id="inspCss"></div></div>`;
   $('#inspHtml').append(codebox(sketch(el), 'html'));
   $('#inspCss').append(codebox(css, 'css'));
   $$('.crumbs button', body).forEach(b => b.addEventListener('click', () => inspect(crumbs[+b.dataset.i])));
