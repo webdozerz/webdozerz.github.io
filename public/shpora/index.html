@@ -107,9 +107,9 @@ main { padding-block: 28px 80px; }
 .btn--small { padding: 4px 10px; font-size: 12px; }
 
 .codebox { position: relative; background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
-.codebox pre { margin: 0; padding: 40px 14px 12px; overflow-x: auto; font-size: 13px; line-height: 1.6; white-space: pre; }
-.codebox .btn { position: absolute; top: 6px; right: 6px; }
-.codebox::before { content: ""; position: absolute; left: 0; right: 0; top: 34px; border-top: 1px solid var(--line); }
+.codebox pre { margin: 0; padding: 52px 14px 12px; overflow-x: auto; font-size: 13px; line-height: 1.6; white-space: pre; }
+.codebox .btn { position: absolute; top: 6px; right: 6px; height: 28px; padding-block: 0; display: inline-flex; align-items: center; }
+.codebox::before { content: ""; position: absolute; left: 0; right: 0; top: 40px; border-top: 1px solid var(--line); }
 .tok-k { color: var(--block); } .tok-s { color: var(--elem); } .tok-c { color: var(--muted); font-style: italic; } .tok-p { color: var(--mod); }
 
 /* cheat cards */
@@ -277,7 +277,7 @@ main { padding-block: 28px 80px; }
 .inspector__close { display: none; }
 .inspector__body { padding: 14px 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; overflow-y: auto; overflow-x: hidden; align-content: start; }
 .inspector__body > * { min-width: 0; }
-.inspector .codebox pre { white-space: pre-wrap; overflow-wrap: anywhere; padding-top: 38px; }
+.inspector .codebox pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 .crumbs { display: flex; flex-wrap: wrap; gap: 4px; font: 12px var(--f-mono); color: var(--muted); }
 .crumbs button { border: 0; background: var(--surface-2); padding: 2px 6px; border-radius: 5px; cursor: pointer; font: inherit; color: inherit; }
 .crumbs button:hover { color: var(--ink); }
