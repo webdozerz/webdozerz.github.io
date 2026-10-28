@@ -8,7 +8,7 @@
 <title>Шпора фронтендера</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Forum&family=Onest:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
 /* Layout: sticky top bar → one view at a time (choice grid / BEM canvas+inspector / cheatsheet with live widget + snippet cards) */
 :root {
@@ -217,64 +217,124 @@ body > main { padding-block: 28px 80px; }
 .site--inspect [data-bem] { cursor: help; }
 .site [data-bem-hover] { outline: 1.5px dashed var(--hl, var(--block)); outline-offset: 2px; }
 .site [data-bem-picked] { outline: 2.5px solid var(--hl, var(--block)) !important; outline-offset: 2px; background-color: color-mix(in srgb, var(--hl, var(--block)) 7%, transparent); }
-.ph { background: var(--wire); border-radius: 8px; position: relative; overflow: hidden; }
-.ph::before, .ph::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - 1px), var(--line) 50%, transparent calc(50% + 1px)); }
+/* the Lenni ART frame keeps the design's own light black/white/red look in both themes */
+.site { --l-bg: #f3f3f1; --l-ink: #121212; --l-red: #c8281e; --l-muted: #6d6d6d; --l-line: #d4d4d0; --l-ph: #dcdcd8; --f-art: "Forum", "Times New Roman", serif;
+  background: var(--l-bg); color: var(--l-ink); color-scheme: light; }
+.site a { color: inherit; }
+.ph { background: var(--l-ph); position: relative; overflow: hidden; }
+.ph::before, .ph::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - 1px), #bdbdb8 50%, transparent calc(50% + 1px)); }
 .ph::after { transform: scaleX(-1); }
-.header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px var(--s-pad); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
-.logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; text-decoration: none; }
-.logo__mark { width: 26px; height: 26px; border-radius: 50%; border: 6px solid var(--ink); }
-.nav__list { display: flex; gap: 20px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
-.nav__link { text-decoration: none; color: var(--muted); font-weight: 500; padding-block: 4px; }
-.nav__link--active { color: var(--ink); box-shadow: inset 0 -2px 0 var(--ink); }
-.button { display: inline-flex; align-items: center; justify-content: center; padding: 10px 20px; border-radius: 8px; font-weight: 700; border: 2px solid var(--ink); background: none; cursor: inherit; text-decoration: none; font-size: 14px; }
-.button--primary { background: var(--ink); color: var(--surface); }
+
+.header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 var(--s-pad) 12px; flex-wrap: wrap; }
+.logo { display: inline-grid; text-decoration: none; background: var(--l-ink); padding: 10px 12px 14px; position: relative; }
+.logo__word { font: 400 20px/1 var(--f-art); color: #fff; letter-spacing: .12em; }
+.logo__badge { justify-self: end; margin-right: -18px; margin-top: 6px; background: var(--l-red); color: #fff; font: 400 13px/1 var(--f-art); letter-spacing: .14em; padding: 4px 12px; }
+.nav__list { display: flex; gap: 24px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+.nav__link { text-decoration: none; font-size: 12px; color: var(--l-ink); }
+.nav__link--active { color: var(--l-red); }
+.button { display: inline-flex; align-items: center; justify-content: center; padding: 10px 22px; font-size: 12px; border: 1px solid var(--l-ink); background: none; cursor: inherit; text-decoration: none; color: var(--l-ink); }
+.button--primary { background: var(--l-red); border-color: var(--l-red); color: #fff; }
 .button--outline { background: none; }
-.header__login { padding: 6px 14px; font-size: 13px; }
-.hero { grid-template-columns: minmax(0, 1fr); padding: clamp(28px, 6vw, 64px) var(--s-pad); display: grid; gap: 14px; text-align: center; justify-items: center; background: var(--surface-2); }
-.hero__title { font-size: clamp(13px, 1.6vw, 15px); font-weight: 600; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
-.hero__name { font-size: clamp(42px, 9vw, 96px); font-weight: 800; letter-spacing: -.04em; line-height: 1; }
-.hero__subtitle { font-size: clamp(18px, 2.6vw, 26px); font-weight: 700; max-width: 26ch; line-height: 1.25; }
-.hero__features { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; width: 100%; max-width: 760px; margin-top: 10px; }
-.feature { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 4px; text-align: left; }
-.feature__value { font-size: 22px; font-weight: 800; }
-.feature__text { color: var(--muted); font-size: 13px; }
-.hero__actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
-/* место секций на странице задают элементы блока home */
+.header__login { padding: 6px 26px; font-size: 11px; margin-top: 12px; }
+
 .home { display: grid; grid-template-columns: minmax(0, 1fr); }
-.home__about, .home__events, .home__blog, .home__contacts { padding: clamp(28px, 5vw, 52px) var(--s-pad); border-top: 1px solid var(--line); }
-.about, .events, .blog, .contacts { display: grid; gap: 20px; }
-.section-title { margin: 0; font-size: clamp(22px, 3vw, 30px); font-weight: 800; letter-spacing: -.02em; }
-.about__title, .events__title, .blog__title { margin-bottom: 4px; }
-.about__inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: center; }
-.about__image { aspect-ratio: 4 / 3; max-width: 100%; }
-.about__content { display: grid; gap: 12px; }
-.about__text { color: var(--muted); }
-.about__list { display: grid; gap: 6px; padding-left: 18px; margin: 0; }
-.events__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
-.event-card { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: grid; }
-.event-card__image { aspect-ratio: 16 / 10; border-radius: 0; }
-.event-card__body { padding: 12px; display: grid; gap: 6px; }
-.event-card__date { font: 600 12px var(--f-mono); color: var(--muted); }
-.event-card__title { font-weight: 700; font-size: 15px; }
-.event-card--featured { border: 2px solid var(--ink); }
-.blog__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
-.post { display: grid; gap: 8px; }
+.hero { grid-template-columns: minmax(0, 1fr); display: grid; justify-items: center; text-align: center; gap: 14px; padding: 28px 0 40px; overflow: hidden; }
+.hero__eyebrow { font: 400 clamp(14px, 2vw, 20px)/1 var(--f-art); text-transform: uppercase; letter-spacing: .04em; }
+.hero__title { position: relative; margin: 0; width: 100%; font: 400 clamp(64px, 14vw, 170px)/.9 var(--f-art); letter-spacing: .02em; display: flex; justify-content: center; align-items: center; gap: 14px; }
+.hero__title::before, .hero__title::after { content: ""; flex: 1; height: .9em; background: var(--l-ink); }
+.hero__subtitle { font: 400 clamp(14px, 2vw, 20px)/1.3 var(--f-art); text-transform: uppercase; max-width: 34ch; }
+.hero__label { font-size: 11px; text-transform: uppercase; color: var(--l-muted); margin-top: 10px; }
+.hero__actions { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; padding-inline: var(--s-pad); }
+
+.home__about, .home__events, .home__blog, .home__contacts { padding: clamp(28px, 5vw, 52px) var(--s-pad); }
+.about, .events, .blog, .contacts { display: grid; gap: 22px; }
+.section-title { justify-self: center; margin: 0; min-width: min(320px, 100%); text-align: center; background: var(--l-ink); color: #fff; font: 400 clamp(18px, 2.4vw, 24px)/1 var(--f-art); text-transform: uppercase; letter-spacing: .04em; padding: 8px 40px; }
+.about__title, .events__title, .blog__title, .contacts__title { margin-bottom: 8px; }
+.about__row { display: grid; gap: 14px; }
+.about__heading { font-size: clamp(16px, 2vw, 22px); font-weight: 700; }
+.about__text { font-size: 12px; color: var(--l-muted); max-width: 60ch; justify-self: end; }
+.about__gallery { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start; }
+.about__image { aspect-ratio: 16 / 10; max-width: 100%; }
+.about__image--small { aspect-ratio: 4 / 5; margin-top: 18%; }
+.about__promo { display: grid; grid-template-columns: 2fr 1fr; gap: 28px; align-items: end; }
+.about__image--framed { aspect-ratio: 21 / 9; overflow: visible; margin: 10px 0 0 14px; }
+.about__image--framed::before { inset: -10px 6% 12px -14px; background: var(--l-red); z-index: -1; }
+.about__image--framed { isolation: isolate; }
+.about__stats { display: grid; gap: 18px; }
+.about__note { font-size: 12px; color: var(--l-muted); }
+.arrow-link { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-decoration: none; font-size: 12px; }
+.arrow-link__icon, .arrow-button { width: 34px; height: 34px; border: 1px solid var(--l-ink); border-radius: 50%; display: grid; place-items: center; text-decoration: none; font-size: 15px; flex: none; }
+
+.slider { display: grid; gap: 22px; }
+.slider__track { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.event-card { display: grid; gap: 8px; align-content: start; }
+.event-card__image { aspect-ratio: 1; }
+.event-card__title { font-size: 15px; font-weight: 700; }
+.event-card__text { font-size: 11px; color: var(--l-muted); }
+.event-card__date { font-size: 10px; color: var(--l-muted); }
+.slider__controls { display: flex; align-items: center; justify-content: center; gap: 40px; }
+.slider__arrow { width: 40px; height: 40px; border: 1px solid var(--l-ink); border-radius: 50%; background: none; font-size: 16px; cursor: inherit; color: var(--l-ink); }
+.slider__dots { display: flex; gap: 6px; }
+.slider__dot { width: 18px; height: 2px; background: var(--l-line); }
+.slider__dot--active { background: var(--l-ink); }
+.more-link { justify-self: end; font-size: 11px; font-weight: 600; text-decoration: none; }
+
+.blog__list { list-style: none; margin: 0; padding: 0; display: grid; }
+.blog__item { padding-block: 18px; border-bottom: 1px solid var(--l-line); }
+.blog__item:last-child { border-bottom: 0; }
+.post { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) auto; gap: 24px; align-items: center; }
 .post__image { aspect-ratio: 3 / 2; }
-.post__tag { font: 600 11px var(--f-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-.post__title { font-weight: 700; }
-.post__link { font-weight: 600; font-size: 13px; }
-.contacts__inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
-.contacts__list { display: grid; gap: 10px; list-style: none; padding: 0; margin: 0; }
-.contacts__item { display: grid; gap: 2px; }
-.contacts__label { font-size: 12px; color: var(--muted); }
-.form { display: grid; gap: 10px; }
-.form__field { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
-.form__input { border: 1.5px solid var(--line); border-radius: 8px; padding: 9px 11px; background: var(--surface); width: 100%; font-size: 14px; }
-.form__textarea { min-height: 80px; resize: vertical; }
-.footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 20px var(--s-pad); background: var(--ink); color: var(--surface); }
-.footer .logo__mark { border-color: var(--surface); }
-.footer__copy { font-size: 13px; opacity: .7; }
-.footer__links { display: flex; gap: 14px; list-style: none; padding: 0; margin: 0; font-size: 13px; }
+.post__body { display: grid; gap: 8px; }
+.post__date { font-size: 10px; color: var(--l-muted); }
+.post__title { font-size: 15px; font-weight: 700; }
+.post__text { font-size: 11px; color: var(--l-muted); }
+
+.contacts__inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 28px; align-items: center; }
+.contacts__list { display: grid; gap: 22px; list-style: none; margin: 0; padding: 0; }
+.contacts__item { display: flex; gap: 16px; align-items: flex-start; }
+.contacts__icon { width: 52px; height: 52px; flex: none; background: var(--l-ink); display: grid; place-items: center; }
+.contacts__icon::before { content: ""; width: 10px; height: 10px; background: var(--l-red); }
+.contacts__icon--address::before { border-radius: 50%; }
+.contacts__icon--rent::before { clip-path: polygon(50% 0, 100% 45%, 100% 100%, 0 100%, 0 45%); }
+.contacts__icon--events::before { clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); width: 12px; height: 12px; }
+.contacts__info { display: grid; gap: 3px; }
+.contacts__label { font-size: 13px; }
+.contacts__line { font-size: 11px; color: var(--l-muted); }
+.contacts__map { aspect-ratio: 16 / 10; }
+
+.home__slogan { padding: 24px 0 8px; overflow: hidden; }
+.slogan__text { font: 400 clamp(30px, 6.5vw, 76px)/1.05 var(--f-art); white-space: nowrap; letter-spacing: .01em; }
+.slogan__line { display: block; padding-left: 30%; }
+
+.footer { display: grid; grid-template-columns: 1fr auto 1fr; grid-template-areas: "nav socials subscribe" "bottom bottom bottom"; gap: 24px; align-items: center; padding: 28px var(--s-pad) 22px; border-top: 1px solid var(--l-line); }
+.footer__nav { grid-area: nav; }
+.footer__menu { list-style: none; margin: 0; padding: 0 0 0 12px; border-left: 2px solid var(--l-red); display: grid; gap: 8px; }
+.footer__link { font-size: 11px; text-decoration: none; }
+.footer__link--active { color: var(--l-red); }
+.socials { grid-area: socials; display: flex; gap: 14px; list-style: none; margin: 0; padding: 0; }
+.socials__link { width: 34px; height: 34px; border-radius: 50%; background: var(--l-ink); color: #fff !important; display: grid; place-items: center; font-size: 11px; font-weight: 700; text-decoration: none; }
+.subscribe { grid-area: subscribe; display: grid; gap: 8px; justify-self: end; max-width: 320px; }
+.subscribe__title { font-size: 11px; font-weight: 600; }
+.subscribe__row { display: flex; }
+.subscribe__input { flex: 1; min-width: 0; border: 0; background: #e2e2de; padding: 9px 10px; font-size: 12px; color: var(--l-ink); }
+.subscribe__button { background: var(--l-ink); color: #fff; border: 0; padding: 9px 14px; font-size: 11px; cursor: inherit; }
+.subscribe__agree { font-size: 10px; color: var(--l-muted); display: flex; gap: 6px; align-items: center; }
+.subscribe__checkbox { accent-color: var(--l-ink); margin: 0; }
+.footer__bottom { grid-area: bottom; display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 10px; color: var(--l-muted); }
+.footer__legal { text-decoration: none; }
+.footer__dev { margin-left: auto; }
+
+@media (max-width: 760px) {
+  .about__gallery, .about__promo, .contacts__inner { grid-template-columns: minmax(0, 1fr); }
+  .about__image--small { margin-top: 0; }
+  .slider__track { grid-template-columns: minmax(0, 1fr); }
+  .post { grid-template-columns: minmax(0, 1fr); }
+  .footer { grid-template-columns: minmax(0, 1fr); grid-template-areas: "nav" "socials" "subscribe" "bottom"; }
+  .subscribe { justify-self: stretch; max-width: none; }
+  .slogan__text { white-space: normal; padding-inline: var(--s-pad); }
+  .slogan__line { padding-left: 0; }
+  .footer__dev { margin-left: 0; }
+}
 
 .tag-label { position: fixed; z-index: 15; pointer-events: none; font: 600 11px var(--f-mono); padding: 2px 7px; border-radius: 5px; background: var(--hl, var(--block)); color: #fff; white-space: nowrap; transform: translateY(-100%); }
 
@@ -540,7 +600,7 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
     <div class="view-head">
       <span class="eyebrow">БЭМ</span>
       <h1>Макет лендинга по БЭМ</h1>
-      <p>Шапка, первый экран, «О нас», «Мероприятия», «Блог», «Контакты» и подвал. Нажмите на любую часть: откроется разбор её классов, что в каждом из них писать и пример CSS. При наведении видны имя класса, размер и внутренние отступы, как в Pixso.</p>
+      <p>Главная Lenni ART из макета в Pixso: шапка, первый экран, «О нас», «Мероприятия», «Блог», «Контакты», слоган и подвал. Нажмите на любую часть: откроется разбор её классов, что в каждом из них писать и пример CSS. При наведении видны имя класса, размер и внутренние отступы, как в Pixso.</p>
     </div>
     <div class="widget bem-intro" data-frame="Frame · Что такое БЭМ">
       <div class="widget__body">
@@ -564,144 +624,193 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
     </div>
     <div class="bem-layout">
       <div class="frame">
-        <div class="frame__bar"><i></i><i></i><i></i><span>Frame · Главная (lenni)</span></div>
+        <div class="frame__bar"><i></i><i></i><i></i><span>Frame · 1920 главная (Lenni ART)</span></div>
         <div class="site site--inspect" id="site">
         <div class="page" data-hint="Блок всей страницы. В настоящем проекте этот класс стоит прямо на теге body: &lt;body class=&quot;page&quot;&gt;. Здесь он на div, потому что макет встроен в другую страницу.">
 
-          <header class="header" data-hint="Шапка сайта. Это отдельный блок: внутри лежат другие блоки (логотип, меню, кнопка).">
-            <a class="logo header__logo" href="#bem" data-hint="Микс: «logo» — самостоятельный блок (его можно повторить в футере), «header__logo» задаёт ему место в шапке.">
-              <span class="logo__mark" data-hint="Знак логотипа — элемент блока logo."></span>
-              <span class="logo__text">Lenni</span>
+          <header class="header" data-hint="Шапка сайта — отдельный блок. Внутри лежат другие блоки: логотип, меню, кнопка.">
+            <a class="logo header__logo" href="#bem" data-hint="Микс: logo — самостоятельный блок (такой же логотип можно поставить в подвал или на карту), header__logo задаёт ему место в шапке.">
+              <span class="logo__word" data-hint="Слово LENNI. Отдельный элемент, потому что у него свой шрифт и белый цвет на чёрном.">LENNI</span>
+              <span class="logo__badge" data-hint="Красная плашка ART — элемент логотипа. Сдвинута вправо и вниз, поэтому у неё своя позиция.">ART</span>
             </a>
-            <nav class="nav header__nav" data-hint="Меню — отдельный блок nav, а header__nav говорит, где он стоит. Отступы и позицию задаём через header__nav, вид пунктов — через nav.">
+            <nav class="nav header__nav" data-hint="Меню — отдельный блок nav, а header__nav говорит, где он стоит в шапке.">
               <ul class="nav__list" data-hint="Меню свёрстано списком: nav → ul → li → a. Так скринридер скажет «список, 4 пункта», а в пункт легко добавить подменю. Можно и проще — ссылки прямо в nav, без ul и li: &lt;nav class=&quot;nav&quot;&gt;&lt;a class=&quot;nav__link&quot;&gt;…&lt;/a&gt;&lt;/nav&gt;. Оба варианта правильные.">
-                <li class="nav__item"><a class="nav__link nav__link--active" href="#about" data-hint="Модификатор nav__link--active выделяет текущий пункт. Модификатор всегда пишется вместе с основным классом.">О нас</a></li>
                 <li class="nav__item"><a class="nav__link" href="#events">Мероприятия</a></li>
                 <li class="nav__item"><a class="nav__link" href="#blog">Блог</a></li>
+                <li class="nav__item"><a class="nav__link nav__link--active" href="#about" data-hint="Красный пункт — текущий раздел. Это модификатор nav__link--active: его добавляет JS или сервер, а сам браузер о «текущем разделе» не знает.">О нас</a></li>
                 <li class="nav__item"><a class="nav__link" href="#contacts">Контакты</a></li>
               </ul>
             </nav>
-            <button class="button button--outline header__login" type="button" data-hint="Три класса сразу: блок button (общие стили всех кнопок), модификатор button--outline (кнопка с обводкой) и элемент header__login (место кнопки в шапке).">Войти</button>
+            <button class="button button--outline header__login" type="button" data-hint="Три класса: блок button (общий вид всех кнопок), модификатор button--outline (кнопка с обводкой) и элемент header__login (место и размер кнопки именно в шапке).">Войти</button>
           </header>
 
           <main class="main" data-hint="Блок main — общая обёртка контента, одинаковая для всех страниц сайта. Шапка и подвал лежат снаружи.">
-          <div class="home" data-hint="Блок главной страницы. Секции внутри — его элементы: home__hero, home__about и так далее. На странице «Афиша» здесь был бы другой блок, например afisha.">
-          <section class="home__hero hero" data-hint="Микс: home__hero — место первого экрана на главной, hero — его собственный вид. В БЭМ первый экран обычно называют hero или promo.">
-            <p class="hero__title">Творческое пространство</p>
-            <h1 class="hero__name" data-hint="Название сайта. На странице должен быть один h1. Тег можно сменить, класс при этом остаётся прежним.">Lenni</h1>
-            <p class="hero__subtitle">Встречи, мастер-классы и люди, с которыми интересно</p>
-            <div class="hero__features" data-hint="Обёртка для карточек внутри hero. Элементу можно дать имя по смыслу: features, list, items.">
-              <div class="feature hero__feature" data-hint="Микс: feature — блок карточки (её можно переиспользовать), hero__feature — её место внутри hero.">
-                <span class="feature__value">120+</span>
-                <span class="feature__text">мероприятий в год</span>
-              </div>
-              <div class="feature hero__feature">
-                <span class="feature__value">8</span>
-                <span class="feature__text">направлений</span>
-              </div>
-              <div class="feature hero__feature">
-                <span class="feature__value">3 000</span>
-                <span class="feature__text">участников</span>
-              </div>
-            </div>
-            <div class="hero__actions">
-              <a class="button button--primary" href="#events" data-hint="button--primary — главный вариант кнопки. Цвет и фон меняет модификатор, базовые стили лежат в .button.">Смотреть афишу</a>
-              <a class="button button--outline" href="#about">Узнать больше</a>
+          <div class="home" data-hint="Блок главной страницы. Секции внутри — его элементы: home__hero, home__about и так далее.">
+
+          <section class="home__hero hero" data-hint="Микс: home__hero — место первого экрана на главной, hero — его собственный вид.">
+            <p class="hero__eyebrow">Арт — пространство</p>
+            <h1 class="hero__title" data-hint="Огромное LENNI. Чёрные полосы слева и справа — не отдельные div, а псевдоэлементы ::before и ::after у этого заголовка. Так в разметке не появляются пустые теги ради украшения.">LENNI</h1>
+            <p class="hero__subtitle">Для людей, горящих сердцем и делом<br>место для настоящего</p>
+            <p class="hero__label">Я хочу:</p>
+            <div class="hero__actions" data-hint="Обёртка, которая ставит две кнопки рядом. Вид самих кнопок задаёт .button, здесь только расположение.">
+              <a class="button button--primary" href="#contacts" data-hint="button--primary — главная красная кнопка. Базовые размеры лежат в .button, модификатор меняет только цвета.">Провести мероприятие</a>
+              <a class="button button--outline" href="#contacts">Стать арендатором</a>
             </div>
           </section>
 
-          <section class="home__about about" id="about" data-hint="Микс: home__about отвечает за место секции на главной (отступы, граница сверху), about — за всё, что внутри «О нас». Если секцию перенести на другую страницу, about останется, а home__about поменяется.">
-            <h2 class="section-title about__title" data-hint="Микс, как в уроке: все заголовки секций выглядят одинаково, поэтому их вид вынесен в отдельный блок section-title. А about__title задаёт место заголовка именно в «О нас», например отступ снизу.">О нас</h2>
-            <div class="about__inner">
-              <div class="ph about__image" data-hint="Картинка. Класс ph — блок-заглушка макета, about__image — элемент секции."></div>
-              <div class="about__content">
-                <p class="about__text">Lenni — площадка, где проходят лекции, творческие встречи и практикумы. Собираем людей вокруг интересных тем.</p>
-                <ul class="about__list" data-hint="Список внутри about. Пункты могут не получать класс, если их не нужно стилизовать отдельно.">
-                  <li>Камерные группы до 20 человек</li>
-                  <li>Ведущие-практики</li>
-                  <li>Записи встреч после события</li>
-                </ul>
+          <section class="home__about about" id="about" data-hint="Микс: home__about отвечает за место секции на главной, about — за всё, что внутри «О нас».">
+            <h2 class="section-title about__title" data-hint="Чёрная плашка с заголовком одинаковая у всех секций, поэтому её вид вынесен в отдельный блок section-title. А about__title задаёт место заголовка именно в «О нас».">О нас</h2>
+            <div class="about__row about__row--project" data-hint="Строка с проектом. Строк две и они устроены по-разному, поэтому у каждой свой модификатор: --project и --venue.">
+              <h3 class="about__heading">Проект «Millennials»</h3>
+              <p class="about__text">Вдохновлён молодыми идейными людьми, увлечёнными творчеством, желающими сделать мир лучше. У них есть талант и стремление, у нас — возможность помочь воплотить их мечту в реальность.</p>
+              <div class="about__gallery" data-hint="Две картинки разного размера, вторая сдвинута вниз. Сетка задаётся здесь, а не у картинок.">
+                <div class="ph about__image about__image--big"></div>
+                <div class="ph about__image about__image--small" data-hint="Та же картинка-элемент about__image, но с модификатором --small: меньше и опущена ниже. Общие стили картинок не повторяются."></div>
+              </div>
+            </div>
+            <div class="about__row about__row--venue">
+              <h3 class="about__heading">Мы предоставляем площади для вашего мероприятия</h3>
+              <p class="about__text">И оказываем помощь с организацией, если вам это нужно. Наша цель — вовлечь в культурную жизнь города как можно больше людей.</p>
+              <div class="about__promo">
+                <div class="ph about__image about__image--framed" data-hint="Красная рамка со сдвигом — псевдоэлемент ::before под картинкой. Модификатор --framed включает её только у этой картинки."></div>
+                <div class="about__stats">
+                  <p class="about__note">Мы уже успешно организовали и провели более 100 проектов. Посмотрите, как это было классно.</p>
+                  <a class="arrow-link about__more" href="#blog" data-hint="«Смотреть» со стрелкой в кружке встречается в нескольких местах, поэтому это отдельный блок arrow-link. about__more ставит его в эту колонку."><span class="arrow-link__text">Смотреть</span><span class="arrow-link__icon" aria-hidden="true">→</span></a>
+                </div>
               </div>
             </div>
           </section>
 
           <section class="home__events events" id="events">
             <h2 class="section-title events__title">Мероприятия</h2>
-            <div class="events__list">
-              <article class="event-card event-card--featured" data-hint="Карточка — отдельный блок event-card, ведь она повторяется. Модификатор --featured выделяет главную карточку.">
-                <div class="ph event-card__image"></div>
-                <div class="event-card__body" data-hint="Элемент body. Помните: «элемент элемента» не бывает. Внутри body будет event-card__title, а не event-card__body__title.">
-                  <span class="event-card__date">12 ноября · 19:00</span>
-                  <h3 class="event-card__title">Лекция о городской фотографии</h3>
+            <div class="slider events__slider" data-hint="Слайдер — отдельный блок: лента карточек и кнопки управления. Такой же слайдер может понадобиться и на другой странице.">
+              <div class="slider__track" data-hint="Лента, которая сдвигается при нажатии на стрелки. Внутри — карточки мероприятий.">
+                <article class="event-card" data-hint="Карточка мероприятия — блок, потому что повторяется. Внутри картинка, название, описание и дата.">
+                  <div class="ph event-card__image"></div>
+                  <h3 class="event-card__title">Собираемся и слушаем альбом Nirvana</h3>
+                  <p class="event-card__text">Третий альбом группы и первый студийный материал, вышедший после…</p>
+                  <time class="event-card__date" datetime="2026-12-07T18:00">07.12.2026 | начало 18:00</time>
+                </article>
+                <article class="event-card">
+                  <div class="ph event-card__image"></div>
+                  <h3 class="event-card__title">Есть тема, нужно обсудить с HowStuffWorks</h3>
+                  <p class="event-card__text">Один из самых популярных подкастов: авторы объясняют, как устроены вещи.</p>
+                  <time class="event-card__date" datetime="2026-12-14T18:30">14.12.2026 | начало 18:30</time>
+                </article>
+                <article class="event-card">
+                  <div class="ph event-card__image"></div>
+                  <h3 class="event-card__title">Вечер | The Best of Sade</h3>
+                  <p class="event-card__text">Музыка в духе соула, джаза, ритм-н-блюза и фанка.</p>
+                  <time class="event-card__date" datetime="2026-12-16T20:00">16.12.2026 | начало 20:00</time>
+                </article>
+              </div>
+              <div class="slider__controls">
+                <button class="slider__arrow slider__arrow--prev" type="button" aria-label="Назад" data-hint="Стрелки одинаковые, отличаются только направлением — поэтому один элемент slider__arrow и модификаторы --prev и --next.">←</button>
+                <div class="slider__dots" data-hint="Точки-индикаторы: показывают, какой слайд сейчас. Активная точка — с модификатором slider__dot--active.">
+                  <span class="slider__dot slider__dot--active"></span><span class="slider__dot"></span><span class="slider__dot"></span>
                 </div>
-              </article>
-              <article class="event-card">
-                <div class="ph event-card__image"></div>
-                <div class="event-card__body">
-                  <span class="event-card__date">16 ноября · 12:00</span>
-                  <h3 class="event-card__title">Мастер-класс по керамике</h3>
-                </div>
-              </article>
-              <article class="event-card">
-                <div class="ph event-card__image"></div>
-                <div class="event-card__body">
-                  <span class="event-card__date">23 ноября · 18:30</span>
-                  <h3 class="event-card__title">Вечер настольных игр</h3>
-                </div>
-              </article>
+                <button class="slider__arrow slider__arrow--next" type="button" aria-label="Вперёд">→</button>
+              </div>
             </div>
+            <a class="more-link events__all" href="#events" data-hint="Ссылка «Смотреть все» есть под мероприятиями и под блогом — отдельный блок more-link. Элементы events__all и blog__all ставят её в своё место.">Смотреть все</a>
           </section>
 
           <section class="home__blog blog" id="blog">
             <h2 class="section-title blog__title">Блог</h2>
-            <div class="blog__list">
-              <article class="post" data-hint="Статья блога — блок post. Его можно вставить и на другую страницу, и он не сломается.">
-                <div class="ph post__image"></div>
-                <span class="post__tag">Заметки</span>
-                <h3 class="post__title">Как мы готовим мастер-классы</h3>
-                <a class="post__link" href="#blog">Читать</a>
-              </article>
-              <article class="post">
-                <div class="ph post__image"></div>
-                <span class="post__tag">Интервью</span>
-                <h3 class="post__title">Пять вопросов ведущей лекций</h3>
-                <a class="post__link" href="#blog">Читать</a>
-              </article>
-              <article class="post">
-                <div class="ph post__image"></div>
-                <span class="post__tag">Итоги</span>
-                <h3 class="post__title">Чем запомнился октябрь</h3>
-                <a class="post__link" href="#blog">Читать</a>
-              </article>
-            </div>
+            <ul class="blog__list" data-hint="Список статей. Здесь подходит ul: это перечень однотипных записей. Линии между ними — через border у .blog__item и :last-child, чтобы у последней линии не было.">
+              <li class="blog__item">
+                <article class="post" data-hint="Статья в ленте — блок post: картинка слева, текст по центру, круглая стрелка справа.">
+                  <div class="ph post__image"></div>
+                  <div class="post__body">
+                    <time class="post__date" datetime="2026-11-25">25.11.2026</time>
+                    <h3 class="post__title">Фотосессия в стенах Театра драмы</h3>
+                    <p class="post__text">Организовывали фотосессию для локального бренда одежды и смогли воплотить все пожелания заказчика.</p>
+                  </div>
+                  <a class="arrow-button post__link" href="#blog" aria-label="Читать" data-hint="Круглая кнопка со стрелкой — свой блок arrow-button: она есть у каждой статьи и может появиться где-то ещё.">→</a>
+                </article>
+              </li>
+              <li class="blog__item">
+                <article class="post">
+                  <div class="ph post__image"></div>
+                  <div class="post__body">
+                    <time class="post__date" datetime="2026-11-16">16.11.2026</time>
+                    <h3 class="post__title">Выставка VR в Томске</h3>
+                    <p class="post__text">Другие миры, яркие эмоции и новый опыт: лучший игровой VR-опыт в Томске.</p>
+                  </div>
+                  <a class="arrow-button post__link" href="#blog" aria-label="Читать">→</a>
+                </article>
+              </li>
+              <li class="blog__item">
+                <article class="post">
+                  <div class="ph post__image"></div>
+                  <div class="post__body">
+                    <time class="post__date" datetime="2026-11-09">09.11.2026</time>
+                    <h3 class="post__title">Rocking radio в заброшенном ангаре</h3>
+                    <p class="post__text">15 электрогенераторов, километры проводов и пару тонн света — для лучшей вечеринки года.</p>
+                  </div>
+                  <a class="arrow-button post__link" href="#blog" aria-label="Читать">→</a>
+                </article>
+              </li>
+            </ul>
+            <a class="more-link blog__all" href="#blog">Смотреть все</a>
           </section>
 
           <section class="home__contacts contacts" id="contacts">
             <h2 class="section-title contacts__title">Контакты</h2>
             <div class="contacts__inner">
               <ul class="contacts__list">
-                <li class="contacts__item"><span class="contacts__label">Адрес</span>ул. Примерная, 1</li>
-                <li class="contacts__item"><span class="contacts__label">Телефон</span>+7 000 000-00-00</li>
-                <li class="contacts__item"><span class="contacts__label">Почта</span>hello@lenni.example</li>
+                <li class="contacts__item" data-hint="Один контакт: чёрный квадрат с иконкой слева, текст справа.">
+                  <span class="contacts__icon contacts__icon--address" aria-hidden="true" data-hint="Квадрат с иконкой. Квадрат у всех одинаковый, а иконка разная — её меняет модификатор: --address, --rent, --events."></span>
+                  <div class="contacts__info"><b class="contacts__label">Томск, Красноармейская 146</b><span class="contacts__line">2 этаж, оф. 206</span></div>
+                </li>
+                <li class="contacts__item">
+                  <span class="contacts__icon contacts__icon--rent" aria-hidden="true"></span>
+                  <div class="contacts__info"><b class="contacts__label">Отдел аренды</b><span class="contacts__line">8 (3822) 90-72-56</span><span class="contacts__line">rent@lenni.example</span></div>
+                </li>
+                <li class="contacts__item">
+                  <span class="contacts__icon contacts__icon--events" aria-hidden="true"></span>
+                  <div class="contacts__info"><b class="contacts__label">Отдел мероприятий</b><span class="contacts__line">8 (3822) 90-72-56</span><span class="contacts__line">events@lenni.example</span></div>
+                </li>
               </ul>
-              <form class="form contacts__form" id="demoForm" data-hint="Форма — блок form, его удобно переиспользовать. contacts__form ставит её в сетку контактов.">
-                <label class="form__field">Имя<input class="form__input" id="f-name" type="text" placeholder="Полина"></label>
-                <label class="form__field">Сообщение<textarea class="form__input form__textarea" id="f-msg" placeholder="Хочу на мастер-класс" data-hint="Два элемента одного блока: form__input даёт общий вид полей, form__textarea добавляет высоту для длинного текста."></textarea></label>
-                <button class="button button--primary" type="submit">Отправить</button>
-              </form>
+              <div class="ph contacts__map" data-hint="Карта. В настоящем проекте сюда вставляют iframe от Яндекс Карт или 2ГИС, класс остаётся тем же."></div>
             </div>
+          </section>
+
+          <section class="home__slogan slogan" data-hint="Большой слоган во всю ширину. Отдельная секция, хоть в ней и одна строка: у неё свой шрифт и отступы.">
+            <p class="slogan__text">Просто делайте, что нравится, <span class="slogan__line">а мы вам поможем</span></p>
           </section>
 
           </div>
           </main>
 
-          <footer class="footer">
-            <a class="logo footer__logo" href="#bem" data-hint="Тот же блок logo, что и в шапке, только с другим элементом-миксом. Ради такого переиспользования БЭМ и нужен."><span class="logo__mark"></span><span class="logo__text">Lenni</span></a>
-            <p class="footer__copy">© 2026 Lenni</p>
-            <ul class="footer__links">
-              <li class="footer__link-item"><a class="footer__link" href="#about">О нас</a></li>
-              <li class="footer__link-item"><a class="footer__link" href="#contacts">Контакты</a></li>
+          <footer class="footer" data-hint="Подвал — блок footer. Внутри несколько частей: меню, юридические ссылки, соцсети, подписка.">
+            <nav class="footer__nav">
+              <ul class="footer__menu" data-hint="Меню подвала с красной линией слева. Линия — border-left у списка, а не отдельный элемент.">
+                <li class="footer__menu-item"><a class="footer__link" href="#events">Календарь мероприятий</a></li>
+                <li class="footer__menu-item"><a class="footer__link footer__link--active" href="#contacts">Провести мероприятие</a></li>
+                <li class="footer__menu-item"><a class="footer__link" href="#contacts">Стать арендатором</a></li>
+                <li class="footer__menu-item"><a class="footer__link" href="#about">Наши проекты</a></li>
+                <li class="footer__menu-item"><a class="footer__link" href="#contacts">Контакты</a></li>
+              </ul>
+            </nav>
+            <ul class="socials footer__socials" data-hint="Иконки соцсетей — блок socials: такие же кружки могут стоять и в шапке. footer__socials — их место в подвале.">
+              <li class="socials__item"><a class="socials__link socials__link--vk" href="#bem" aria-label="ВКонтакте">vk</a></li>
+              <li class="socials__item"><a class="socials__link socials__link--ok" href="#bem" aria-label="Вторая соцсеть">ok</a></li>
             </ul>
+            <form class="subscribe footer__subscribe" id="demoForm" data-hint="Форма подписки — блок subscribe: её можно поставить и в конце статьи. footer__subscribe ставит её в правую колонку подвала.">
+              <p class="subscribe__title">Подпишись и будь в курсе происходящего</p>
+              <div class="subscribe__row">
+                <input class="subscribe__input" id="f-email" type="email" placeholder="Email" aria-label="Email">
+                <button class="subscribe__button" type="submit">Подписаться</button>
+              </div>
+              <label class="subscribe__agree"><input class="subscribe__checkbox" id="f-agree" type="checkbox" checked> Согласен на обработку персональных данных</label>
+            </form>
+            <div class="footer__bottom">
+              <span class="footer__copy">© Millennials 2025</span>
+              <a class="footer__legal" href="#bem">Политика конфиденциальности</a>
+              <a class="footer__legal" href="#bem">Cookies</a>
+              <span class="footer__dev">Создание и продвижение Dignity</span>
+            </div>
           </footer>
         </div>
         </div>
@@ -1814,82 +1923,129 @@ function generic(el, ps) {
 }
 /* what each class is responsible for, in plain words, plus a sample of the CSS that goes into it */
 const INFO = {
-  'page': ['Общие настройки всей страницы: шрифт, цвет текста, фон. Всё, что должно действовать везде.', 'font-family: "Onest", sans-serif;\ncolor: #1b2130;\nbackground: #fff;'],
-  'header': ['Внешний вид шапки: расположение логотипа, меню и кнопки в одну строку, внутренние отступы, линия снизу.', 'display: flex;\njustify-content: space-between;\nalign-items: center;\npadding: 14px 40px;'],
-  'logo': ['Как выглядит сам логотип: размер, шрифт, расстояние между значком и текстом. Эти стили одинаковые и в шапке, и в подвале.', 'display: flex;\nalign-items: center;\ngap: 8px;\nfont-size: 18px;\nfont-weight: 800;'],
-  'header__logo': ['Где логотип стоит именно в шапке: внешние отступы, сжимается ли он, порядок. Сам логотип этот класс не меняет.', 'flex-shrink: 0;\nmargin-right: 24px;'],
-  'footer__logo': ['Где логотип стоит именно в подвале: внешние отступы, выравнивание. Размер и шрифт уже заданы в .logo.', 'margin-bottom: 8px;'],
-  'logo__mark': ['Значок логотипа: его размер, форма, цвет.', 'width: 26px;\nheight: 26px;\nborder-radius: 50%;'],
-  'logo__text': ['Надпись логотипа. Отдельный класс нужен, если текст надо стилизовать отдельно от значка, например спрятать на телефоне.', 'letter-spacing: -0.01em;'],
-  'nav': ['Внешний вид меню. Сейчас почти всё лежит в его элементах, но класс блока нужен, чтобы меню можно было вставить в другое место.', 'font-size: 15px;'],
-  'header__nav': ['Где меню стоит в шапке: отступы от логотипа и кнопки, растягивается ли оно на свободное место.', 'margin-left: auto;\nmargin-right: 24px;'],
-  'nav__list': ['Список пунктов меню: убираем точки у списка и ставим пункты в строку.', 'display: flex;\ngap: 20px;\nlist-style: none;\nmargin: 0;\npadding: 0;'],
-  'nav__item': ['Один пункт списка (тег li). Часто стилей нет, но класс ставят, чтобы потом можно было, например, добавить разделитель.', '/* обычно пусто */'],
-  'nav__link': ['Как выглядит ссылка меню: цвет, убранное подчёркивание, отступы, эффект при наведении.', 'color: #5b6476;\ntext-decoration: none;\npadding: 4px 0;'],
-  'nav__link--active': ['Только то, что отличает текущий пункт от остальных: другой цвет и подчёркивание. Остальное берётся из .nav__link.', 'color: #1b2130;\nborder-bottom: 2px solid currentColor;'],
-  'button': ['Общий вид всех кнопок на сайте: размер, отступы, скругление, шрифт. Пишется один раз, используется везде.', 'display: inline-flex;\npadding: 10px 20px;\nborder: 2px solid #1b2130;\nborder-radius: 8px;\nfont-weight: 700;'],
-  'button--primary': ['Только отличие главной кнопки: заливка и цвет текста. Размер и скругление уже есть в .button.', 'background: #1b2130;\ncolor: #fff;'],
-  'button--outline': ['Только отличие кнопки с обводкой: прозрачный фон. Всё остальное приходит из .button.', 'background: transparent;\ncolor: #1b2130;'],
-  'header__login': ['Как кнопка «Войти» встроена в шапку: она чуть меньше обычной и не сжимается. Это касается только шапки, поэтому не в .button.', 'padding: 6px 14px;\nfont-size: 13px;\nflex-shrink: 0;'],
-  'main': ['Общая обёртка контента на всех страницах сайта: например, растягивается на всю высоту, чтобы подвал был внизу.', 'flex-grow: 1;'],
-  'home': ['Главная страница целиком. Отвечает за то, как секции идут друг за другом.', 'display: grid;'],
-  'home__hero': ['Место первого экрана на главной: отступ снизу, ширина. Если hero появится на другой странице, этот класс там будет другим.', 'margin-bottom: 0;'],
-  'hero': ['Внешний вид первого экрана: фон, внутренние отступы, выравнивание текста по центру.', 'display: grid;\njustify-items: center;\ntext-align: center;\npadding: 64px 40px;\nbackground: #f3f5f9;'],
-  'hero__title': ['Маленькая надпись над названием: размер, заглавные буквы, разрядка.', 'font-size: 15px;\ntext-transform: uppercase;\nletter-spacing: 0.14em;'],
-  'hero__name': ['Крупное название сайта: большой размер шрифта и плотный межстрочный интервал.', 'font-size: clamp(42px, 9vw, 96px);\nfont-weight: 800;\nline-height: 1;'],
-  'hero__subtitle': ['Описание под названием: размер и ограничение ширины, чтобы строка не была слишком длинной.', 'font-size: 26px;\nmax-width: 26ch;'],
-  'hero__features': ['Обёртка, которая выстраивает карточки с цифрами в ряд. Отвечает только за сетку, а не за вид карточек.', 'display: grid;\ngrid-template-columns: repeat(3, 1fr);\ngap: 12px;'],
-  'feature': ['Как выглядит одна карточка с цифрой: рамка, фон, внутренние отступы. Такую карточку можно поставить и в другую секцию.', 'padding: 14px;\nborder: 1px solid #cfd5e0;\nborder-radius: 10px;'],
-  'hero__feature': ['Что нужно карточке именно внутри hero: например, выравнивание текста влево, ведь весь hero выровнен по центру.', 'text-align: left;'],
-  'feature__value': ['Крупная цифра в карточке.', 'font-size: 22px;\nfont-weight: 800;'],
-  'feature__text': ['Подпись под цифрой: мельче и серее.', 'font-size: 13px;\ncolor: #5b6476;'],
-  'hero__actions': ['Ряд кнопок: ставит их рядом и задаёт расстояние между ними. Вид самих кнопок задаёт .button.', 'display: flex;\ngap: 10px;\nflex-wrap: wrap;'],
-  'home__about': ['Место секции «О нас» на главной: внутренние отступы и линия сверху. Это раскладка страницы, а не вид секции.', 'padding: 52px 40px;\nborder-top: 1px solid #cfd5e0;'],
-  'about': ['Внешний вид самой секции «О нас»: расстояние между заголовком и содержимым.', 'display: grid;\ngap: 20px;'],
-  'section-title': ['Как выглядят все заголовки секций: размер, жирность, межстрочный интервал. Заголовки одинаковые, поэтому стили пишутся один раз в отдельном блоке, а не повторяются в about__title, events__title и других.', 'font-size: 30px;\nfont-weight: 800;\nline-height: 1.2;\nmargin: 0;'],
-  'about__title': ['Где заголовок стоит в секции «О нас»: отступ до содержимого, выравнивание. Размер и шрифт уже заданы в .section-title.', 'margin-bottom: 4px;'],
-  'about__inner': ['Делит секцию на две колонки: картинка слева, текст справа.', 'display: grid;\ngrid-template-columns: 1fr 1fr;\ngap: 24px;'],
-  'ph': ['Заглушка картинки, как на макете в Pixso. В настоящем проекте здесь будет тег img, а класс ph не нужен.', 'background: #eef1f6;'],
-  'about__image': ['Размер и пропорции картинки в секции «О нас».', 'aspect-ratio: 4 / 3;\nwidth: 100%;'],
-  'about__content': ['Колонка с текстом: расстояние между абзацем и списком.', 'display: grid;\ngap: 12px;'],
-  'about__text': ['Абзац текста: цвет и размер.', 'color: #5b6476;'],
-  'about__list': ['Список преимуществ: отступ слева под точки, расстояние между пунктами.', 'display: grid;\ngap: 6px;\npadding-left: 18px;'],
-  'home__events': ['Место секции «Мероприятия» на главной: отступы и линия сверху, как у остальных секций.', 'padding: 52px 40px;\nborder-top: 1px solid #cfd5e0;'],
-  'events': ['Внешний вид секции «Мероприятия»: расстояние между заголовком и карточками.', 'display: grid;\ngap: 20px;'],
-  'events__title': ['Место заголовка в секции «Мероприятия», например отступ до карточек. Вид заголовка задаёт .section-title.', 'margin-bottom: 4px;'],
-  'events__list': ['Сетка карточек: сколько колонок и расстояние между ними. Вид самих карточек задаёт .event-card.', 'display: grid;\ngrid-template-columns: repeat(auto-fill, minmax(190px, 1fr));\ngap: 14px;'],
-  'event-card': ['Как выглядит одна карточка мероприятия: рамка, скругление. Карточки повторяются, поэтому это отдельный блок.', 'border: 1px solid #cfd5e0;\nborder-radius: 10px;\noverflow: hidden;'],
-  'event-card--featured': ['Только отличие выделенной карточки: толстая тёмная рамка. Всё остальное приходит из .event-card.', 'border: 2px solid #1b2130;'],
-  'event-card__image': ['Картинка карточки: пропорции.', 'aspect-ratio: 16 / 10;\nwidth: 100%;'],
-  'event-card__body': ['Текстовая часть карточки: внутренние отступы и расстояние между датой и названием.', 'display: grid;\ngap: 6px;\npadding: 12px;'],
-  'event-card__date': ['Дата: мелкий серый шрифт.', 'font-size: 12px;\ncolor: #5b6476;'],
+  'page': ['Общие настройки всей страницы: шрифт, цвет текста, фон. Всё, что должно действовать везде.', 'font-family: "Open Sans", sans-serif;\ncolor: #121212;\nbackground: #f3f3f1;'],
+  'header': ['Внешний вид шапки: логотип, меню и кнопка в одну строку, внутренние отступы.', 'display: flex;\njustify-content: space-between;\nalign-items: center;\npadding: 0 40px 12px;'],
+  'logo': ['Как выглядит сам логотип: чёрный прямоугольник, внутренние отступы. Одинаково в любом месте сайта.', 'display: inline-grid;\nbackground: #121212;\npadding: 10px 12px 14px;'],
+  'header__logo': ['Где логотип стоит именно в шапке: отступы, сжимается ли он. Сам вид логотипа этот класс не трогает.', 'flex-shrink: 0;'],
+  'logo__word': ['Слово LENNI: шрифт, белый цвет, разрядка между буквами.', 'font-family: "Forum", serif;\nfont-size: 20px;\ncolor: #fff;\nletter-spacing: 0.12em;'],
+  'logo__badge': ['Красная плашка ART: фон, размер текста и сдвиг вправо за край чёрного прямоугольника.', 'justify-self: end;\nmargin-right: -18px;\nbackground: #c8281e;\ncolor: #fff;\npadding: 4px 12px;'],
+  'nav': ['Внешний вид меню. Почти всё лежит в его элементах, но класс блока нужен, чтобы меню можно было перенести.', 'font-size: 12px;'],
+  'header__nav': ['Где меню стоит в шапке: по центру, с отступами от логотипа и кнопки.', 'margin-inline: auto;'],
+  'nav__list': ['Список пунктов: убираем точки и ставим пункты в строку.', 'display: flex;\ngap: 24px;\nlist-style: none;\nmargin: 0;\npadding: 0;'],
+  'nav__item': ['Один пункт списка (li). Часто стилей нет, но класс ставят, чтобы потом можно было добавить, например, разделитель.', '/* обычно пусто */'],
+  'nav__link': ['Как выглядит ссылка меню: цвет, размер, без подчёркивания.', 'color: #121212;\nfont-size: 12px;\ntext-decoration: none;'],
+  'nav__link--active': ['Только отличие текущего пункта: красный цвет. Остальное берётся из .nav__link.', 'color: #c8281e;'],
+  'button': ['Общий вид всех кнопок на сайте: размер, отступы, рамка, шрифт. Пишется один раз, используется везде.', 'display: inline-flex;\npadding: 10px 22px;\nborder: 1px solid #121212;\nfont-size: 12px;'],
+  'button--primary': ['Только отличие главной кнопки: красная заливка и белый текст. Размер уже есть в .button.', 'background: #c8281e;\nborder-color: #c8281e;\ncolor: #fff;'],
+  'button--outline': ['Только отличие кнопки с обводкой: прозрачный фон. Всё остальное приходит из .button.', 'background: transparent;'],
+  'header__login': ['Как кнопка «Войти» встроена в шапку: она меньше обычной и чуть опущена. Это касается только шапки, поэтому не в .button.', 'padding: 6px 26px;\nfont-size: 11px;\nmargin-top: 12px;'],
+  'main': ['Общая обёртка контента на всех страницах: например, растягивается на всю высоту, чтобы подвал был внизу.', 'flex-grow: 1;'],
+  'home': ['Главная страница целиком: как секции идут друг за другом.', 'display: grid;'],
+  'home__hero': ['Место первого экрана на главной. Если hero появится на другой странице, этот класс там будет другим.', '/* например, margin-bottom */'],
+  'hero': ['Внешний вид первого экрана: всё по центру, внутренние отступы.', 'display: grid;\njustify-items: center;\ntext-align: center;\ngap: 14px;\npadding: 28px 0 40px;'],
+  'hero__eyebrow': ['Надпись «Арт — пространство» над названием: шрифт и заглавные буквы.', 'font-family: "Forum", serif;\ntext-transform: uppercase;'],
+  'hero__title': ['Огромное LENNI. Чёрные полосы по бокам — псевдоэлементы ::before и ::after, они растягиваются через flex: 1.', 'display: flex;\nalign-items: center;\ngap: 14px;\nfont-size: 170px;\n}\n.hero__title::before,\n.hero__title::after {\n  content: "";\n  flex: 1;\n  height: 0.9em;\n  background: #121212;'],
+  'hero__subtitle': ['Подзаголовок под названием: шрифт, заглавные буквы, ограничение ширины строки.', 'font-family: "Forum", serif;\ntext-transform: uppercase;\nmax-width: 34ch;'],
+  'hero__label': ['Подпись «Я хочу:» над кнопками: мелкая и серая.', 'font-size: 11px;\ncolor: #6d6d6d;\ntext-transform: uppercase;'],
+  'hero__actions': ['Ряд кнопок: ставит их рядом и задаёт расстояние. Вид самих кнопок задаёт .button.', 'display: flex;\ngap: 24px;\nflex-wrap: wrap;\njustify-content: center;'],
+  'section-title': ['Чёрная плашка с заголовком: одинаковая у всех секций, поэтому стили пишутся один раз здесь, а не в about__title, events__title и других.', 'justify-self: center;\nmin-width: 320px;\npadding: 8px 40px;\nbackground: #121212;\ncolor: #fff;\ntext-transform: uppercase;'],
+  'home__about': ['Место секции «О нас» на главной: внутренние отступы. Это раскладка страницы, а не вид секции.', 'padding: 52px 40px;'],
+  'about': ['Внешний вид самой секции «О нас»: расстояние между заголовком и строками.', 'display: grid;\ngap: 22px;'],
+  'about__title': ['Где заголовок стоит в секции «О нас»: отступ до содержимого. Вид плашки уже задан в .section-title.', 'margin-bottom: 8px;'],
+  'about__row': ['Одна смысловая строка секции: заголовок, текст и картинки. Общие стили для обеих строк.', 'display: grid;\ngap: 14px;'],
+  'about__row--project': ['Отличия первой строки (проект Millennials). Сейчас пусто, но модификатор помогает найти строку и поменять её отдельно.', '/* пока пусто */'],
+  'about__row--venue': ['Отличия второй строки (площади для мероприятий). Например, другой отступ сверху.', 'margin-top: 24px;'],
+  'about__heading': ['Подзаголовок строки: «Проект Millennials», «Мы предоставляем площади…».', 'font-size: 22px;\nfont-weight: 700;'],
+  'about__text': ['Абзац текста: мелкий, серый, прижат вправо.', 'font-size: 12px;\ncolor: #6d6d6d;\nmax-width: 60ch;\njustify-self: end;'],
+  'about__gallery': ['Сетка из двух картинок: большая слева, маленькая справа.', 'display: grid;\ngrid-template-columns: 2fr 1fr;\ngap: 24px;\nalign-items: start;'],
+  'ph': ['Заглушка картинки, как перечёркнутый прямоугольник в Pixso. В настоящем проекте здесь будет тег img, а класс ph не нужен.', 'background: #dcdcd8;'],
+  'about__image': ['Общие стили всех картинок в «О нас»: пропорции и ширина.', 'aspect-ratio: 16 / 10;\nwidth: 100%;'],
+  'about__image--big': ['Большая картинка: отличий нет, но модификатор подсказывает, какая из двух это.', '/* пока пусто */'],
+  'about__image--small': ['Маленькая картинка: другие пропорции и сдвиг вниз.', 'aspect-ratio: 4 / 5;\nmargin-top: 18%;'],
+  'about__image--framed': ['Картинка с красной рамкой со сдвигом. Рамка — псевдоэлемент ::before под картинкой.', 'position: relative;\n}\n.about__image--framed::before {\n  content: "";\n  position: absolute;\n  inset: -10px 6% 12px -14px;\n  background: #c8281e;\n  z-index: -1;'],
+  'about__promo': ['Две колонки: картинка с рамкой слева, текст и «Смотреть» справа.', 'display: grid;\ngrid-template-columns: 2fr 1fr;\ngap: 28px;\nalign-items: end;'],
+  'about__stats': ['Колонка с текстом про 100 проектов и ссылкой.', 'display: grid;\ngap: 18px;'],
+  'about__note': ['Текст «Мы уже провели более 100 проектов»: мелкий и серый.', 'font-size: 12px;\ncolor: #6d6d6d;'],
+  'arrow-link': ['Ссылка со стрелкой в кружке: текст слева, кружок справа. Встречается в нескольких местах, поэтому отдельный блок.', 'display: flex;\njustify-content: space-between;\nalign-items: center;'],
+  'about__more': ['Где ссылка «Смотреть» стоит в секции «О нас». Вид уже задан в .arrow-link.', '/* например, margin-top */'],
+  'arrow-link__text': ['Текст ссылки «Смотреть».', 'font-size: 12px;'],
+  'arrow-link__icon': ['Кружок со стрелкой: размер, рамка, скругление.', 'width: 34px;\nheight: 34px;\nborder: 1px solid #121212;\nborder-radius: 50%;'],
+  'home__events': ['Место секции «Мероприятия» на главной: отступы.', 'padding: 52px 40px;'],
+  'events': ['Внешний вид секции «Мероприятия»: расстояние между заголовком, слайдером и ссылкой.', 'display: grid;\ngap: 22px;'],
+  'events__title': ['Место заголовка в «Мероприятиях». Вид плашки задаёт .section-title.', 'margin-bottom: 8px;'],
+  'slider': ['Слайдер целиком: лента карточек и управление под ней.', 'display: grid;\ngap: 22px;'],
+  'events__slider': ['Где слайдер стоит в секции мероприятий. Сам слайдер от этого не меняется.', '/* например, margin-inline: -40px */'],
+  'slider__track': ['Лента карточек. В настоящем слайдере она сдвигается при нажатии на стрелки.', 'display: grid;\ngrid-template-columns: repeat(3, 1fr);\ngap: 20px;'],
+  'event-card': ['Как выглядит одна карточка мероприятия. Карточки повторяются, поэтому это отдельный блок.', 'display: grid;\ngap: 8px;'],
+  'event-card__image': ['Квадратная обложка мероприятия.', 'aspect-ratio: 1;\nwidth: 100%;\nobject-fit: cover;'],
   'event-card__title': ['Название мероприятия.', 'font-size: 15px;\nfont-weight: 700;'],
-  'home__blog': ['Место секции «Блог» на главной: отступы и линия сверху.', 'padding: 52px 40px;\nborder-top: 1px solid #cfd5e0;'],
-  'blog': ['Внешний вид секции «Блог»: расстояние между заголовком и статьями.', 'display: grid;\ngap: 20px;'],
-  'blog__title': ['Место заголовка в секции «Блог». Вид заголовка задаёт .section-title.', 'margin-bottom: 4px;'],
-  'blog__list': ['Сетка статей: колонки и промежутки.', 'display: grid;\ngrid-template-columns: repeat(3, 1fr);\ngap: 14px;'],
-  'post': ['Одна статья в списке: расстояние между картинкой, тегом, заголовком и ссылкой.', 'display: grid;\ngap: 8px;'],
-  'post__image': ['Картинка статьи: пропорции и скругление.', 'aspect-ratio: 3 / 2;\nborder-radius: 8px;'],
-  'post__tag': ['Рубрика над заголовком: мелкие заглавные буквы.', 'font-size: 11px;\ntext-transform: uppercase;'],
-  'post__title': ['Заголовок статьи.', 'font-weight: 700;'],
-  'post__link': ['Ссылка «Читать».', 'font-weight: 600;\ncolor: #3d5afe;'],
-  'home__contacts': ['Место секции «Контакты» на главной: отступы и линия сверху.', 'padding: 52px 40px;\nborder-top: 1px solid #cfd5e0;'],
-  'contacts': ['Внешний вид секции «Контакты»: расстояние между заголовком и содержимым.', 'display: grid;\ngap: 20px;'],
-  'contacts__title': ['Место заголовка в секции «Контакты». Сейчас стилей нет, но класс оставляем: если отступ понадобится только здесь, его добавят сюда, не трогая остальные заголовки.', '/* пока пусто */'],
-  'contacts__inner': ['Две колонки: слева контакты, справа форма.', 'display: grid;\ngrid-template-columns: 1fr 1fr;\ngap: 24px;'],
-  'contacts__list': ['Список контактов: без точек, с расстоянием между пунктами.', 'display: grid;\ngap: 10px;\nlist-style: none;\npadding: 0;'],
-  'contacts__item': ['Один контакт: подпись сверху, значение снизу.', 'display: grid;\ngap: 2px;'],
-  'contacts__label': ['Подпись «Адрес», «Телефон»: мелкий серый текст.', 'font-size: 12px;\ncolor: #5b6476;'],
-  'form': ['Как выглядит форма вообще: расстояние между полями. Такую же форму можно поставить на другую страницу.', 'display: grid;\ngap: 10px;'],
-  'contacts__form': ['Где форма стоит в секции контактов: например, ограничение ширины. Вид формы при этом не меняется.', 'max-width: 480px;'],
-  'form__field': ['Поле с подписью (тег label): подпись над полем ввода.', 'display: grid;\ngap: 4px;\nfont-size: 13px;'],
-  'form__input': ['Общий вид всех полей ввода: рамка, скругление, отступы внутри.', 'width: 100%;\npadding: 9px 11px;\nborder: 1.5px solid #cfd5e0;\nborder-radius: 8px;'],
-  'form__textarea': ['Только то, чем поле для сообщения отличается от обычного: оно выше и растягивается по высоте.', 'min-height: 80px;\nresize: vertical;'],
-  'footer': ['Внешний вид подвала: тёмный фон, светлый текст, раскладка в строку.', 'display: flex;\njustify-content: space-between;\nalign-items: center;\npadding: 20px 40px;\nbackground: #1b2130;\ncolor: #fff;'],
-  'footer__copy': ['Строка с копирайтом: мелкий полупрозрачный текст.', 'font-size: 13px;\nopacity: 0.7;'],
-  'footer__links': ['Список ссылок в подвале: в строку, без точек.', 'display: flex;\ngap: 14px;\nlist-style: none;\npadding: 0;'],
-  'footer__link-item': ['Пункт списка ссылок. Имя из двух слов пишется через дефис: link-item.', '/* обычно пусто */'],
-  'footer__link': ['Ссылка в подвале: цвет наследуется от подвала, подчёркивание убрано.', 'color: inherit;\ntext-decoration: none;'],
+  'event-card__text': ['Короткое описание: мелкий серый текст.', 'font-size: 11px;\ncolor: #6d6d6d;'],
+  'event-card__date': ['Дата и время. Тег time с атрибутом datetime, чтобы дату понимали поисковики.', 'font-size: 10px;\ncolor: #6d6d6d;'],
+  'slider__controls': ['Ряд управления: стрелка, точки, стрелка.', 'display: flex;\njustify-content: center;\nalign-items: center;\ngap: 40px;'],
+  'slider__arrow': ['Общий вид обеих стрелок: кружок с рамкой.', 'width: 40px;\nheight: 40px;\nborder: 1px solid #121212;\nborder-radius: 50%;\nbackground: none;'],
+  'slider__arrow--prev': ['Отличие стрелки «назад». Если иконка одна, её можно развернуть.', 'transform: scaleX(-1);'],
+  'slider__arrow--next': ['Отличие стрелки «вперёд». Сейчас пусто: стрелка смотрит вправо по умолчанию.', '/* пока пусто */'],
+  'slider__dots': ['Ряд точек-индикаторов.', 'display: flex;\ngap: 6px;'],
+  'slider__dot': ['Одна точка (здесь чёрточка): серая.', 'width: 18px;\nheight: 2px;\nbackground: #d4d4d0;'],
+  'slider__dot--active': ['Точка текущего слайда: чёрная. Модификатор переставляет JS при листании.', 'background: #121212;'],
+  'more-link': ['Ссылка «Смотреть все»: справа, мелкая и жирная. Есть в двух секциях, поэтому отдельный блок.', 'justify-self: end;\nfont-size: 11px;\nfont-weight: 600;'],
+  'events__all': ['Место «Смотреть все» под мероприятиями.', '/* например, margin-top */'],
+  'home__blog': ['Место секции «Блог» на главной: отступы.', 'padding: 52px 40px;'],
+  'blog': ['Внешний вид секции «Блог».', 'display: grid;\ngap: 22px;'],
+  'blog__title': ['Место заголовка в «Блоге». Вид плашки задаёт .section-title.', 'margin-bottom: 8px;'],
+  'blog__list': ['Список статей без точек.', 'list-style: none;\nmargin: 0;\npadding: 0;'],
+  'blog__item': ['Одна строка списка: отступы и линия снизу. У последней строки линию убирает :last-child.', 'padding-block: 18px;\nborder-bottom: 1px solid #d4d4d0;\n}\n.blog__item:last-child {\n  border-bottom: 0;'],
+  'post': ['Как выглядит статья в ленте: три колонки — картинка, текст, кнопка.', 'display: grid;\ngrid-template-columns: 1fr 1.6fr auto;\ngap: 24px;\nalign-items: center;'],
+  'post__image': ['Картинка статьи: пропорции.', 'aspect-ratio: 3 / 2;\nwidth: 100%;'],
+  'post__body': ['Текстовая часть: дата, заголовок и описание друг под другом.', 'display: grid;\ngap: 8px;'],
+  'post__date': ['Дата публикации: мелкая и серая.', 'font-size: 10px;\ncolor: #6d6d6d;'],
+  'post__title': ['Заголовок статьи. При наведении в макете он красный — это :hover, а не модификатор.', 'font-size: 15px;\nfont-weight: 700;\n}\n.post__title:hover {\n  color: #c8281e;'],
+  'post__text': ['Описание статьи.', 'font-size: 11px;\ncolor: #6d6d6d;'],
+  'arrow-button': ['Круглая кнопка со стрелкой: размер, рамка, скругление. Своя сущность, поэтому блок.', 'width: 34px;\nheight: 34px;\nborder: 1px solid #121212;\nborder-radius: 50%;\ndisplay: grid;\nplace-items: center;'],
+  'post__link': ['Где кружок стоит в статье: справа, не сжимается.', 'flex-shrink: 0;'],
+  'blog__all': ['Место «Смотреть все» под блогом.', '/* например, margin-top */'],
+  'home__contacts': ['Место секции «Контакты» на главной: отступы.', 'padding: 52px 40px;'],
+  'contacts': ['Внешний вид секции «Контакты».', 'display: grid;\ngap: 22px;'],
+  'contacts__title': ['Место заголовка в «Контактах». Вид плашки задаёт .section-title.', 'margin-bottom: 8px;'],
+  'contacts__inner': ['Две колонки: контакты слева, карта справа.', 'display: grid;\ngrid-template-columns: 1fr 1.3fr;\ngap: 28px;\nalign-items: center;'],
+  'contacts__list': ['Список контактов без точек.', 'display: grid;\ngap: 22px;\nlist-style: none;\npadding: 0;'],
+  'contacts__item': ['Один контакт: квадрат с иконкой и текст рядом.', 'display: flex;\ngap: 16px;'],
+  'contacts__icon': ['Чёрный квадрат под иконку. Общий для всех трёх контактов.', 'width: 52px;\nheight: 52px;\nbackground: #121212;\ndisplay: grid;\nplace-items: center;'],
+  'contacts__icon--address': ['Иконка адреса. Меняется только картинка внутри квадрата.', 'background-image: url("img/icon-pin.svg");'],
+  'contacts__icon--rent': ['Иконка отдела аренды.', 'background-image: url("img/icon-home.svg");'],
+  'contacts__icon--events': ['Иконка отдела мероприятий.', 'background-image: url("img/icon-star.svg");'],
+  'contacts__info': ['Текст контакта: заголовок и строки под ним.', 'display: grid;\ngap: 3px;'],
+  'contacts__label': ['Заголовок контакта: адрес или название отдела.', 'font-size: 13px;\nfont-weight: 700;'],
+  'contacts__line': ['Строка с телефоном, почтой или этажом.', 'font-size: 11px;\ncolor: #6d6d6d;'],
+  'contacts__map': ['Карта: пропорции блока. Саму карту вставляют iframe-ом от Яндекс Карт или 2ГИС.', 'aspect-ratio: 16 / 10;\nwidth: 100%;'],
+  'home__slogan': ['Место слогана на главной: отступы, обрезка того, что вылезает за край.', 'padding: 24px 0 8px;\noverflow: hidden;'],
+  'slogan': ['Блок большого слогана. Его можно повторить на другой странице.', '/* общий вид */'],
+  'slogan__text': ['Огромный текст в одну строку, особый шрифт.', 'font-family: "Forum", serif;\nfont-size: 76px;\nwhite-space: nowrap;'],
+  'slogan__line': ['Вторая строка «а мы вам поможем», сдвинутая вправо.', 'display: block;\npadding-left: 30%;'],
+  'footer': ['Внешний вид подвала: сетка из трёх колонок и строки снизу.', 'display: grid;\ngrid-template-columns: 1fr auto 1fr;\ngap: 24px;\npadding: 28px 40px;'],
+  'footer__nav': ['Где меню стоит в подвале: левая колонка.', 'grid-area: nav;'],
+  'footer__menu': ['Меню подвала: столбик ссылок с красной линией слева.', 'list-style: none;\npadding-left: 12px;\nborder-left: 2px solid #c8281e;\ndisplay: grid;\ngap: 8px;'],
+  'footer__menu-item': ['Пункт меню подвала. Имя из двух слов пишется через дефис: menu-item.', '/* обычно пусто */'],
+  'footer__link': ['Ссылка в подвале: мелкая, без подчёркивания.', 'font-size: 11px;\ntext-decoration: none;'],
+  'footer__link--active': ['Только отличие выделенной ссылки: красный цвет.', 'color: #c8281e;'],
+  'socials': ['Ряд иконок соцсетей. Блок, потому что такие же кружки могут стоять и в шапке.', 'display: flex;\ngap: 14px;\nlist-style: none;\npadding: 0;'],
+  'footer__socials': ['Где иконки стоят в подвале: средняя колонка.', 'grid-area: socials;'],
+  'socials__item': ['Пункт списка соцсетей.', '/* обычно пусто */'],
+  'socials__link': ['Общий вид кружка соцсети: чёрный круг.', 'width: 34px;\nheight: 34px;\nborder-radius: 50%;\nbackground: #121212;'],
+  'socials__link--vk': ['Иконка ВКонтакте внутри кружка.', 'background-image: url("img/vk.svg");'],
+  'socials__link--ok': ['Иконка второй соцсети.', 'background-image: url("img/ok.svg");'],
+  'subscribe': ['Форма подписки: заголовок, поле с кнопкой и галочка. Блок, потому что её можно поставить и в конце статьи.', 'display: grid;\ngap: 8px;\nmax-width: 320px;'],
+  'footer__subscribe': ['Где форма стоит в подвале: правая колонка, прижата вправо.', 'grid-area: subscribe;\njustify-self: end;'],
+  'subscribe__title': ['Заголовок «Подпишись и будь в курсе происходящего».', 'font-size: 11px;\nfont-weight: 600;'],
+  'subscribe__row': ['Поле и кнопка вплотную в одну строку.', 'display: flex;'],
+  'subscribe__input': ['Поле для почты: серый фон, без рамки.', 'flex: 1;\nborder: 0;\nbackground: #e2e2de;\npadding: 9px 10px;'],
+  'subscribe__button': ['Чёрная кнопка «Подписаться». Отличается от .button, поэтому свой элемент.', 'background: #121212;\ncolor: #fff;\nborder: 0;\npadding: 9px 14px;'],
+  'subscribe__agree': ['Строка с галочкой согласия: мелкий серый текст.', 'display: flex;\ngap: 6px;\nfont-size: 10px;\ncolor: #6d6d6d;'],
+  'subscribe__checkbox': ['Сам чекбокс. accent-color красит галочку в нужный цвет.', 'accent-color: #121212;'],
+  'footer__bottom': ['Нижняя строка подвала: копирайт, юридические ссылки, разработчик.', 'grid-area: bottom;\ndisplay: flex;\nflex-wrap: wrap;\ngap: 8px 24px;\nfont-size: 10px;'],
+  'footer__copy': ['Копирайт «© Millennials 2025».', 'color: #6d6d6d;'],
+  'footer__legal': ['Ссылки «Политика конфиденциальности» и «Cookies».', 'text-decoration: none;'],
+  'footer__dev': ['«Создание и продвижение» — прижата вправо через margin-left: auto.', 'margin-left: auto;'],
 };
 const ROLE = {
   block: 'отвечает за то, как элемент выглядит сам по себе: размеры, шрифт, цвета, внутренние отступы',
@@ -1925,7 +2081,8 @@ function inspect0(el) {
   const body = $('#inspBody');
   const crumbs = chain(el);
   const css = ps.map(p => {
-    const props = (INFO[p.cls] || [, '/* стили */'])[1].split('\n').map(l => '  ' + l).join('\n');
+    const [first, ...rest] = (INFO[p.cls] || [, '/* стили */'])[1].split('\n}\n');
+    const props = first.split('\n').map(l => '  ' + l).join('\n') + (rest.length ? '\n}\n' + rest.join('\n}\n') : '');
     return `/* ${KIND[p.kind][0].toLowerCase()} */\n.${p.cls} {\n${props}\n}`;
   }).join('\n\n');
   body.innerHTML = `
