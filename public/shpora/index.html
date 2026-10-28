@@ -107,13 +107,20 @@ main { padding-block: 28px 80px; }
 .btn--small { padding: 4px 10px; font-size: 12px; }
 
 .codebox { position: relative; background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
-.codebox pre { margin: 0; padding: 12px 14px; overflow-x: auto; font-size: 13px; line-height: 1.6; white-space: pre; }
+.codebox pre { margin: 0; padding: 40px 14px 12px; overflow-x: auto; font-size: 13px; line-height: 1.6; white-space: pre; }
 .codebox .btn { position: absolute; top: 6px; right: 6px; }
+.codebox::before { content: ""; position: absolute; left: 0; right: 0; top: 34px; border-top: 1px solid var(--line); }
 .tok-k { color: var(--block); } .tok-s { color: var(--elem); } .tok-c { color: var(--muted); font-style: italic; } .tok-p { color: var(--mod); }
 
 /* cheat cards */
-.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.cards { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
 .cheat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+@media (min-width: 900px) {
+  .cheat { grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 24px; padding: 20px; }
+  .cheat h3 { grid-column: 1; grid-row: 1; }
+  .cheat p { grid-column: 1; grid-row: 2; }
+  .cheat .codebox { grid-column: 2; grid-row: 1 / span 2; }
+}
 .cheat--flash { animation: flash 1.4s ease; }
 @keyframes flash { 0%, 40% { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent); } }
 .cheat h3 { font-size: 16px; }
@@ -304,7 +311,6 @@ main { padding-block: 28px 80px; }
   .play, .sem, .sand { grid-template-columns: minmax(0, 1fr); }
   .git { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .about__inner, .contacts__inner { grid-template-columns: minmax(0, 1fr); }
-  .cards { grid-template-columns: minmax(0, 1fr); }
   .header { justify-content: center; }
   .bar .wrap { flex-wrap: wrap; gap: 8px; }
   .bar__tabs { width: 100%; }
