@@ -374,9 +374,7 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
 .route__step { position: relative; display: grid; gap: 10px; align-content: start; }
 .route__num { display: flex; align-items: center; gap: 8px; font: 600 12px var(--f-mono); color: var(--muted); }
 .route__num i { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-style: normal; background: var(--surface); border: 2px solid var(--accent); color: var(--accent); }
-.route__step--done .route__num i { background: var(--accent); color: #fff; }
-[data-topic="js"].route__step--done .route__num i { color: #1a1400; }
-.route__num::after { content: ""; flex: 1; height: 2px; background: repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 10px); }
+[data-topic="js"].route__num::after { content: ""; flex: 1; height: 2px; background: repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 10px); }
 .route__step:last-child .route__num::after { display: none; }
 .route__open { position: relative; display: grid; gap: 10px; align-content: start; text-align: left; padding: 18px; background: var(--surface); border: 1px solid var(--line); cursor: pointer; min-height: 230px; transition: border-color .15s, transform .15s; }
 .route__open:hover { border-color: var(--accent); transform: translateY(-2px); }
@@ -385,11 +383,6 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
 .route__open h2 { font-size: 19px; }
 .route__open p { color: var(--muted); font-size: 14px; }
 .route__live { margin-top: auto; font: 500 12px var(--f-mono); color: var(--accent); }
-.route__done { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); cursor: pointer; }
-.route__done input { width: 16px; height: 16px; accent-color: var(--accent); margin: 0; }
-.progress { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--muted); }
-.progress__bar { flex: 0 1 220px; height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; }
-.progress__fill { height: 100%; width: 0; background: var(--ink); transition: width .3s; }
 .results__item { border-radius: 4px; }
 .results__topic { color: var(--accent); }
 
@@ -472,7 +465,7 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
   <section data-view="home">
     <div class="intro">
       <h1 class="intro__title">Шпора<span>.</span></h1>
-      <p>Шпаргалки по вёрстке в том порядке, в каком их проходят на курсе. В каждой теме есть живой пример, который можно покрутить, и готовый код. Отмечайте пройденное: отметки сохранятся в этом браузере.</p>
+      <p>Шпаргалки по вёрстке в том порядке, в каком их проходят на курсе. В каждой теме есть живой пример, который можно покрутить, и готовый код.</p>
       <label class="search" for="q">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input id="q" type="search" placeholder="Найти: commit, flex, querySelector, label" autocomplete="off">
@@ -480,7 +473,6 @@ h1, .intro__title { font-family: var(--f-display); font-weight: 700; letter-spac
     </div>
     <div class="results" id="results" hidden></div>
     <ol class="route" id="choice"></ol>
-    <div class="progress" id="progress"><div class="progress__bar"><div class="progress__fill" id="progressFill"></div></div><span id="progressText"></span></div>
   </section>
 
   <!-- ================= BEM ================= -->
@@ -1101,29 +1093,14 @@ document.addEventListener('click', e => {
 const choice = $('#choice');
 const ORDER = ['git', 'html', 'css', 'bem', 'js'];
 const LIVE = { bem: 'кликабельный макет', html: 'карта тегов', css: 'песочница flex и grid', js: 'живое меню', git: 'симулятор коммитов' };
-const DONE_KEY = 'shpora-done';
-let done = [];
-try { done = JSON.parse(localStorage.getItem(DONE_KEY) || '[]'); } catch (e) { done = []; }
-function saveDone() { try { localStorage.setItem(DONE_KEY, JSON.stringify(done)); } catch (e) {} }
-function renderProgress() {
-  $('#progressFill').style.width = (done.length / ORDER.length * 100) + '%';
-  $('#progressText').textContent = done.length ? `Изучено ${done.length} из ${ORDER.length}` : 'Начните с Git и идите по порядку';
-  $$('.route__step').forEach(li => li.classList.toggle('route__step--done', done.includes(li.dataset.topic)));
-}
 ORDER.forEach((key, i) => {
   const s = key === 'bem' ? BEM_CARD : SHEETS[key];
   const li = document.createElement('li');
   li.className = 'route__step'; li.dataset.topic = key;
   li.innerHTML = `<span class="route__num"><i>${i + 1}</i></span>
-    <button class="route__open" type="button" data-go="${key}"><span class="route__badge">${esc(s.badge)}</span><h2>${esc(s.name)}</h2><p>${esc(s.desc)}</p><span class="route__live">▸ ${LIVE[key]}</span></button>
-    <label class="route__done" for="done-${key}"><input type="checkbox" id="done-${key}"${done.includes(key) ? ' checked' : ''}>Изучено</label>`;
-  li.querySelector('input').addEventListener('change', e => {
-    done = e.target.checked ? [...new Set([...done, key])] : done.filter(k => k !== key);
-    saveDone(); renderProgress();
-  });
+    <button class="route__open" type="button" data-go="${key}"><span class="route__badge">${esc(s.badge)}</span><h2>${esc(s.name)}</h2><p>${esc(s.desc)}</p><span class="route__live">▸ ${LIVE[key]}</span></button>`;
   choice.append(li);
 });
-renderProgress();
 
 const INDEX = [];
 Object.entries(SHEETS).forEach(([key, s]) => s.items.forEach((it, i) => INDEX.push({ key, id: `${key}-${i}`, it, hay: (it.t + ' ' + it.d + ' ' + it.tags.join(' ') + ' ' + it.code).toLowerCase() })));
