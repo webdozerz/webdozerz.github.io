@@ -72,7 +72,7 @@ export const profile = {
   leadIntro: 'Беру сложный фронтенд целиком: от архитектуры и UI-кита до интеграции с API и realtime-данными.',
   focusLabel: 'Среди проектов:',
   focus: ['торговые терминалы криптобирж', 'финансовые админ-панели', 'многоязычные SSR-сайты', 'Telegram Mini Apps'],
-  about: 'В проектах отвечаю за стартовый шаблон, UI-кит, слой API с генерацией типов, realtime на WebSocket, тесты и CI. Выстроил в команде AI-assisted разработку на Claude Code и Cursor. Менторю новых разработчиков и планирую работу на проекте.',
+  about: 'В проектах отвечаю за стартовый шаблон, UI-кит, слой API с генерацией типов, realtime на WebSocket, тесты и CI. Выстроил в команде AI-assisted разработку на Claude Code и Cursor и участвовал во внедрении процесса Spec-Driven Development на OpenSpec. Менторю новых разработчиков и планирую работу на проекте.',
 }
 
 // Стаж считаем от первой коммерческой работы (Astana Prom Design, январь 2020) полными годами,
@@ -218,21 +218,25 @@ export const jobs: Job[] = [
       {
         title: 'AI-assisted разработка и внутренние инструменты',
         period: '2025 — 2026',
-        stack: ['Claude Code', 'Cursor', 'LLM API', 'Python', 'aiogram', 'PostgreSQL'],
+        stack: ['Claude Code', 'Cursor', 'OpenSpec', 'LLM API', 'VS Code API', 'Python', 'aiogram', 'PostgreSQL'],
         highlights: [
           'Внедрил Claude Code и Cursor в команду: правила и скиллы во всех проектах',
+          'Участвовал во внедрении Spec-Driven Development на OpenSpec: спецификация → план → код с ИИ → приёмочные тесты',
+          'Сделал расширение VS Code и Cursor, которое ведёт разработчика по шагам процесса и запускает агента, проверки и обновление спек кнопками',
           'Сделал Chrome-расширение Confluence → Jira на LLM и расширение Jira для VS Code',
           'Написал Telegram-боты: согласование отпусков (PostgreSQL, **64** теста, Jira) и заказы еды (**10** парсеров)',
         ],
         sketch: 'tools',
         case: {
-          task: 'Убрать рутину в команде: перенос ТЗ в задачи, работа с Jira, согласования.',
+          task: 'Сделать разработку с ИИ предсказуемой и убрать рутину в команде: перенос ТЗ в задачи, работа с Jira, согласования.',
           role: 'Инициатор и автор инструментов.',
-          decision: 'Claude Code и Cursor со скиллами в каждом проекте; Chrome-расширение превращает страницу Confluence в задачи Jira через LLM; Jira прямо в VS Code; Telegram-боты для отпусков и обедов.',
-          result: 'ТЗ из Confluence раскладывается на эпики и задачи за один клик; отпуска согласуются в Telegram и сами попадают в Jira.',
+          decision: 'Процесс Spec-Driven Development: аналитик пишет спецификацию, разработчик реализует её с агентом через план, расхождения уходят тимлиду, QA получает тесты по тем же сценариям; расширение VS Code показывает шаг задачи и запускает нужные команды. Claude Code и Cursor со скиллами в каждом проекте; Chrome-расширение превращает страницу Confluence в задачи Jira через LLM; Jira прямо в VS Code; Telegram-боты для отпусков и обедов.',
+          result: 'Код от агента пишется по согласованной спецификации, а не «как придумает»; ТЗ из Confluence раскладывается на эпики и задачи за один клик; отпуска согласуются в Telegram и сами попадают в Jira.',
         },
         points: [
           'Внедрил Claude Code и Cursor в работу команды: CLAUDE.md, AGENTS.md, правила и скиллы во всех проектах на Starter Kit.',
+          'Участвовал во внедрении Spec-Driven Development на OpenSpec: аналитик описывает изменение в репозитории спецификаций, разработчик реализует свою группу задач с агентом через design и план, расхождения со спекой эскалируются тимлиду и вносятся в спеку отдельным PR, QA получает приёмочные e2e-тесты по сценариям.',
+          'Расширение для VS Code и Cursor под этот процесс: шаг задачи, блокеры, прогресс плана по PR; ветка, запуск агента, проверки и обновление спек — кнопками.',
           'Chrome-расширение, которое превращает ТЗ из Confluence в эпики, истории и задачи Jira через LLM.',
           'Telegram-бот согласования отпусков на Python: роли от сотрудника до HR, заявки создают задачи в Jira, 64 теста.',
           'Telegram-бот командных заказов еды: 10 парсеров меню, общая корзина, деление стоимости доставки.',
@@ -334,7 +338,7 @@ export const skills = [
   { area: 'Финтех', items: 'TradingView Charting Library, Sumsub (KYC/KYB), 2FA, ролевой доступ, BigNumber' },
   { area: 'Качество', items: 'Vitest, Vue Test Utils, Jest, ESLint, husky, commitlint' },
   { area: 'Сборка и деплой', items: 'Vite, Docker, nginx, GitHub Actions, SonarQube' },
-  { area: 'AI-инструменты', items: 'Claude Code, Cursor, MCP, LLM API' },
+  { area: 'AI-инструменты', items: 'Claude Code, Cursor, MCP, LLM API, OpenSpec (Spec-Driven Development)' },
   { area: 'Процессы', items: 'Jira, Confluence, code review, менторинг, планирование' },
 ]
 
