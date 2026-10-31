@@ -9,6 +9,14 @@ useSeoMeta({
 
 const projects = [
   {
+    to: '/redesign/baltikprodukt/',
+    image: '/redesign/baltikprodukt/og.jpg',
+    title: 'Балтик продукт',
+    text: 'Рыбная база в Туле с 1995 года, опт и розница +3 %: прайс на 354 позиции с поиском, цена коробкой с подсказкой «ещё 6 банок — и цена 74 ₽», список заказа с готовым письмом менеджеру, условия и реквизиты на одной странице.',
+    source: 'https://www.baltikprodukt.ru',
+    tags: ['Nuxt 3', 'Vue', '1С-Битрикс'],
+  },
+  {
     to: '/redesign/papinalavka/',
     image: '/redesign/papinalavka/og.jpg',
     title: 'Папина лавка',
