@@ -189,7 +189,7 @@
   на 38pchel `.pc-qty` жил в компоненте `PcQty`, а корзина рисует счётчик без компонента — на ней
   стили бы пропали.
 - Если в папке репозитория уже работает чужой dev-сервер (другая сессия), свой — на другом
-  порту (`nuxt-dev-ft` → 3021 в `.claude/launch.json`, не коммитить), а `nuxi generate` —
+  порту (временный конфиг в `.claude/launch.json`, не коммитить и удалить в конце сессии), а `nuxi generate` —
   в копии репозитория (`rsync` без `node_modules`/`.nuxt` + симлинк `node_modules`), чтобы не
   перезаписать `.nuxt` работающего сервера. Признак — вкладка показывает «.nuxt/dist directory has been
   removed. Restarting Nuxt…» или «nuxt.config.ts updated» без твоих правок (38pchel: рядом шёл чужой
