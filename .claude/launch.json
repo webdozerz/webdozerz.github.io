@@ -94,6 +94,28 @@
         "3043"
       ],
       "port": 3043
+    },
+    {
+      "name": "nuxt-dev-pl",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "nuxt",
+        "dev",
+        "--port",
+        "3047"
+      ],
+      "port": 3047
+    },
+    {
+      "name": "nuxt-dev-bp",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "nuxt",
+        "dev",
+        "--port",
+        "3051"
+      ],
+      "port": 3051
     }
   ]
 }
