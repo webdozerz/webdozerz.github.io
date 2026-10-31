@@ -30,7 +30,6 @@ const commands = computed<Command[]>(() => [
   { id: 'resume', group: 'Инструменты', label: 'Резюме', hint: 'есть PDF', run: () => router.push('/resume') },
   { id: 'effort', group: 'Инструменты', label: 'Калькулятор трудозатрат', run: () => router.push('/effort') },
   { id: 'ipr', group: 'Инструменты', label: 'План развития фронтендера', run: () => router.push('/ipr') },
-  { id: 'peas', group: 'Инструменты', label: '20 горошин', hint: 'техника от тревоги', run: () => router.push('/peas') },
   {
     id: 'theme',
     group: 'Настройки',

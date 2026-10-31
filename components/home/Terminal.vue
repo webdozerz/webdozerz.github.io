@@ -12,7 +12,6 @@ const pages: Record<string, string> = {
   resume: '/resume',
   effort: '/effort',
   ipr: '/ipr',
-  peas: '/peas',
   redesign: '/redesign',
 }
 
@@ -99,9 +98,9 @@ const commands: Record<string, { help?: string, run: (args: string[]) => void }>
     help: 'файлы и страницы',
     run: (args) => {
       if (args.includes('-a') || args.includes('-la'))
-        out('.  ..  .secrets  resume.txt  resume/  effort/  ipr/  peas/  redesign/')
+        out('.  ..  .secrets  resume.txt  resume/  effort/  ipr/  redesign/')
       else
-        out('resume.txt  resume/  effort/  ipr/  peas/  redesign/')
+        out('resume.txt  resume/  effort/  ipr/  redesign/')
     },
   },
   cat: {
@@ -116,8 +115,7 @@ const commands: Record<string, { help?: string, run: (args: string[]) => void }>
       }
       else if (file === '.secrets') {
         out('1. Первый коммит в этот репозиторий — сентябрь 2018.')
-        out('2. В /peas можно правда успокоиться за 20 горошин.')
-        out('3. Попробуйте Konami-код на странице: ↑↑↓↓←→←→BA.')
+        out('2. Попробуйте Konami-код на странице: ↑↑↓↓←→←→BA.')
       }
       else {
         out(`cat: ${file ?? ''}: нет такого файла`, 'err')
