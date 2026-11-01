@@ -522,7 +522,7 @@ const { data: comments } = await useFetch('/api/comments', {
     title: 'useAsyncData',
     level: 'middle',
     summary: '`useAsyncData` — базовый composable загрузки данных с SSR: выполняет любую async-функцию и хранит результат под ключом.',
-    what: '`useAsyncData(key, handler, options)` — базовый механизм загрузки данных в Nuxt, на нём построен `useFetch`. При SSR выполняет `handler` на сервере, сохраняет возвращённое значение в payload под ключом и при гидратации берёт его оттуда, не вызывая функцию повторно. Возвращает `data`, `status`, `error`, `refresh`, `execute`, `clear`. Опции: `server`, `lazy`, `immediate`, `default`, `transform`, `pick`, `watch`, `dedupe`, `getCachedData`, `deep`. В Nuxt 4 `data` по умолчанию — `shallowRef` (`deep: false`), а в Nuxt 3 — глубоко реактивный ref.',
+    what: '`useAsyncData(key, handler, options)` — базовый механизм загрузки данных в Nuxt, на нём построен `useFetch`. При SSR выполняет `handler` на сервере, сохраняет возвращённое значение в payload под ключом и при гидратации берёт его оттуда, не вызывая функцию повторно. Возвращает `data`, `status`, `error`, `refresh`, `execute`, `clear`. Опции: `server`, `lazy`, `immediate`, `default`, `transform`, `pick`, `watch`, `dedupe`, `getCachedData`, `deep`. Глубину реактивности задаёт опция `deep`: в Nuxt 3 по умолчанию `deep: true` (глубоко реактивный ref), в Nuxt 4 умолчание сменили на `deep: false` — `data` становится `shallowRef`.',
     analogy: '',
     where: 'Страница товара, где параллельно грузятся товар и отзывы; запрос к CMS через её SDK; GraphQL; данные, собранные из нескольких источников.',
     why: 'Даёт любой асинхронной функции те же гарантии при SSR, что и `useFetch`: один вызов, передача результата в браузер, реактивный статус.',
