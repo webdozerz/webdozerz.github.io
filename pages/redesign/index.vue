@@ -9,6 +9,14 @@ useSeoMeta({
 
 const projects = [
   {
+    to: '/redesign/aks124/',
+    image: '/redesign/aks124/og.jpg',
+    title: 'ИП Аксюченко',
+    text: 'Оптовая бакалея, кондитерка, чай и кофе со склада в Красноярске: каталог листами брендов с ценой за штуку и упаковку, поиск по прайсу, бренды А–Я, список заказа упаковками со шкалой до бесплатной доставки и готовым письмом.',
+    source: 'https://aks124.ru',
+    tags: ['Nuxt 3', 'Vue', 'Megagroup'],
+  },
+  {
     to: '/redesign/baltikprodukt/',
     image: '/redesign/baltikprodukt/og.jpg',
     title: 'Балтик продукт',
