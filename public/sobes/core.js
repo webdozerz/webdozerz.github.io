@@ -1,8 +1,7 @@
-/* Core: DOM helpers, highlighter, code editor, persistent store with spaced repetition. Everything hangs off window.SOBES. */
-window.SOBES = window.SOBES || { topics: [], quiz: [] };
+/* Core: DOM helpers, syntax highlighter, code blocks. Everything hangs off window.SOBES. */
+window.SOBES = window.SOBES || { topics: [] };
 (() => {
 const S = window.SOBES;
-S.tasks = S.tasks || [];
 S.demos = S.demos || {};
 
 /* views pass optional children as `cond ? node : null`; native append would print them as "null" */
@@ -115,119 +114,15 @@ function codeBlock(src, lang = 'js', title = '', mod = '') {
     h('pre', h('code', { html: hl(src.replace(/^\n+|\s+$/g, ''), lang) })));
 }
 
-/* ---------- editor: transparent textarea over highlighted pre ---------- */
-function editor(value, lang, onChange) {
-  const pre = h('pre', { 'aria-hidden': 'true' });
-  const gutter = h('div.editor__gutter');
-  const ta = h('textarea', { spellcheck: 'false', autocapitalize: 'off', autocomplete: 'off', 'aria-label': 'Редактор кода' });
-  ta.value = value;
-  const scroll = h('div.editor__scroll', gutter, pre, ta);
-  const paint = () => {
-    pre.innerHTML = hl(ta.value, lang) + '\n';
-    gutter.textContent = ta.value.split('\n').map((_, i) => i + 1).join('\n');
-  };
-  ta.addEventListener('input', () => { paint(); onChange && onChange(ta.value); });
-  ta.addEventListener('keydown', e => {
-    const { selectionStart: s, selectionEnd: en, value: v } = ta;
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      if (e.shiftKey) {
-        const ls = v.lastIndexOf('\n', s - 1) + 1;
-        if (v.slice(ls, ls + 2) === '  ') { ta.value = v.slice(0, ls) + v.slice(ls + 2); ta.selectionStart = ta.selectionEnd = Math.max(ls, s - 2); }
-      } else { ta.value = v.slice(0, s) + '  ' + v.slice(en); ta.selectionStart = ta.selectionEnd = s + 2; }
-      ta.dispatchEvent(new Event('input'));
-    } else if (e.key === 'Enter' && !e.metaKey && !e.ctrlKey) {
-      e.preventDefault();
-      const ls = v.lastIndexOf('\n', s - 1) + 1;
-      let indent = v.slice(ls).match(/^\s*/)[0];
-      if (/[{([]$/.test(v.slice(0, s).trimEnd())) indent += '  ';
-      ta.value = v.slice(0, s) + '\n' + indent + v.slice(en);
-      ta.selectionStart = ta.selectionEnd = s + 1 + indent.length;
-      ta.dispatchEvent(new Event('input'));
-    }
-  });
-  const fit = () => { ta.style.height = '0'; ta.style.height = Math.max(pre.scrollHeight, 220) + 'px'; };
-  ta.addEventListener('input', fit);
-  paint();
-  const root = h('div.editor', scroll);
-  queueMicrotask(fit);
-  return { el: root, get value() { return ta.value; }, set value(v) { ta.value = v; paint(); fit(); onChange && onChange(v); }, focus: () => ta.focus() };
-}
 
-/* ---------- store: localStorage behind a tiny repository, so a server backend can replace it later ---------- */
-const KEY = 'sobes:v1';
-const DAY = 864e5;
-const INTERVALS = [0, 1, 3, 7, 16, 35]; // days per Leitner box
-const blank = () => ({ cards: {}, seen: {}, tasks: {}, days: {}, last: null, sessions: [], settings: { level: 'middle' } });
-let data = blank();
-try { data = Object.assign(blank(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} };
-const today = () => new Date().toISOString().slice(0, 10);
-const touchDay = () => { data.days[today()] = (data.days[today()] || 0) + 1; };
+const byId = {};
+const indexContent = () => S.topics.forEach(t => { byId[t.id] = t; });
 
-const store = {
-  get data() { return data; },
-  /* record an answer; score 0..1. Moves the card between boxes and schedules the next review. */
-  answer(id, score, meta = {}) {
-    const c = data.cards[id] || (data.cards[id] = { box: 0, due: 0, n: 0, sum: 0, wrong: 0, hist: [] });
-    c.n++; c.sum += score; c.last = score; c.at = Date.now();
-    c.hist.push([Date.now(), Math.round(score * 100) / 100]); if (c.hist.length > 20) c.hist.shift();
-    if (score >= .8) c.box = Math.min(c.box + 1, INTERVALS.length - 1);
-    else if (score >= .4) c.box = Math.max(c.box - 1, 1);
-    else { c.box = 0; c.wrong++; }
-    if (score < .8) c.wrong = c.wrong || 1;
-    c.due = Date.now() + (c.box === 0 ? 10 * 60e3 : INTERVALS[c.box] * DAY);
-    Object.assign(c, meta);
-    touchDay(); save();
-    return c;
-  },
-  card: id => data.cards[id],
-  seeTopic(id) { data.seen[id] = Date.now(); data.last = { topic: id, at: Date.now() }; touchDay(); save(); },
-  task(id, patch) { data.tasks[id] = Object.assign(data.tasks[id] || {}, patch); if (patch.solved) touchDay(); save(); },
-  session(s) { data.sessions.unshift(Object.assign({ at: Date.now() }, s)); data.sessions = data.sessions.slice(0, 50); save(); },
-  setting(k, v) { data.settings[k] = v; save(); },
-  reset() { data = blank(); save(); },
-  export: () => JSON.stringify(data),
-  import(json) { data = Object.assign(blank(), JSON.parse(json)); save(); },
-  streak() {
-    let n = 0; const d = new Date();
-    if (!data.days[today()]) d.setDate(d.getDate() - 1);
-    while (data.days[d.toISOString().slice(0, 10)]) { n++; d.setDate(d.getDate() - 1); }
-    return n;
-  },
+/* tiny per-browser memory: last opened topic, nothing else */
+const recall = {
+  get last() { try { return localStorage.getItem('sobes:last'); } catch (e) { return null; } },
+  set last(id) { try { localStorage.setItem('sobes:last', id); } catch (e) {} },
 };
 
-/* ---------- content index ---------- */
-const byId = {};
-const qIndex = {}; // question id → { q, topic, kind: 'q' | 'quiz' }
-function indexContent() {
-  S.topics.forEach(t => {
-    byId[t.id] = t;
-    (t.questions || []).forEach(q => { qIndex[q.id] = { item: q, topic: t, kind: 'q' }; });
-  });
-  S.quiz.forEach(q => { qIndex[q.id] = { item: q, topic: byId[q.topic], kind: 'quiz' }; });
-}
-const topicItems = t => [...(t.questions || []).map(q => q.id), ...S.quiz.filter(q => q.topic === t.id).map(q => q.id)];
-/* mastery: mean of last scores, unanswered count as 0 */
-function mastery(t) {
-  const ids = topicItems(t);
-  if (!ids.length) return 0;
-  return ids.reduce((s, id) => s + (data.cards[id] ? data.cards[id].last : 0), 0) / ids.length;
-}
-const answered = t => topicItems(t).filter(id => data.cards[id]).length;
-const dueCards = () => Object.entries(data.cards).filter(([id, c]) => qIndex[id] && c.due <= Date.now()).sort((a, b) => a[1].box - b[1].box || a[1].due - b[1].due);
-const mistakes = () => Object.entries(data.cards).filter(([id, c]) => qIndex[id] && c.wrong > 0).sort((a, b) => b[1].at - a[1].at);
-const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-
-/* Rough word overlap between a free-text answer and a key point — pre-ticks keys the user probably mentioned. */
-const stem = w => w.toLowerCase().replace(/ё/g, 'е').slice(0, Math.max(4, Math.ceil(w.length * .6)));
-const STOP = new Set(['это', 'который', 'которая', 'чтобы', 'когда', 'если', 'тоже', 'того', 'тоже', 'есть', 'нужно', 'можно', 'будет', 'только', 'через', 'после', 'перед', 'между', 'потому', 'with', 'that', 'this', 'from']);
-function keyHit(answer, key) {
-  const a = new Set((answer.match(/[\wа-яё$.]+/gi) || []).filter(w => w.length > 2).map(stem));
-  const words = (key.match(/[\wа-яё$.]+/gi) || []).filter(w => w.length > 3 && !STOP.has(w.toLowerCase())).map(stem);
-  if (!words.length) return false;
-  return words.filter(w => a.has(w)).length / words.length >= .5;
-}
-
-Object.assign(S, { $, $$, h, esc, hl, codeBlock, editor, toast, store, SECTIONS, secOf, LEVELS, LEVEL_NAME, byId, qIndex, indexContent, topicItems, mastery, answered, dueCards, mistakes, shuffle, keyHit, DAY });
+Object.assign(S, { $, $$, h, esc, hl, codeBlock, toast, SECTIONS, secOf, LEVEL_NAME, byId, indexContent, recall });
 })();
