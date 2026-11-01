@@ -2074,7 +2074,7 @@ html.ak-html {
   p {
     margin-top: 8px;
   }
-  a {
+  a:not(.ak-btn) {
     color: var(--ak-accent);
     font-weight: 600;
   }
