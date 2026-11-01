@@ -4,7 +4,12 @@ const S = window.SOBES;
 const { $, $$, h, esc, codeBlock, SECTIONS, secOf, LEVEL_NAME, byId, recall } = S;
 S.indexContent();
 const view = $('#view');
-const topicsOf = sec => S.topics.filter(t => t.section === sec);
+/* topics of a section ordered by group (first appearance), so sidebar, cards and prev/next agree */
+const topicsOf = sec => {
+  const ts = S.topics.filter(t => t.section === sec);
+  const groups = [...new Set(ts.map(t => t.group))];
+  return groups.flatMap(g => ts.filter(t => t.group === g));
+};
 const cvar = sec => ({ '--c': 'var(--c-' + sec + ')' });
 const plural = (n, a, b, c) => n % 10 === 1 && n % 100 !== 11 ? a : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? b : c;
 /* inline `code` in plain strings */
@@ -34,7 +39,8 @@ function home() {
     h('header.hero',
       h('p.eyebrow', 'Шпаргалка перед собеседованием'),
       h('h1', 'Что это, зачем и чем отличается'),
-      h('p.hero__lead', 'JavaScript, браузер, Vue 3, Nuxt 3, TypeScript и принципы проектирования — простыми словами. В каждой теме суть, аналогия из жизни, пример и вопросы с собеседования с готовыми ответами.'),
+      h('p.hero__lead', 'JavaScript, браузер, Vue 3, Nuxt 3, TypeScript, тестирование, производительность и принципы проектирования. В каждой теме точное определение и механизм, где это встречается, чем отличается от похожего, пример и вопросы с собеседования с готовыми ответами.'),
+      h('p.note', h('b', 'Версии. '), 'Материал рассчитан на Vue 3.5+ и Nuxt 3. Где возможность появилась позже или ведёт себя иначе в Nuxt 4, это указано в теме. Примеры сверяйте с версией своего проекта.'),
       last ? h('a.resume', { href: '#/t/' + last.id, style: cvar(last.section) }, h('span', 'Вы остановились на'), h('b', last.title), h('i', '→')) : null),
     h('div.index', SECTIONS.map(s => {
       const ts = topicsOf(s.id);
@@ -56,7 +62,7 @@ function section(id) {
   return [
     h('header.page-head', { style: cvar(id) }, h('p.eyebrow', h('i.dot'), s.tag), h('h1', s.name), h('p.page-head__lead', s.desc)),
     ...groups.map(g => h('section.group', h('h2', g), h('div.cards', ts.filter(t => t.group === g).map(t =>
-      h('a.card', { href: '#/t/' + t.id, style: cvar(id) }, h('b', t.title), h('p', t.summary), S.demos[t.id] ? h('span.card__live', h('i.live'), 'интерактив') : null))))),
+      h('a.card', { href: '#/t/' + t.id, style: cvar(id) }, h('b', t.title), h('p', { html: fmt(t.summary) }), S.demos[t.id] ? h('span.card__live', h('i.live'), 'интерактив') : null))))),
   ];
 }
 
@@ -69,14 +75,15 @@ function topic(id) {
   const blocks = [], toc = [];
   const block = (key, title, ...content) => { toc.push([key, title]); blocks.push(h('section.block', { id: 'b-' + key }, h('h2', title), ...content)); };
 
-  if (t.simple) blocks.push(h('aside.simple', h('span', 'Если по-простому'), h('p', { html: fmt(t.simple) })));
+  if (t.what) block('what', 'Что это', h('div.prose', paras(t.what)));
+  const analogy = t.analogy || t.simple;
+  if (analogy) blocks.push(h('aside.simple', h('span', 'Образ для запоминания'), h('p', { html: fmt(analogy) })));
   if (S.demos[id]) {
     const holder = h('div.demo');
     toc.push(['demo', 'Как это работает']);
     blocks.push(h('section.block', { id: 'b-demo' }, h('h2', 'Как это работает'), holder));
     queueMicrotask(() => { try { S.demos[id](holder, t); } catch (e) { holder.append(h('p.demo__note', 'Пример не запустился: ' + e.message)); console.error(e); } });
   }
-  if (t.what) block('what', 'Что это', h('div.prose', paras(t.what)));
   const facts = [['Где встречается', t.where], ['Зачем нужно', t.why], ['Когда брать', t.when]].filter(f => f[1]);
   if (facts.length) { toc.push(['facts', 'Где, зачем, когда']); blocks.push(h('dl.facts', { id: 'b-facts' }, facts.map(([k, v]) => h('div', h('dt', k), h('dd', { html: fmt(v) }))))); }
   const diff = Array.isArray(t.diff) ? t.diff : t.diff ? [{ vs: '', text: t.diff }] : [];
@@ -84,7 +91,7 @@ function topic(id) {
   if (t.code && t.code.length) block('code', 'Пример', codeExamples(t.code));
   if (t.pitfalls && t.pitfalls.length) block('pitfalls', 'Частые ошибки', h('ul.pitfalls', t.pitfalls.map(p => h('li', { html: fmt(p) }))));
   if (t.questions && t.questions.length) {
-    const list = h('div.faq', t.questions.map(q => h('details.faq__item', h('summary', h('span', q.q)), h('div.faq__a', paras(q.a)))));
+    const list = h('div.faq', t.questions.map(q => h('details.faq__item', h('summary', h('span', { html: fmt(q.q) })), h('div.faq__a', paras(q.a)))));
     const toggle = h('button.link-btn', { type: 'button', onclick: () => { const all = $$('details', list); const open = !all.every(d => d.open); all.forEach(d => { d.open = open; }); toggle.textContent = open ? 'Свернуть ответы' : 'Показать все ответы'; } }, 'Показать все ответы');
     toc.push(['faq', 'Спросят на собесе']);
     blocks.push(h('section.block', { id: 'b-faq' }, h('div.block__head', h('h2', 'Что спросят на собеседовании'), toggle), h('p.muted', 'Попробуйте ответить сами, потом откройте ответ.'), list));
@@ -93,7 +100,7 @@ function topic(id) {
 
   return [h('div.topic', { style: cvar(t.section) },
     h('article.topic__body',
-      h('header.page-head', h('p.eyebrow', h('a', { href: '#/s/' + t.section }, h('i.dot'), secOf(t.section).name), h('span', '/'), h('span', t.group), t.level ? h('span.level', LEVEL_NAME[t.level] || t.level) : null), h('h1', t.title), h('p.page-head__lead', t.summary)),
+      h('header.page-head', h('p.eyebrow', h('a', { href: '#/s/' + t.section }, h('i.dot'), secOf(t.section).name), h('span', '/'), h('span', t.group), t.level ? h('span.level', LEVEL_NAME[t.level] || t.level) : null), h('h1', t.title), h('p.page-head__lead', { html: fmt(t.summary) })),
       blocks),
     h('nav.toc', { 'aria-label': 'На странице' }, h('p', 'На странице'), toc.map(([k, title]) => h('a', { href: '#b-' + k, onclick: e => { e.preventDefault(); document.getElementById('b-' + k)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }, title))))];
 }
@@ -130,14 +137,14 @@ window.addEventListener('hashchange', render);
 /* ---------- search ---------- */
 const q = $('#q'); const sr = $('#searchResults');
 let srIdx = 0, idx = null;
-const searchIndex = () => idx || (idx = S.topics.map(t => ({ t, text: [t.title, t.summary, t.simple, t.what, t.group, ...(t.questions || []).map(x => x.q)].join(' ').toLowerCase() })));
+const searchIndex = () => idx || (idx = S.topics.map(t => ({ t, text: [t.title, t.summary, t.analogy || t.simple, t.what, t.group, ...(t.questions || []).map(x => x.q)].join(' ').toLowerCase() })));
 q.addEventListener('input', () => {
   const v = q.value.trim().toLowerCase();
   if (!v) { sr.hidden = true; return; }
   const words = v.split(/\s+/);
   const res = searchIndex().filter(x => words.every(w => x.text.includes(w))).map(x => [x.t, x.t.title.toLowerCase().includes(v) ? 2 : 1]).sort((a, b) => b[1] - a[1]).slice(0, 10);
   srIdx = 0;
-  sr.replaceChildren(...(res.length ? res.map(([t], i) => h('a.sr' + (i === 0 ? '.is-active' : ''), { href: '#/t/' + t.id, style: cvar(t.section), onclick: () => { sr.hidden = true; q.value = ''; } }, h('i.dot'), h('b', t.title), h('small', secOf(t.section).name + ' · ' + t.summary))) : [h('p.sr__empty', 'Ничего не нашлось')]));
+  sr.replaceChildren(...(res.length ? res.map(([t], i) => h('a.sr' + (i === 0 ? '.is-active' : ''), { href: '#/t/' + t.id, style: cvar(t.section), onclick: () => { sr.hidden = true; q.value = ''; } }, h('i.dot'), h('b', t.title), h('small', secOf(t.section).name + ' · ' + t.summary.replace(/`/g, '')))) : [h('p.sr__empty', 'Ничего не нашлось')]));
   sr.hidden = false;
 });
 q.addEventListener('keydown', e => {

@@ -332,7 +332,7 @@ D['js-debounce-throttle'] = holder => {
   body.append(h('div.row', h('span.small.muted', 'Задержка'), h('input', { type: 'range', min: 100, max: 1000, step: 50, value: ms, oninput: e => { ms = +e.target.value; val.textContent = ms + ' мс'; } }), val,
     h('button.btn.btn--ghost.btn--sm', { type: 'button', onclick: () => { Object.values(lanes).forEach(l => { l.innerHTML = ''; }); Object.keys(n).forEach(k => { n[k] = 0; counts[k].textContent = 0; }); t0 = 0; } }, 'Очистить')),
   area, h('div.lanes', lane('raw', 'события'), lane('deb', 'debounce'), lane('thr', 'throttle')),
-  h('p.demo__note', '<b>Debounce</b> — для поиска по вводу и ресайза: важен итог после паузы. <b>Throttle</b> — для скролла, mousemove, бесконечной ленты: нужны регулярные обновления, но не на каждый пиксель.'));
+  h('p.demo__note', { html: '<b>Debounce</b> — для поиска по вводу и ресайза: важен итог после паузы. <b>Throttle</b> — для скролла, mousemove, бесконечной ленты: нужны регулярные обновления, но не на каждый пиксель.' }));
 };
 
 /* ================= JS: hoisting ================= */
@@ -384,7 +384,7 @@ D['web-events'] = holder => {
   outer.addEventListener('mousedown', () => { log.clear(); queue = 0; });
   const toggle = (k, label) => h('label.check', h('input', { type: 'checkbox', checked: opts[k], onchange: e => { opts[k] = e.target.checked; } }), h('span', label));
   body.append(h('div.grid.grid--2', toggle('capture', 'Слушать фазу capture (третий аргумент true)'), toggle('stop', 'Вызвать stopPropagation() на div.card')), outer, log,
-    h('p.demo__note', 'Подсказка: кликните по div.card мимо кнопки — целью станет он, и кнопка вообще не участвует. <code>event.target</code> — где кликнули, <code>event.currentTarget</code> — чей обработчик сейчас работает.'));
+    h('p.demo__note', { html: 'Подсказка: кликните по div.card мимо кнопки — целью станет он, и кнопка вообще не участвует. <code>event.target</code> — где кликнули, <code>event.currentTarget</code> — чей обработчик сейчас работает.' }));
 };
 
 /* ================= Web: delegation ================= */
@@ -432,7 +432,7 @@ D['web-reflow'] = holder => {
     log.add((bad ? 'чтение/запись вперемешку: ' : 'сначала чтение, потом запись: ') + (performance.now() - t).toFixed(1) + ' мс', bad ? 'l-bad' : 'l-ok');
   };
   body.append(h('div.row', h('button.btn.btn--sm.btn--bad', { type: 'button', onclick: () => run(true) }, 'Плохо: read/write в цикле'), h('button.btn.btn--sm.btn--ok', { type: 'button', onclick: () => run(false) }, 'Хорошо: батч чтений')), box, log,
-    h('p.demo__note', 'Reflow (layout) — пересчёт геометрии, дорогой. Repaint — перерисовка пикселей без смены геометрии, дешевле. <code>transform</code> и <code>opacity</code> обычно не вызывают ни того, ни другого — только композитинг.'));
+    h('p.demo__note', { html: 'Reflow (layout) — пересчёт геометрии, дорогой. Repaint — перерисовка пикселей без смены геометрии, дешевле. <code>transform</code> и <code>opacity</code> обычно не вызывают ни того, ни другого — только композитинг.' }));
 };
 
 /* ================= Vue demos on real Vue ================= */
@@ -751,7 +751,7 @@ D['arch-observer'] = holder => {
   const emit = p => { log.add('emit("cart:add", "' + p + '") → ' + listeners.size + ' подписчиков', 'l-warn'); listeners.forEach(fn => fn(p)); };
   body.append(h('div.grid.grid--2', Object.keys(subs).map(k => h('label.check', h('input', { type: 'checkbox', checked: subs[k], onchange: e => { e.target.checked ? on(k, handlers[k]) : off(k); log.add((e.target.checked ? 'on' : 'off') + '("cart:add", ' + k + ')', 'l-mute'); } }), h('span', NAMES[k])))),
     h('div.row', ['Чай', 'Кофе', 'Печенье'].map(p => h('button.btn.btn--sm.btn--primary', { type: 'button', onclick: () => emit(p) }, '+ ' + p)), h('span.small.muted', 'В корзине:'), badge), log,
-    h('p.demo__note', 'Реактивность Vue — тот же Observer: <code>ref</code> — издатель, эффекты рендера и <code>watch</code> — подписчики, которые Vue регистрирует сам при чтении значения.'));
+    h('p.demo__note', { html: 'Реактивность Vue — тот же Observer: <code>ref</code> — издатель, эффекты рендера и <code>watch</code> — подписчики, которые Vue регистрирует сам при чтении значения.' }));
 };
 
 /* ================= Arch: strategy ================= */

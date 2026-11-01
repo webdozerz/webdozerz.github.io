@@ -14,7 +14,7 @@
   --ok: #5fd39a; --ok-bg: rgba(95, 211, 154, .1);
   --bad: #ff7676; --bad-bg: rgba(255, 118, 118, .1);
   --warn: #f2bd57; --warn-bg: rgba(242, 189, 87, .1);
-  --c-js: #e9cf4c; --c-web: #f39158; --c-vue: #4cc38a; --c-nuxt: #3cc9c4; --c-ts: #6aa6f5; --c-arch: #bb99f5;
+  --c-js: #e9cf4c; --c-web: #f39158; --c-vue: #4cc38a; --c-nuxt: #3cc9c4; --c-ts: #6aa6f5; --c-test: #ef8fc4; --c-perf: #a7d65a; --c-arch: #bb99f5;
   --tok-k: #ff85b8; --tok-s: #9bdca5; --tok-n: #f2bd57; --tok-c: #6b6b74; --tok-f: #84bcff; --tok-t: #f39158; --tok-a: #bb99f5;
   --code-bg: #0e0e10;
   --shadow: 0 12px 32px rgba(0, 0, 0, .4);
@@ -28,7 +28,7 @@
   --bg: #f6f5f1; --surface: #ffffff; --surface-2: #f0efea; --surface-3: #e7e5df; --line: #e4e2dc; --line-2: #d2cfc7;
   --ink: #1c1b19; --muted: #66645e; --faint: #9c998f; --primary: #1c1b19; --primary-ink: #ffffff;
   --ok: #17864f; --ok-bg: rgba(23, 134, 79, .09); --bad: #cc3434; --bad-bg: rgba(204, 52, 52, .08); --warn: #a26a00; --warn-bg: rgba(162, 106, 0, .09);
-  --c-js: #a68600; --c-web: #c85a17; --c-vue: #1d8a59; --c-nuxt: #0d8a86; --c-ts: #2f6cc9; --c-arch: #7448cc;
+  --c-js: #a68600; --c-web: #c85a17; --c-vue: #1d8a59; --c-nuxt: #0d8a86; --c-ts: #2f6cc9; --c-test: #b8357a; --c-perf: #5b8a12; --c-arch: #7448cc;
   --tok-k: #c2255c; --tok-s: #2b8a3e; --tok-n: #b35c00; --tok-c: #9c998f; --tok-f: #1c64f2; --tok-t: #c2410c; --tok-a: #7048e8;
   --code-bg: #fbfaf7; --shadow: 0 12px 32px rgba(40, 36, 28, .1);
   color-scheme: light;
@@ -139,6 +139,8 @@ code, pre, kbd, .mono { font-family: var(--f-mono); }
 .block h2, .block__head h2 { font-size: 22px; font-weight: 650; letter-spacing: -.01em; }
 .block__head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .prose { display: grid; gap: 12px; font-size: 17px; line-height: 1.7; }
+.note { max-width: 720px; font-size: 14px; color: var(--muted); padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.note b { color: var(--ink); font-weight: 600; }
 .simple { position: relative; padding: 22px 24px; border-radius: var(--r); background: color-mix(in srgb, var(--c) 9%, var(--surface)); border: 1px solid color-mix(in srgb, var(--c) 30%, var(--line)); display: grid; gap: 8px; }
 .simple span { font: 600 11px var(--f-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--c); }
 .simple p { font-size: 18px; line-height: 1.6; }

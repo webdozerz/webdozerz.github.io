@@ -32,11 +32,13 @@ function h(tag, attrs, ...kids) {
 }
 
 const SECTIONS = [
-  { id: 'js', name: 'JavaScript', tag: 'JS', desc: 'Типы, замыкания, this, прототипы, event loop, промисы' },
-  { id: 'web', name: 'Браузер и Web API', tag: 'WEB', desc: 'DOM, события, хранилища, fetch, CORS, HTTP, рендеринг' },
+  { id: 'js', name: 'JavaScript', tag: 'JS', desc: 'Типы, замыкания, this, прототипы, event loop, промисы, модули и ошибки' },
+  { id: 'web', name: 'Браузер и Web API', tag: 'WEB', desc: 'DOM, события, хранилища, fetch, CORS, HTTP, рендеринг, воркеры' },
   { id: 'vue', name: 'Vue 3', tag: 'VUE', desc: 'Реактивность, компоненты, Pinia, архитектура, производительность' },
   { id: 'nuxt', name: 'Nuxt 3', tag: 'NUXT', desc: 'SSR, гидратация, роутинг, Nitro, useFetch и компания' },
-  { id: 'ts', name: 'TypeScript', tag: 'TS', desc: 'Дженерики, utility types, guards, типизация Vue и Pinia' },
+  { id: 'ts', name: 'TypeScript', tag: 'TS', desc: 'Дженерики, utility и продвинутые типы, guards, типизация Vue и Pinia' },
+  { id: 'test', name: 'Тестирование', tag: 'TEST', desc: 'Виды тестов, Vitest, моки, Vue Test Utils, Pinia, Playwright' },
+  { id: 'perf', name: 'Производительность и сборка', tag: 'PERF', desc: 'Core Web Vitals, профилирование, Vite, бандл, загрузка' },
   { id: 'arch', name: 'Принципы и паттерны', tag: 'ARCH', desc: 'SOLID, KISS, DRY, ООП, паттерны на фронтенде' },
 ];
 const secOf = id => SECTIONS.find(s => s.id === id);
