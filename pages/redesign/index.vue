@@ -9,6 +9,14 @@ useSeoMeta({
 
 const projects = [
   {
+    to: '/redesign/22bee/',
+    image: '/redesign/22bee/og.jpg',
+    title: 'Мёд и Соты',
+    text: 'Алтайский мёд оптом с собственных пасек: прайс 9 сортов куботейнерами по 34 кг с ценой от 34 и от 200 кг, подсказка «ещё 3 куботейнера — и 480 ₽/кг», заявка с весом, суммой и готовым письмом, страницы сортов, документы пасеки и 27 отзывов.',
+    source: 'https://22bee.ru',
+    tags: ['Nuxt 3', 'Vue', 'Megagroup'],
+  },
+  {
     to: '/redesign/aks124/',
     image: '/redesign/aks124/og.jpg',
     title: 'ИП Аксюченко',
