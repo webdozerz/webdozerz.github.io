@@ -119,7 +119,7 @@ composables/use<Slug>Cart.ts              useState + localStorage, persist() в 
   (`narrow-block`).
 - Колонка grid с `auto` растягивается до min-content содержимого: у блока с
   сегментными кнопками в узкой карточке ставь `grid-template-columns: minmax(0, 1fr)`.
-- Проверка: `npm run dev` (или preview_start), затем `npm run generate` — той же командой
+- Проверка: `pnpm dev` (или preview_start), затем `pnpm run generate` — той же командой (с 03.11.2026 проект на pnpm, Node 22)
   собирает GitHub Actions; она не должна падать на новых маршрутах.
 
 ## 3. Коммит и деплой

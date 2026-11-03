@@ -9,7 +9,7 @@
     "deploy": "./deploy.sh",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "lint": "npm lint:eslint && npm lint:prettier",
+    "lint": "pnpm lint:eslint && pnpm lint:prettier",
     "lint:eslint": "eslint .",
     "lint:prettier": "prettier . --check",
     "lintfix": "eslint . --fix && prettier --write --list-different .",
@@ -30,5 +30,6 @@
     "prettier": "^3.3.2",
     "sass": "^1.89.1",
     "typescript": "^5.5.2"
-  }
+  },
+  "packageManager": "pnpm@11.1.0"
 }

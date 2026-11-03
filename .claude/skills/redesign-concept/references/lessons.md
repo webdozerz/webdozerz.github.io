@@ -186,6 +186,10 @@
   шапки (fermatomsk, сдвиг 22 px при первом товаре).
 
 ## Инструменты
+- **Деплой падал с «bzBulk is not defined» при пререндере**, хотя локальный generate проходил (izyumovskoe): в CI стояли
+  Node 20 и Nuxt 3.12 из `package-lock.json`, локально — Nuxt 3.21 из pnpm, а кэш `.nuxt` в workflow подсовывал старые
+  автоимпорты. Перевели проект на pnpm (`pnpm-lock.yaml`, `packageManager`), CI на Node 22, кэш `.nuxt` убрали. Если CI
+  падает, а локально нет, — собери копию так же, как CI: `pnpm install --frozen-lockfile && pnpm run generate`.
 - **Новая константа в `utils/<slug>.ts` не попала в автоимпорт** (aks124): `.nuxt/imports.d.ts` не обновился, SSR — 500
   «akFreeFrom is not defined», `touch` файла не помог. Помогли перестановка экспорта и перезапуск `nuxt dev`.
   Проверка: `grep -c <имя> .nuxt/imports.d.ts`.

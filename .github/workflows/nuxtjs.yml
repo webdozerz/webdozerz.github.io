@@ -31,44 +31,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Detect package manager
-        id: detect-package-manager
-        run: |
-          if [ -f "${{ github.workspace }}/yarn.lock" ]; then
-            echo "manager=yarn" >> $GITHUB_OUTPUT
-            echo "command=install" >> $GITHUB_OUTPUT
-            exit 0
-          elif [ -f "${{ github.workspace }}/package.json" ]; then
-            echo "manager=npm" >> $GITHUB_OUTPUT
-            echo "command=ci" >> $GITHUB_OUTPUT
-            exit 0
-          else
-            echo "Unable to determine package manager"
-            exit 1
-          fi
+      - name: Setup pnpm
+        # версия pnpm берётся из поля packageManager в package.json
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: ${{ steps.detect-package-manager.outputs.manager }}
+          node-version: "22"
+          cache: pnpm
       - name: Setup Pages
         # Без static_site_generator: иначе action подкладывает пустой nuxt.config.js
         # и сборка игнорирует nuxt.config.ts.
         uses: actions/configure-pages@v5
-      - name: Restore cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            dist
-            .nuxt
-          key: ${{ runner.os }}-nuxt-build-${{ hashFiles('dist') }}
-          restore-keys: |
-            ${{ runner.os }}-nuxt-build-
+      # Кэш .nuxt не восстанавливаем: ключ по пустой ещё папке dist был постоянным,
+      # и сборка подхватывала старые автоимпорты («bzBulk is not defined» при пререндере).
       - name: Install dependencies
         timeout-minutes: 5
-        run: npm ci --no-audit --no-fund --loglevel=http
+        run: pnpm install --frozen-lockfile
       - name: Static HTML export with Nuxt
-        run: ${{ steps.detect-package-manager.outputs.manager }} run generate
+        run: pnpm run generate
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
