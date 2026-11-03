@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import BzIcon from '~/components/redesign/22bee/BzIcon.vue'
 import BzQty from '~/components/redesign/22bee/BzQty.vue'
+// явно: Nuxt 3.12 из package-lock (CI) не подхватывает bzBulk автоимпортом в этом файле — пререндер падал с «bzBulk is not defined»
+import { bzBulk, bzCube } from '~/utils/22bee'
 
 // Страница сорта: у оригинала все сорта на одной странице, и в поиске «гречишный мёд оптом Алтай» его не найти.
 const route = useRoute()
