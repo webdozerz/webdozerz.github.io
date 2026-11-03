@@ -125,6 +125,10 @@ const onKey = (e: KeyboardEvent) => {
   searchOpen.value = false
 }
 const locked = computed(() => ui.menu.value || !!ui.login.value || !!ui.oneClick.value)
+// autofocus не срабатывает у полей, которые Vue вставляет позже, — ставим фокус сами
+watch([() => ui.login.value, () => ui.oneClick.value], () =>
+  nextTick(() => document.querySelector<HTMLInputElement>('.iz-modal form input')?.focus()),
+)
 watch(locked, (v) => document.documentElement.classList.toggle('iz-lock', v))
 watch(
   () => route.fullPath,
@@ -1905,6 +1909,17 @@ html.iz-lock {
     position: absolute;
     right: 12px;
     top: 12px;
+  }
+  /* у окна входа заголовка нет — крестик встаёт в строку переключателя «Вход / Регистрация», а не на него */
+  &__close + .iz-seg {
+    margin-right: 46px;
+  }
+  &:has(> .iz-modal__close + .iz-seg) .iz-modal__close {
+    top: 31px;
+
+    @media (max-width: 375px) {
+      top: 25px;
+    }
   }
   &__lead {
     color: var(--iz-muted);
