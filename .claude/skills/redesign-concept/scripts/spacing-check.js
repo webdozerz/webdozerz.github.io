@@ -4,11 +4,12 @@
 //
 // Запуск как у responsive-audit-nuxt.js: файл в public/__gap.js, затем
 //   eval(await (await fetch('/__gap.js', {cache: 'reload'})).text())
-//   window.__gaps('/redesign/<slug>/', ['', 'catalog', …], [390, 1280]).then(r => window.__GAP = r)
+//   window.__gaps('/redesign/<slug>/', ['', 'catalog', …], [390, 1280], '.sn-main').then(r => window.__GAP = r)
 // Ещё ищет блоки уже своей flex-колонки (narrow-block).
 // Возвращает 'ok' или { 'heading-tight <страница>': [...], 'box-touch …', 'narrow-block …' }.
-// Ищет внутри .sn-main — замени на main своего концепта.
-window.__gaps = async (base, pages, widths) => {
+// main — селектор основного содержимого концепта (по умолчанию <main>). Страница не загрузилась
+// — 'not-loaded', main не найден — 'selector-missing': такая страница не проверена.
+window.__gaps = async (base, pages, widths, main = 'main') => {
   const out = {}
   const add = (k, v) => { (out[k] = out[k] || new Set()).add(v) }
   const name = (e) => e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.split(' ')[0] : '')
@@ -17,8 +18,10 @@ window.__gaps = async (base, pages, widths) => {
     f.style.cssText = `position:fixed;left:-9999px;top:0;width:${widths[0]}px;height:900px;border:0`
     f.src = base + p
     document.body.appendChild(f)
-    await new Promise(r => { f.onload = r; setTimeout(r, 15000) })
+    const loaded = await new Promise(r => { f.onload = () => r(true); setTimeout(() => r(false), 15000) })
+    if (!loaded || !f.contentDocument) { add('not-loaded ' + p, 0); f.remove(); continue }
     await new Promise(r => setTimeout(r, 1500))
+    if (!f.contentDocument.querySelector(main)) { add('selector-missing ' + p, main); f.remove(); continue }
     for (const w of widths) {
       f.style.width = w + 'px'
       await new Promise(r => setTimeout(r, 150))
@@ -26,7 +29,7 @@ window.__gaps = async (base, pages, widths) => {
       const boxy = (e) => { const cs = getComputedStyle(e); return cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== 'rgb(255, 255, 255)' || cs.boxShadow !== 'none' || parseFloat(cs.borderTopWidth) > 0 }
       // блоки уже родителя-колонки: grid/flex с align-items:start, перестроенный во flex-колонку
       // на телефоне, сжимает строки до содержимого (корзина sanych на 390 px)
-      d.querySelectorAll('.sn-main *').forEach(parent => {
+      d.querySelectorAll(main + ' *').forEach(parent => {
         const cs = getComputedStyle(parent)
         const column = cs.display.includes('flex') && cs.flexDirection === 'column'
         if (!column || !parent.offsetParent || getComputedStyle(parent).display === 'contents') return
@@ -39,8 +42,8 @@ window.__gaps = async (base, pages, widths) => {
           if (kw < inner - 8 && getComputedStyle(k).alignSelf !== 'center') add('narrow-block ' + p, `${w}: ${name(k)} ${Math.round(kw)} из ${Math.round(inner)}px`)
         }
       })
-      d.querySelectorAll('.sn-main *').forEach(parent => {
-        if (parent.closest('button, a, .sn-qty, .sn-seg, select, label > span')) return
+      d.querySelectorAll(main + ' *').forEach(parent => {
+        if (parent.closest('button, a, [class$="-qty"], [class*="-qty "], [class$="-seg"], [class*="-seg "], select, label > span')) return
         const kids = [...parent.children].filter(k => k.offsetParent && k.getBoundingClientRect().height > 0)
         for (let i = 1; i < kids.length; i++) {
           const a = kids[i - 1].getBoundingClientRect(), b = kids[i].getBoundingClientRect()

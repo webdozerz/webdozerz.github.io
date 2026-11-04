@@ -11,16 +11,19 @@
 | Продукты: доставка по городу, своя марка, интервалы | `niches/grocery-city-delivery.md` | sibprod |
 | Рыба и морепродукты: опт + розница на одном сайте | `niches/fish-wholesale-retail.md` | rybasibiri, mrkfish |
 | Рыба под привоз: заказ к дню доставки, витрина в Telegram-канале | `niches/fish-preorder.md` | lavkafish |
-| Фермерские продукты, маленькие магазины на Taplink / в соцсетях | `niches/farm-taplink.md` | foodgood, fermatomsk, papinalavka, izyumovskoe (птица + молодняк) |
+| Фермерские продукты, маленькие магазины на Taplink / в соцсетях | `niches/farm-taplink.md` | foodgood, fermatomsk, papinalavka, izyumovskoe (птица + молодняк), fermaaltaya (КФХ с доставкой по графику) |
 | Молочный завод / производитель со своей доставкой | `niches/dairy-producer.md` | fermertomska |
 | Мёд и продукты пчеловодства: семейная пасека | `niches/honey-apiary.md` | 38pchel |
 | Мясное производство + обеды в офис + кафе | `niches/meat-lunch.md` | tomich |
 | Мясная лавка с доставкой | `niches/meat-shop.md` | sanych |
 | Цветы и подарки | `niches/flowers.md` | bukety, mnerozy |
 | Кондитерская: готовые торты + заказные по весу к дате | `niches/confectionery.md` | naslagdenia |
-| Кафе, рестораны, доставка еды | `niches/cafe.md` | — |
-| Услуги по записи: салоны, клиники, автосервисы | `niches/services.md` | — |
-| Стройматериалы, B2B-каталоги | `niches/b2b-building.md` | — |
+| Кафе, рестораны, доставка еды — **черновик** | `niches/cafe.md` | — |
+| Услуги по записи: салоны, клиники, автосервисы — **черновик** | `niches/services.md` | — |
+| Стройматериалы, B2B-каталоги — **черновик** | `niches/b2b-building.md` | — |
+
+**Черновик** — короткий список без проекта и источников: прочитай, но перед брифом сделай
+2–4 запроса WebSearch, как для новой ниши, и после проекта допиши файл и сними пометку.
 
 Ориентиры — крупные игроки ниши в России (их пользователи уже привыкли к этим паттернам)
 и исследования UX e-commerce (Baymard).

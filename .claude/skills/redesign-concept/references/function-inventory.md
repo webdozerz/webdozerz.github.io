@@ -10,12 +10,17 @@
 
 ```js
 () => {
-  const vis = e => e.offsetParent !== null
+  // offsetParent у position:fixed — null, поэтому видимость по размеру и стилям
+  const vis = e => { const r = e.getBoundingClientRect(), cs = getComputedStyle(e)
+    return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' }
   const txt = e => (e.innerText || e.value || e.placeholder || e.title ||
     e.getAttribute('aria-label') || '').trim().replace(/\s+/g, ' ').slice(0, 60)
   return {
     controls: [...document.querySelectorAll('a,button,input,select,textarea')]
-      .filter(vis).map(e => `${e.tagName}|${e.name || ''}|${txt(e)}`).slice(0, 120),
+      .filter(vis).map(e => `${e.tagName}|${e.name || ''}|${txt(e)}`).slice(0, 200),
+    controlsTotal: [...document.querySelectorAll('a,button,input,select,textarea')].filter(vis).length,
+    fixed: [...document.querySelectorAll('body *')].filter(e => getComputedStyle(e).position === 'fixed' && vis(e))
+      .map(e => e.tagName + '.' + (typeof e.className === 'string' ? e.className.split(' ')[0] : '') + '|' + txt(e)).slice(0, 20),
     tabs: [...document.querySelectorAll('[role=tab], .tabs li, .wc-tabs li')].map(txt),
     forms: [...document.querySelectorAll('form')].map(f =>
       [...f.elements].map(el => el.name || el.type).filter(Boolean).join(',')),
@@ -87,6 +92,7 @@
 | **Корзины у оригинала нет** (заказ звонком, в мессенджер, по почте, по прайсу) | Корзину и оформление НЕ добавлять — это новый функционал, на платформе клиента он может не делаться без боли. Вместо неё «Добавить в список»: количество у товара, список с пересчётом суммы (localStorage), из списка — готовое сообщение (товары, количество, сумма, имя/адрес по желанию) с кнопками «Скопировать» и «Открыть в <их мессенджере>» по их же каналам. Образец — `fermatomsk` (`FmMessage.vue`: пузырь чата с текстом заказа). В письме это «список, который сам превращается в сообщение вам», а не «корзина» |
 | Функция требует сервера (оплата, логин, отправка формы) | Интерфейс + честное демо-сообщение («Это демо: код не отправляется») |
 
-Моки: отзывы — 2–4 правдоподобных отзыва с датами, без выдуманных фамилий и без
-утверждений, которые могут оказаться ложью о товаре. Форма добавляет отзыв локально
-с пометкой «виден только вам».
+Моки: отзывы — только реальные, с сайта оригинала (или с их карточки на картах, если сайт
+на неё ссылается). Нет отзывов — пустое состояние «Отзывов пока нет» и рабочая форма;
+придуманные отзывы, даты и оценки не пишем — посетитель примет их за настоящие. Форма
+добавляет отзыв локально с пометкой «виден только вам».

@@ -7,11 +7,12 @@
 //   1. скопируй файл в public/__aud.js (после проверки удали);
 //   2. одним вызовом (укладывается в таймаут 45 с):
 //      eval(await (await fetch('/__aud.js', {cache: 'reload'})).text())
-//      window.__AUD = { base: '/redesign/<slug>/', pages: ['', 'catalog', 'cart', …] }
+//      window.__AUD = { base: '/redesign/<slug>/', pages: ['', 'catalog', 'cart', …], prefix: 'sn' }
 //      JSON.stringify(await window.__audit())
 //      ширины по умолчанию — края шкалы брейкпоинтов (см. qa.md); свои: widths: [...],
 //      сплошной проход: from: 320, to: 1440, step: 8 (долгий — тогда в фоне через window.__RES)
-// Селекторы кнопок, строки покупки и шапки — с префиксом концепта: поправь под свой префикс.
+// prefix — CSS-префикс концепта (sn у sanych): от него строятся селекторы кнопок, строки покупки
+// и шапки. Не найдено ни одной кнопки или шапки — 'selector-missing', а не ложный 'ok'.
 // Ложное срабатывание: text-overflow у кнопки корзины с абсолютным бейджем-счётчиком.
 window.__audit = async () => {
   const base = window.__AUD.base, pages = window.__AUD.pages
@@ -24,7 +25,9 @@ window.__audit = async () => {
 
   const out = {}
   const add = (k, v) => { (out[k] = out[k] || new Set()).add(v) }
-  const buttons = '.sn-btn, .sn-catbtn, .sn-cartbtn, .sn-seg button, .sn-qty, .snc-side__link, .sn-tabbar__item'
+  const x = A.prefix || 'sn'
+  const buttons = `.${x}-btn, .${x}-catbtn, .${x}-cartbtn, .${x}-seg button, .${x}-qty, .${x}c-side__link, .${x}-tabbar__item`
+  let seenButtons = 0, seenHeader = 0
 
   // все страницы грузятся параллельно: загрузка — самая долгая часть, сами проверки быстрые
   const frames = await Promise.all(pages.map(p => {
@@ -46,6 +49,7 @@ window.__audit = async () => {
       if (d.documentElement.scrollWidth > w) add('hscroll ' + p, w)
 
       d.querySelectorAll(buttons).forEach(b => {
+        seenButtons++
         if (!b.offsetParent || b.closest('dialog')) return
         const cs = getComputedStyle(b)
         if (cs.fontSize === '0px') return                       // режим «только иконка»
@@ -61,8 +65,8 @@ window.__audit = async () => {
         }
       })
 
-      d.querySelectorAll('.sn-buy__row').forEach(row => {
-        const q = row.querySelector('.sn-qty'), a = row.querySelector('.sn-buy__add')
+      d.querySelectorAll(`.${x}-buy__row`).forEach(row => {
+        const q = row.querySelector(`.${x}-qty`), a = row.querySelector(`.${x}-buy__add`)
         if (!q || !a || !q.offsetParent || !a.offsetParent) return
         const qr = q.getBoundingClientRect(), ar = a.getBoundingClientRect()
         if (Math.abs(ar.top - qr.top) < 2 && ar.left - qr.right < 5) add('buy-gap ' + p, w)
@@ -126,7 +130,8 @@ window.__audit = async () => {
         box.remove()
       }
 
-      const hdr = d.querySelector('.sn-header__row')
+      const hdr = d.querySelector(`.${x}-header__row`)
+      if (hdr) seenHeader++
       if (hdr && hdr.offsetParent) {
         const hr = hdr.getBoundingClientRect()
         hdr.querySelectorAll(':scope > *').forEach(e => {
@@ -136,6 +141,8 @@ window.__audit = async () => {
     }
     f.remove()
   }
+  if (!seenButtons) add('selector-missing', buttons)
+  if (!seenHeader) add('selector-missing', `.${x}-header__row`)
   for (const k in out) out[k] = [...out[k]].slice(0, 24)
   return Object.keys(out).length ? out : 'ok'
 }
