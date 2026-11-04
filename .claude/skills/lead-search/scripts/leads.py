@@ -14,6 +14,7 @@ import glob
 import json
 import os
 import re
+import socket
 import sys
 import urllib.error
 import urllib.parse
@@ -89,6 +90,16 @@ def decode(body):
         return body.decode('utf-8', 'replace'), 'utf-8'
 
 
+def unreachable(url):
+    """Нет DNS — домен мёртв. DNS есть, а соединения нет — часто сайт не пускает иностранные
+    IP: при включённом VPN это не отказ, а повод открыть без VPN."""
+    try:
+        socket.gethostbyname(urllib.parse.urlsplit(url).hostname or '')
+        return 'no_connect'
+    except OSError:
+        return 'unreachable'
+
+
 def check(url):
     if '//' not in url:
         url = 'https://' + url
@@ -106,10 +117,10 @@ def check(url):
                 code, final, body = fetch('http://' + url[8:])
                 out['note'] = 'первый запрос по https упал, через http открылся'
             except Exception as e2:
-                out.update(status='unreachable', error=str(e2)[:120])
+                out.update(status=unreachable(url), error=str(e2)[:120])
                 return out
         else:
-            out.update(status='unreachable', error=str(e)[:120])
+            out.update(status=unreachable(url), error=str(e)[:120])
             return out
     html, enc = decode(body)
     low = html.lower()
