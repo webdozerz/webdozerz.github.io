@@ -42,7 +42,8 @@ PLATFORMS = {
     'Adobe Muse': r'muse_|adobe muse',
 }
 PARKED = r'домен (продаётся|продается|припаркован)|this domain (is|may be) for sale|parked domain|reg\.ru.*домен|сайт заблокирован|account suspended|hosting.*заглушк'
-BOT_WALL = r'ddos-guard|cloudflare.*(challenge|attention required)|captcha|проверка браузера'
+# Только страницы-заглушки защиты: обычная reCAPTCHA в форме обратной связи — не стена.
+BOT_WALL = r'ddos-guard|attention required|just a moment\.\.\.|checking your browser|cf-chl|проверка браузера|smartcaptcha.*подтвердите'
 
 
 def norm(s):
@@ -105,10 +106,10 @@ def check(url):
                 code, final, body = fetch('http://' + url[8:])
                 out['note'] = 'первый запрос по https упал, через http открылся'
             except Exception as e2:
-                out.update(status='manual_check', error=str(e2)[:120])
+                out.update(status='unreachable', error=str(e2)[:120])
                 return out
         else:
-            out.update(status='manual_check', error=str(e)[:120])
+            out.update(status='unreachable', error=str(e)[:120])
             return out
     html, enc = decode(body)
     low = html.lower()
