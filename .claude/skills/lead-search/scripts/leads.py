@@ -74,7 +74,8 @@ def show(d):
 def fetch(url):
     req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept-Language': 'ru'})
     try:
-        with urllib.request.urlopen(req, timeout=20) as r:
+        # Живой .ru-сайт отвечает за ~5 с; дольше — блок иностранных IP или мёртв.
+        with urllib.request.urlopen(req, timeout=10) as r:
             body = r.read(1_500_000)
             return r.status, r.geturl(), body
     except urllib.error.HTTPError as e:
@@ -109,10 +110,28 @@ def check(url):
     except UnicodeError:
         pass
     out = {'url': url}
+    # Быстрая проба: живой сайт принимает соединение за ~5 с. Без неё urllib ждёт таймаут
+    # на каждом IP домена по очереди (mail.ru — 30 с).
+    host = urllib.parse.urlsplit(url).hostname or ''
+    try:
+        ip = socket.gethostbyname(host)
+    except OSError:
+        out.update(status='unreachable', error='нет DNS')
+        return out
+    for port in (443, 80):
+        try:
+            socket.create_connection((ip, port), 6).close()
+            break
+        except OSError:
+            continue
+    else:
+        out.update(status='no_connect', error='нет соединения за 6 с по 443 и 80')
+        return out
     try:
         code, final, body = fetch(url)
     except Exception as e:  # сеть, TLS, таймаут — сайт мог открыться бы в браузере
-        if url.startswith('https://'):
+        # Таймаут по http не лечится — повторяем только при ошибках TLS и сертификата.
+        if url.startswith('https://') and 'timed out' not in str(e):
             try:
                 code, final, body = fetch('http://' + url[8:])
                 out['note'] = 'первый запрос по https упал, через http открылся'
