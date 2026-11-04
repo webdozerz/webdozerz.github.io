@@ -9,6 +9,14 @@ useSeoMeta({
 
 const projects = [
   {
+    to: '/redesign/fermaaltaya/',
+    image: '/redesign/fermaaltaya/og.jpg',
+    title: 'Ферма Алтая',
+    text: 'Фермерские продукты с бесплатной доставкой в Новосибирск и Барнаул: 181 товар в 17 разделах с иконками из логотипа фермы, живая неделя доставки с отсчётом до конца приёма, весовое мясо с суммой «≈ за упаковку», корзина с городом, оплатой, баллами 2 % и минимальным заказом, вход, избранное, 39 магазинов-партнёров.',
+    source: 'https://ferma-altaya.ru',
+    tags: ['Nuxt 3', 'Vue', '5CMS'],
+  },
+  {
     to: '/redesign/izyumovskoe/',
     image: '/redesign/izyumovskoe/og.jpg',
     title: 'КФХ «Изюмовское»',
