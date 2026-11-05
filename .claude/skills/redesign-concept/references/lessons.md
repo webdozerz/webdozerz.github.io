@@ -242,4 +242,8 @@
   removed. Restarting Nuxt…» или «nuxt.config.ts updated» без твоих правок (38pchel: рядом шёл чужой
   `nuxt dev` на 3000 и правка Метрики). Свой сервер тогда — в копии, правки синхронизируй `rsync`
   без `node_modules`, `.nuxt`, `nuxt.config.ts`, `package.json`; `nuxt.config.ts` в копию — из `HEAD`.
+- **`pnpm run` в копии с симлинком `node_modules` опасен** (rkdon, pnpm 11): проверка зависимостей перед запуском видит
+  модули другого корня и запускает `pnpm install`, который хочет удалить папку модулей — через симлинк это настоящий
+  `node_modules` репозитория. Без TTY он падает с `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`, с TTY спросит. В копии
+  запускай только `pnpm --config.verify-deps-before-run=false run generate` (или `./node_modules/.bin/nuxi generate`).
 
