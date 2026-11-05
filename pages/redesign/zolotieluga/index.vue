@@ -6,12 +6,9 @@ import type { ZlBrand } from '~/utils/zolotieluga'
 
 const ui = useZolotielugaUi()
 
-// Стеллаж первого экрана: шесть бутылок «Золотых лугов» одной высоты, две полки по три, под каждой — «ценник»
-// с названием и жирностью (цен у оригинала нет). Снимки бутылок — плотная обрезка без полей, поэтому одна высота = ровный ряд.
-const rack = [
-  ['43', '60', '11'],
-  ['1064', '61', '1220'],
-].map((row) => row.map((id) => zlProduct(id)!))
+// Витрина первого экрана: шесть бутылок «Золотых лугов» одной высоты в одинаковых плитках, под бутылкой — название
+// и жирность (цен у оригинала нет). Снимки бутылок — плотная обрезка без полей, поэтому одна высота = ровный ряд.
+const rack = ['43', '60', '11', '1064', '61', '1220'].map((id) => zlProduct(id)!)
 const rackTag: Record<string, string> = { '11': 'Молоко', '1064': 'Йогурт', '1220': 'С гранолой' }
 
 const cityCount = computed(() => zlStoreCount(ui.city.value))
@@ -61,19 +58,12 @@ const vacCities = zlVacancyIntro.cities.map((c) => ({ c, n: zlVacancies.filter((
         </ul>
       </div>
       <div class="zl-hero__shelf">
-        <div v-for="(row, r) in rack" :key="r" class="zl-rack">
-          <div class="zl-rack__row">
-            <NuxtLink v-for="p in row" :key="p.id" :to="zlProductPath(p.id)" class="zl-rack__item">
-              <img :src="zlImg(p.imgs[0])" :alt="'Золотые луга, ' + p.name" width="150" height="420" />
-            </NuxtLink>
-          </div>
-          <div class="zl-stitch zl-rack__edge" aria-hidden="true" />
-          <div class="zl-rack__row">
-            <NuxtLink v-for="p in row" :key="p.id" :to="zlProductPath(p.id)" class="zl-rack__tag">
-              <b>{{ rackTag[p.id] || p.name }}</b>
-              <small>{{ p.fats.length ? p.fats.join(', ') : '720 г' }}</small>
-            </NuxtLink>
-          </div>
+        <div class="zl-rack">
+          <NuxtLink v-for="p in rack" :key="p.id" :to="zlProductPath(p.id)" class="zl-rack__item">
+            <span class="zl-rack__img"><img :src="zlImg(p.imgs[0])" :alt="'Золотые луга, ' + p.name" width="150" height="420" /></span>
+            <b>{{ rackTag[p.id] || p.name }}</b>
+            <small>{{ p.fats.length ? p.fats.join(', ') : '720 г' }}</small>
+          </NuxtLink>
         </div>
         <NuxtLink :to="zlPath('/products')" class="zl-rack__all">Вся продукция — {{ zlProducts.length }} <ZlIcon name="arrow" :size="18" /></NuxtLink>
       </div>
@@ -290,12 +280,7 @@ const vacCities = zlVacancyIntro.cities.map((c) => ({ c, n: zlVacancies.filter((
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 22px;
-    padding: 32px 28px 28px;
-    border-radius: 24px;
-    border: 1px solid var(--zl-line);
-    background: #fff;
-    overflow: hidden;
+    gap: 16px;
   }
 }
 .zl-finder {
@@ -351,13 +336,44 @@ const vacCities = zlVacancyIntro.cities.map((c) => ({ c, n: zlVacancies.filter((
 }
 
 .zl-rack {
-  --zl-bottle: clamp(150px, 15vw, 214px);
-  &__row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-  }
+  --zl-bottle: clamp(150px, 13.5vw, 200px);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
   &__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 0;
+    padding: 18px 10px 14px;
+    border-radius: var(--zl-R);
+    border: 1px solid var(--zl-line);
+    background: #fff;
+    text-align: center;
+    transition: border-color 0.2s;
+    b {
+      margin-top: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      line-height: 1.25;
+      color: var(--zl-ink);
+    }
+    small {
+      font-size: 13px;
+      color: var(--zl-muted);
+    }
+    &:hover {
+      border-color: #e8bbb5;
+      b {
+        color: var(--zl-accent);
+      }
+      img {
+        transform: scale(1.04);
+      }
+    }
+  }
+  &__img {
     display: flex;
     justify-content: center;
     align-items: flex-end;
@@ -370,41 +386,6 @@ const vacCities = zlVacancyIntro.cities.map((c) => ({ c, n: zlVacancies.filter((
       transition: transform 0.25s;
       transform-origin: 50% 100%;
     }
-    &:hover img {
-      transform: scale(1.04);
-    }
-  }
-  &__edge {
-    margin: 0 -28px 10px;
-    height: 12px;
-  }
-  &__tag {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    padding: 7px 8px;
-    border-radius: 10px;
-    background: var(--zl-surface);
-    text-align: center;
-    min-width: 0;
-    transition: background 0.2s;
-    b {
-      font-weight: 600;
-      font-size: 14px;
-      line-height: 1.25;
-      color: var(--zl-ink);
-    }
-    small {
-      font-size: 12px;
-      color: var(--zl-muted);
-    }
-    &:hover {
-      background: var(--zl-soft);
-      b {
-        color: var(--zl-accent);
-      }
-    }
   }
   &__all {
     display: inline-flex;
@@ -415,41 +396,43 @@ const vacCities = zlVacancyIntro.cities.map((c) => ({ c, n: zlVacancies.filter((
     color: var(--zl-accent);
   }
 }
+.zl-hero__shelf > .zl-rack__all {
+  margin-left: 4px;
+}
 @media (max-width: 1199px) {
   .zl-rack {
-    --zl-bottle: 170px;
+    --zl-bottle: 160px;
   }
 }
 @media (max-width: 989px) {
   .zl-rack {
-    --zl-bottle: 210px;
+    --zl-bottle: 200px;
   }
 }
 @media (max-width: 768px) {
   .zl-rack {
-    --zl-bottle: 160px;
-    &__edge {
-      margin: 0 -16px 8px;
-    }
+    --zl-bottle: 150px;
   }
 }
 @media (max-width: 576px) {
   .zl-rack {
-    --zl-bottle: 132px;
-    &__row {
-      gap: 8px;
-    }
-    &__tag {
-      padding: 6px 4px;
+    --zl-bottle: 120px;
+    gap: 8px;
+    &__item {
+      padding: 12px 4px 10px;
       b {
-        font-size: 13px;
+        margin-top: 8px;
+        font-size: 14px;
+      }
+      small {
+        font-size: 12px;
       }
     }
   }
 }
 @media (max-width: 375px) {
   .zl-rack {
-    --zl-bottle: 112px;
+    --zl-bottle: 100px;
   }
 }
 
@@ -697,8 +680,7 @@ const vacCities = zlVacancyIntro.cities.map((c) => ({ c, n: zlVacancies.filter((
     }
     &__shelf {
       order: 4;
-      padding: 20px 16px 18px;
-      gap: 16px;
+      gap: 12px;
     }
     .zl-finder {
       order: 5;
