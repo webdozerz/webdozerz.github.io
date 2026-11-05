@@ -61,6 +61,12 @@ const tastesUsed = Object.keys(rkTastes)
             </button>
           </div>
         </div>
+        <ul class="rk-tastes">
+          <li v-for="k in tastesUsed" :key="k">
+            <img :src="rkImg(rkTastes[k].icon)" alt="" width="44" height="44" />{{ rkTastes[k].title }}
+          </li>
+          <li><img :src="rkImg('t/tk-ist_belka.png')" alt="" width="44" height="44" />Источник белка</li>
+        </ul>
         <div class="rk-packs">
           <article v-for="t in list" :key="t.img" class="rk-pack" :style="{ '--c': rkLines[t.line].color }">
             <img :src="rkImg(t.img)" :alt="'Тиксы ' + t.name" width="250" height="321" loading="lazy" />
@@ -71,12 +77,6 @@ const tastesUsed = Object.keys(rkTastes)
             </span>
           </article>
         </div>
-        <ul class="rk-tastes">
-          <li v-for="k in tastesUsed" :key="k">
-            <img :src="rkImg(rkTastes[k].icon)" alt="" width="44" height="44" />{{ rkTastes[k].title }}
-          </li>
-          <li><img :src="rkImg('t/tk-ist_belka.png')" alt="" width="44" height="44" />Источник белка</li>
-        </ul>
       </section>
 
       <section class="rk-section rk-section--tight rk-about">
@@ -279,7 +279,7 @@ ul.rk-tastes {
   display: flex;
   flex-wrap: wrap;
   gap: 10px 24px;
-  margin-top: 28px;
+  margin-bottom: 24px;
   padding: 18px 22px;
   border-radius: 18px;
   background: var(--rk-surface);
@@ -427,6 +427,24 @@ ul.rk-tastes {
   }
   .rk-tixyhero__short {
     display: inline;
+  }
+}
+@media (max-width: 768px) {
+  ul.rk-tastes {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    gap: 18px;
+    padding: 12px 16px;
+    li {
+      white-space: nowrap;
+      font-size: 14px;
+      gap: 8px;
+    }
+    img {
+      width: 34px;
+      height: 34px;
+    }
   }
 }
 </style>
