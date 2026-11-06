@@ -5,7 +5,8 @@
   python3 -I leads.py check <url> ...            GET с редиректами: код, итоговый адрес, title,
                                                  размер, viewport, маркеры платформы, парковка
   python3 -I leads.py seen <seen.md> <dir>       сверка seen.md с выгрузкой трекера
-                                                 (<dir> — out_dir ArtifactData list, файлы sites/*.json)
+                                                 (<dir> — out_dir ArtifactData list коллекций
+                                                 sites и removed: sites/*.json, removed/*.json)
   python3 -I leads.py validate <file.json>       проверка JSON агента: поля, ниши, fit, дубли
 
 Решений скрипт не принимает: печатает наблюдения, отбор делает сессия по criteria.md.
@@ -187,23 +188,47 @@ def seen_groups(path):
     return sections
 
 
-def seen(path, dump):
-    tracker = {}
-    for f in glob.glob(os.path.join(dump, '**', '*.json'), recursive=True):
+def load(dump, collection):
+    """Документы одной коллекции из out_dir ArtifactData: <dump>/<collection>/*.json."""
+    out = []
+    for f in sorted(glob.glob(os.path.join(dump, collection, '*.json'))):
         d = json.load(open(f, encoding='utf-8'))
-        if d.get('url'):
-            tracker[norm(d['url'])] = d.get('name', '')
+        d = d.get('data', d) if isinstance(d.get('data'), dict) else d
+        out.append(d)
+    return out
+
+
+def seen(path, dump):
+    tracker = {norm(d['url']): d.get('name', '') for d in load(dump, 'sites') if d.get('url')}
+    # removed — журнал кнопки «Удалить» в трекере: причина, комментарий, дата
+    removed = {norm(d['url']): d for d in load(dump, 'removed') if d.get('url')}
     sec = seen_groups(path)
     added = next((v for k, v in sec.items() if k.startswith('Добавлены')), [])
-    every = set(tracker).union(*[g for v in sec.values() for g in v])
+    gone = next((v for k, v in sec.items() if k.startswith('Удалены')), [])
+    every = set(tracker).union(set(removed), *[g for v in sec.values() for g in v])
     known = set().union(*[g for v in sec.values() for g in v]) if sec else set()
     print('В трекере, но нет в seen.md (дописать в «Добавлены»):')
     for d in sorted(set(tracker) - known):
         print('  ', d, '—', tracker[d])
-    print('В «Добавлены», но ни одного домена группы нет в трекере (удалены пользователем → перенести):')
+
+    def why(g):
+        r = next((removed[d] for d in sorted(g) if d in removed), None)
+        if not r:
+            return 'причина не записана'
+        note = (' — ' + r['note']) if r.get('note') else ''
+        return '%s%s, %s' % (r.get('reasonLabel') or r.get('reason') or 'Другое', note,
+                             '.'.join(reversed((r.get('removedAt') or '')[:10].split('-'))))
+
+    print('В «Добавлены», но ни одного домена группы нет в трекере (удалены пользователем → перенести с причиной):')
     for g in added:
         if not g & set(tracker):
-            print('  ', ', '.join(sorted(g)))
+            print('  ', ', '.join(sorted(g)), '—', why(g))
+    lost = [d for d in sorted(removed) if not any(d in g for g in added + gone)]
+    if lost:
+        print('В журнале removed, но нет ни в «Добавлены», ни в «Удалены» (дописать в «Удалены»):')
+        for d in lost:
+            r = removed[d]
+            print('  ', d, '—', r.get('name', ''), r.get('city', ''), '—', why({d}))
     print('Все домены для исключения у агентов (%d):' % len(every))
     print('  ', ', '.join(show(d) for d in sorted(every)))
 
