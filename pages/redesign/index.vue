@@ -9,6 +9,14 @@ useSeoMeta({
 
 const projects = [
   {
+    to: '/redesign/gornyimed/',
+    image: '/redesign/gornyimed/og.jpg',
+    title: 'Пасеки Соловьёвых',
+    text: 'Семейная пасека из Горного Алтая: гречишный и разнотравье 2026 года в банках 1, 1,5 и 3 кг с ценой за килограмм, опт куботейнерами в той же корзине, мёд в стиках для кафе, экспорт, документы, 92 новости и фотогалерея кочевой пасеки.',
+    source: 'https://gornyimed.ru',
+    tags: ['Nuxt 3', 'Vue', 'Yii'],
+  },
+  {
     to: '/redesign/mpkchita/',
     image: '/redesign/mpkchita/og.jpg',
     title: 'Маккавеевский пищекомбинат',
