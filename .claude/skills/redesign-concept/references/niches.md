@@ -11,7 +11,7 @@
 | Продукты: доставка по городу, своя марка, интервалы | `niches/grocery-city-delivery.md` | sibprod |
 | Рыба и морепродукты: опт + розница на одном сайте | `niches/fish-wholesale-retail.md` | rybasibiri, mrkfish |
 | Рыба под привоз: заказ к дню доставки, витрина в Telegram-канале | `niches/fish-preorder.md` | lavkafish |
-| Фермерские продукты, маленькие магазины на Taplink / в соцсетях | `niches/farm-taplink.md` | foodgood, fermatomsk, papinalavka, izyumovskoe (птица + молодняк), fermaaltaya (КФХ с доставкой по графику) |
+| Фермерские продукты, маленькие магазины на Taplink / в соцсетях | `niches/farm-taplink.md` | foodgood, fermatomsk, papinalavka, izyumovskoe (птица + молодняк), fermaaltaya (КФХ с доставкой по графику), dereda (агрегатор фермеров, имя фермера у товара) |
 | Молочный завод / производитель со своей доставкой | `niches/dairy-producer.md` | fermertomska |
 | Молочный комбинат: витрина без цен, покупают в сетях («Где купить») | `niches/dairy-producer.md` (раздел «Без доставки») + `food-producer-b2b.md` | zolotieluga |
 | Мёд и продукты пчеловодства: семейная пасека | `niches/honey-apiary.md` | 38pchel, 22bee, gornyimed |
