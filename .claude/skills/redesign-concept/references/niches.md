@@ -14,7 +14,7 @@
 | Фермерские продукты, маленькие магазины на Taplink / в соцсетях | `niches/farm-taplink.md` | foodgood, fermatomsk, papinalavka, izyumovskoe (птица + молодняк), fermaaltaya (КФХ с доставкой по графику) |
 | Молочный завод / производитель со своей доставкой | `niches/dairy-producer.md` | fermertomska |
 | Молочный комбинат: витрина без цен, покупают в сетях («Где купить») | `niches/dairy-producer.md` (раздел «Без доставки») + `food-producer-b2b.md` | zolotieluga |
-| Мёд и продукты пчеловодства: семейная пасека | `niches/honey-apiary.md` | 38pchel |
+| Мёд и продукты пчеловодства: семейная пасека | `niches/honey-apiary.md` | 38pchel, 22bee, gornyimed |
 | Производитель: корпоративная витрина без цен — опт, СТМ, своя марка | `niches/food-producer-b2b.md` | rkdon |
 | Мясокомбинат со своей розничной сетью, витрина без цен («Где купить», «открыто сейчас») | `niches/food-producer-b2b.md` (последний раздел) + `meat-shop.md` | mpkchita |
 | Мясное производство + обеды в офис + кафе | `niches/meat-lunch.md` | tomich |
