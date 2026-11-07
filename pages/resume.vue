@@ -6,9 +6,9 @@ import { contacts, education, jobs, petProjects, profile, siteUrl, skills, stats
 useHomeHead()
 useSeoMeta({
   title: 'Резюме — Илья Андрюшов, Frontend-разработчик',
-  description: 'Резюме Ильи Андрюшова: Frontend-разработчик (Middle+), Vue 3, Nuxt, TypeScript.',
+  description: 'Резюме Ильи Андрюшова: Frontend-разработчик (Senior), Vue 3, Nuxt, TypeScript.',
   ogTitle: 'Резюме — Илья Андрюшов',
-  ogDescription: 'Frontend-разработчик (Middle+): Vue 3, Nuxt, TypeScript.',
+  ogDescription: 'Frontend-разработчик (Senior): Vue 3, Nuxt, TypeScript.',
   ogUrl: `${siteUrl}/resume`,
 })
 useHead({ link: [{ rel: 'canonical', href: `${siteUrl}/resume` }] })

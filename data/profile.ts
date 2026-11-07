@@ -65,7 +65,7 @@ export const profile = {
   firstName: 'Илья',
   lastName: 'Андрюшов',
   role: 'Frontend-разработчик',
-  grade: 'Middle+',
+  grade: 'Senior',
   city: 'Томск',
   stackLine: 'Vue 3 · Nuxt · TypeScript',
   lead: 'Последние годы — торговые терминалы криптобирж, финансовые админ-панели, многоязычные SSR-сайты и Telegram Mini Apps.',
@@ -96,7 +96,7 @@ export const stats = [
 export const jobs: Job[] = [
   {
     company: 'Криптон Студио',
-    role: 'Frontend-разработчик (Middle+)',
+    role: 'Frontend-разработчик',
     period: '01.2022 — сейчас',
     place: 'Томск',
     projects: [
