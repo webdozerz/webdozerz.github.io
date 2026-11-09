@@ -24,7 +24,7 @@ useHead({
   link: [
     { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
     { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-    { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap' },
+    { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap' },
   ],
 })
 
@@ -314,7 +314,7 @@ html.kz-lock {
   min-height: 100vh;
   background: #fff;
   color: var(--kz-text);
-  font-family: 'Nunito', system-ui, sans-serif;
+  font-family: 'Manrope', system-ui, sans-serif;
   font-size: 16px;
   line-height: 1.6;
 
@@ -1480,6 +1480,7 @@ ul.kz-artlist {
       }
       .kz-menu__link {
         padding: 6px 8px;
+        font-size: 14px;
       }
     }
   }
