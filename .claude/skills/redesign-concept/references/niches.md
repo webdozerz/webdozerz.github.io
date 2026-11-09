@@ -17,6 +17,7 @@
 | Мёд и продукты пчеловодства: семейная пасека | `niches/honey-apiary.md` | 38pchel, 22bee, gornyimed |
 | Производитель: корпоративная витрина без цен — опт, СТМ, своя марка | `niches/food-producer-b2b.md` | rkdon |
 | Мясокомбинат со своей розничной сетью, витрина без цен («Где купить», «открыто сейчас») | `niches/food-producer-b2b.md` (последний раздел) + `meat-shop.md` | mpkchita |
+| Птицефабрика без цен: яйцо по категориям, отдел продаж мелкий/крупный опт, свой завод кормов | `niches/food-producer-b2b.md` (раздел kuzbasskay) | kuzbasskay |
 | Мясное производство + обеды в офис + кафе | `niches/meat-lunch.md` | tomich |
 | Мясная лавка с доставкой | `niches/meat-shop.md` | sanych |
 | Цветы и подарки | `niches/flowers.md` | bukety, mnerozy |
