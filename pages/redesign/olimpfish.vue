@@ -164,6 +164,7 @@ onBeforeUnmount(() => {
             <a :href="olContacts.tg" target="_blank" rel="noopener" aria-label="Telegram">TG</a>
           </div>
           <button type="button" class="ol-strip__call" @click="ui.open('callback')"><OlIcon name="phone" />Заказать звонок</button>
+          <NuxtLink :to="olPath('/account')" class="ol-strip__user"><OlIcon name="user" />{{ shop.user.value || 'Войти' }}</NuxtLink>
         </div>
       </div>
 
@@ -201,7 +202,6 @@ onBeforeUnmount(() => {
           </nav>
           <div class="ol-tools">
             <button type="button" class="ol-tool" :class="{ 'is-on': ui.search.value }" aria-label="Поиск" @click="openSearch"><OlIcon :name="ui.search.value ? 'close' : 'search'" /></button>
-            <NuxtLink :to="olPath('/account')" class="ol-tool ol-tool--user" :aria-label="shop.user.value ? 'Личный кабинет' : 'Войти'"><OlIcon name="user" /></NuxtLink>
             <NuxtLink :to="olPath('/favorites')" class="ol-tool" aria-label="Избранное">
               <OlIcon name="heart" /><i v-if="shop.fav.value.length">{{ shop.fav.value.length }}</i>
             </NuxtLink>
@@ -537,6 +537,7 @@ html:has(.ol) { scroll-padding-top: 100px; }
   &__phones { display: flex; gap: 16px; margin-left: auto; a { font-weight: 700; color: var(--ol-ink); } }
   &__soc { display: flex; gap: 6px; a { width: 30px; height: 26px; justify-content: center; border-radius: 7px; background: var(--ol-surf); font-size: 11px; font-weight: 800; color: var(--ol-ink); &:hover { background: var(--ol-soft); } } }
   &__call, &__call:focus { padding: 0; border: 0; background: none; font-weight: 700; color: var(--ol-acc); &:hover { color: var(--ol-acc-d); } }
+  &__user { font-weight: 600; color: var(--ol-ink); .ol-icon { color: var(--ol-ink); } }
 }
 .ol-bar { border-bottom: 1px solid var(--ol-line); background: #fff;
   &__in { display: flex; align-items: center; gap: 22px; height: var(--ol-bar); }
@@ -545,7 +546,7 @@ html:has(.ol) { scroll-padding-top: 100px; }
 .ol-logo { flex: none; display: block; img { display: block; width: 186px; height: auto; } }
 .ol-nav { display: flex; align-items: center; gap: 2px; min-width: 0;
   &__item { position: relative; }
-  &__link { display: inline-flex; align-items: center; gap: 4px; padding: 10px 11px; border-radius: 9px; font-size: 14.5px; font-weight: 600; color: var(--ol-ink); white-space: nowrap;
+  &__link { display: inline-flex; align-items: center; gap: 3px; padding: 10px 8px; border-radius: 9px; font-size: 14px; font-weight: 600; color: var(--ol-ink); white-space: nowrap;
     .ol-icon { width: 16px; height: 16px; color: var(--ol-mute); transition: transform .15s; }
     &:hover, &.is-on { color: var(--ol-acc); }
     &--hot { background: var(--ol-soft); color: var(--ol-acc); &:hover { background: #ffe2c4; } }
@@ -660,12 +661,12 @@ html:has(.ol) { scroll-padding-top: 100px; }
 
 @media (max-width: 1520px) {
   .ol-wrap { max-width: 1280px; }
+  .ol-cartbtn { width: 46px; padding: 0; justify-content: center; span { display: none; } i { left: auto; right: -6px; } }
 }
 @media (max-width: 1400px) {
-  .ol-nav__link { padding: 10px 8px; font-size: 14px; }
-  .ol-bar__in { gap: 14px; }
-  .ol-logo img { width: 164px; }
-  .ol-cartbtn { width: 46px; padding: 0; justify-content: center; span { display: none; } i { left: auto; right: -6px; } }
+  .ol-nav__link { padding: 10px 6px; font-size: 13.5px; }
+  .ol-bar__in { gap: 12px; }
+  .ol-logo img { width: 160px; }
 }
 @media (max-width: 1199px) {
   .ol-nav { display: none; }
@@ -687,7 +688,7 @@ html:has(.ol) { scroll-padding-top: 100px; }
   .ol-strip__in { gap: 14px; min-height: 38px; }
   .ol-strip__call { margin-left: 0; }
   .ol-logo img { width: 140px; }
-  .ol .ol-tool--user, .ol-tools .ol-tool:nth-child(3) { display: none; }
+  .ol-tools .ol-tool:nth-child(2), .ol-strip__user { display: none !important; }
   .ol-cartbtn { width: 46px; padding: 0; justify-content: center; span { display: none; } i { left: auto; right: -6px; } }
   .ol .ol-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .ol .ol-sec { padding-top: 48px; }
