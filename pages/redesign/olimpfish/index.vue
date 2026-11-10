@@ -61,7 +61,7 @@ onMounted(() => shop.persist())
     <!-- акция -->
     <section class="ol-wrap ol-sec">
       <div class="ol-promo">
-        <img class="ol-promo__img" :src="olNews[0].img" alt="Акция: скидка 5% на икру нерки" width="600" height="500" loading="lazy" />
+        <img class="ol-promo__img" :src="olNews[0].img" alt="Акция: скидка 5% на икру нерки" width="798" height="528" loading="lazy" />
         <div class="ol-promo__text">
           <span class="ol-promo__date">Акция с {{ olDate(olNews[0].date) }}</span>
           <h2>Скидка 5% на всю икру нерки</h2>
@@ -255,8 +255,16 @@ onMounted(() => shop.persist())
   grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 14px;
 }
+.ol ul.ol-cats > li {
+  display: grid;
+}
 .ol .ol-cats__tile {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-items: start;
+  height: 100%;
+  box-sizing: border-box;
   gap: 2px;
   padding: 10px 10px 14px;
   border: 1px solid var(--ol-line);
@@ -268,6 +276,7 @@ onMounted(() => shop.persist())
     margin-top: 6px;
     font-size: 14px;
     line-height: 1.3;
+    hyphens: auto;
     color: var(--ol-ink);
   }
   small {
@@ -472,7 +481,7 @@ onMounted(() => shop.persist())
   align-content: start;
   &__ph {
     display: block;
-    aspect-ratio: 6 / 5;
+    aspect-ratio: 4 / 3;
     border-radius: var(--ol-R);
     overflow: hidden;
     background: var(--ol-surf);
@@ -555,14 +564,15 @@ onMounted(() => shop.persist())
   }
   .ol .ol-cats__tile {
     grid-template-columns: 84px minmax(0, 1fr);
-    grid-template-rows: auto auto;
+    grid-template-rows: auto minmax(0, 1fr);
     text-align: left;
-    align-items: center;
+    align-items: start;
+    align-content: start;
     column-gap: 12px;
     padding: 10px;
     b {
-      margin-top: 0;
-      align-self: end;
+      margin-top: 8px;
+      align-self: start;
     }
     small {
       align-self: start;
@@ -669,6 +679,8 @@ onMounted(() => shop.persist())
   }
   .ol .ol-cats__tile {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    align-items: start;
     text-align: center;
     padding: 8px 8px 12px;
     b {

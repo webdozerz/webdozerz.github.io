@@ -74,7 +74,7 @@ const pick = (id: string) => router.replace({ query: id === 'news' ? {} : { tab:
   }
   &__ph {
     display: block;
-    aspect-ratio: 6 / 5;
+    aspect-ratio: 4 / 3;
     border-radius: var(--ol-R);
     overflow: hidden;
     margin-bottom: 4px;

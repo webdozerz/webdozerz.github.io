@@ -222,7 +222,7 @@ export const olNews: OlPost[] = [
     date: '2026-10-27',
     title: 'Акция! Скидка 5% на всю икру нерки',
     text: 'Предложение распространяется на икру нерки в стеклянных банках и пластиковой упаковке.',
-    img: olUp('2026/10/akcziya-nerka-600x500.png'),
+    img: `${OL_BASE}/img/news-nerka.jpg`,
     url: `${OL_ORIG}/akcziya-skidka-5-na-vsyu-ikru-nerki/`,
   },
   {
