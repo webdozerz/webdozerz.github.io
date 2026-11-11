@@ -68,6 +68,7 @@ export const profile = {
   role: 'Frontend-разработчик',
   grade: 'Senior',
   city: 'Томск',
+  workFormat: 'удалённый, гибридный или офисный · Россия и СНГ',
   stackLine: 'Vue 3 · Nuxt · TypeScript',
   lead: 'Последние годы — торговые терминалы криптобирж, финансовые админ-панели, многоязычные SSR-сайты и Telegram Mini Apps.',
   leadIntro: 'Беру сложный фронтенд целиком: от архитектуры и UI-кита до интеграции с API и realtime-данными.',
@@ -335,14 +336,12 @@ export const petProjects: PetProject[] = [
 
 export const skills = [
   { area: 'Языки', items: 'TypeScript, JavaScript, HTML, CSS, SCSS; Python для ботов и автоматизации' },
-  { area: 'Фреймворки', items: 'Vue 3, Nuxt 3/4 (SSR, SSG), Vue 2, Pinia, Vue Router, TanStack Query, VueUse; React — базово' },
-  { area: 'UI', items: 'PrimeVue 4, дизайн-токены, адаптивная вёрстка, RTL, Tailwind CSS, Figma' },
-  { area: 'Данные и realtime', items: 'REST, OpenAPI с генерацией типов, WebSocket, Socket.IO, headless CMS, Firebase' },
-  { area: 'Финтех', items: 'TradingView Charting Library, Sumsub (KYC/KYB), 2FA, ролевой доступ, BigNumber' },
-  { area: 'Качество', items: 'Vitest, Vue Test Utils, Jest, ESLint, husky, commitlint' },
-  { area: 'Сборка и деплой', items: 'Vite, Docker, nginx, GitHub Actions, SonarQube' },
-  { area: 'AI-инструменты', items: 'Claude Code, Cursor, MCP, LLM API, OpenSpec (Spec-Driven Development)' },
-  { area: 'Процессы', items: 'Jira, Confluence, code review, менторинг, планирование' },
+  { area: 'Frontend', items: 'Vue 3, Nuxt 3/4 (SSR, SSG), Vue 2, Pinia, Vue Router, TanStack Query, VueUse; React — базово' },
+  { area: 'UI и графики', items: 'PrimeVue 4, Tailwind CSS, дизайн-токены, адаптивная вёрстка, RTL, Figma, TradingView Charting Library, ECharts' },
+  { area: 'API и realtime', items: 'REST, OpenAPI с генерацией типов, WebSocket, Socket.IO, headless CMS, Firebase' },
+  { area: 'Качество', items: 'Vitest, Vue Test Utils, Jest, ESLint, SonarQube, husky, commitlint' },
+  { area: 'Инфраструктура и AI', items: 'Vite, Docker, nginx, GitHub Actions; Claude Code, Cursor, MCP, LLM API, OpenSpec' },
+  { area: 'Финтех и процессы', items: 'Sumsub (KYC/KYB), 2FA, ролевой доступ, BigNumber; Jira, Confluence, code review, менторинг, планирование' },
 ]
 
 export const education = {

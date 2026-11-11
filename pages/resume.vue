@@ -45,7 +45,10 @@ function emphasize(text: string) {
           {{ profile.firstName }} {{ profile.lastName }}
         </h1>
         <p class="resume__role">
-          {{ profile.role }} ({{ profile.grade }}) · {{ profile.stackLine }} · {{ profile.city }}
+          <b>{{ profile.grade }} {{ profile.role }}</b> · {{ profile.stackLine }} · {{ profile.city }}
+        </p>
+        <p class="resume__format">
+          Формат работы: {{ profile.workFormat }}
         </p>
         <ul class="resume__contacts mono">
           <li><a :href="`mailto:${contacts.email}`">{{ contacts.email }}</a></li>
@@ -228,6 +231,17 @@ function emphasize(text: string) {
     margin: 8px 0 0;
     color: var(--h-text-soft);
     font-size: 16px;
+
+    b {
+      color: var(--h-text);
+      font-weight: 600;
+    }
+  }
+
+  &__format {
+    margin: 6px 0 0;
+    color: var(--h-muted);
+    font-size: 14px;
   }
 
   &__contacts {
@@ -480,6 +494,11 @@ function emphasize(text: string) {
     &__role {
       margin-top: 4px;
       font-size: 13.5px;
+    }
+
+    &__format {
+      margin-top: 3px;
+      font-size: 11.5px;
     }
 
     &__contacts {
