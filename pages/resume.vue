@@ -83,6 +83,9 @@ function emphasize(text: string) {
             </h3>
             <span class="resume__period mono">{{ job.period }} · {{ job.place }}</span>
           </div>
+          <p v-if="job.summary" class="resume__summary">
+            {{ job.summary }}
+          </p>
 
           <ul v-if="job.highlights || job.points" class="resume__list">
             <li v-for="item in job.highlights ?? job.points" :key="item">
@@ -293,6 +296,12 @@ function emphasize(text: string) {
     flex-shrink: 0;
     color: var(--h-faint);
     font-size: 12px;
+  }
+
+  &__summary {
+    margin: 4px 0 0;
+    color: var(--h-muted);
+    font-size: 14px;
   }
 
   &__project {
