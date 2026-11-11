@@ -9,7 +9,7 @@
 | Продукты: опт + розница, HoReCa, две цены в карточке | `niches/grocery-wholesale.md` | prodagro, produkt24 |
 | Продукты: крупный опт без корзины, прайс по запросу | `niches/grocery-distributor.md` | sibirtreid, baltikprodukt, aks124 |
 | Продукты: доставка по городу, своя марка, интервалы | `niches/grocery-city-delivery.md` | sibprod, apeti (рыночные продукты на вес, зоны доставки) |
-| Рыба и морепродукты: опт + розница на одном сайте; деликатесы день в день (устрицы по размерам, услуга «открыть») | `niches/fish-wholesale-retail.md` | rybasibiri, mrkfish, oyster |
+| Рыба и морепродукты: опт + розница на одном сайте; деликатесы день в день (устрицы по размерам, услуга «открыть»); оптовая база с прайсом без фото | `niches/fish-wholesale-retail.md` | rybasibiri, mrkfish, oyster, olimpfish, smolryba |
 | Рыба под привоз: заказ к дню доставки, витрина в Telegram-канале | `niches/fish-preorder.md` | lavkafish |
 | Фермерские продукты, маленькие магазины на Taplink / в соцсетях | `niches/farm-taplink.md` | foodgood, fermatomsk, papinalavka, izyumovskoe (птица + молодняк), fermaaltaya (КФХ с доставкой по графику), dereda (агрегатор фермеров, имя фермера у товара) |
 | Молочный завод / производитель со своей доставкой | `niches/dairy-producer.md` | fermertomska |
