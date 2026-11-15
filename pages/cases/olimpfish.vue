@@ -20,7 +20,48 @@ useSeoMeta({
 useHead({ link: [{ rel: 'canonical', href: url }] })
 
 const ui = useHomeUi()
-onMounted(() => ui.syncTheme())
+
+// Подсветка пункта содержания: активен последний раздел, чей заголовок прошёл верхнюю треть экрана.
+// Раздел «Что сделали» продолжается парами скриншотов, поэтому смотрим на начала разделов, а не на их видимость.
+const active = ref('start')
+
+// После клика по пункту держим его подсвеченным, пока идёт плавная прокрутка:
+// короткие последние разделы иначе подсветились бы соседним.
+let lockUntil = 0
+
+function pick(id: string) {
+  active.value = id
+  lockUntil = Date.now() + 1000
+}
+
+// Восемь замеров на событие — дёшево, считаем прямо в обработчике прокрутки.
+function updateActive() {
+  if (Date.now() < lockUntil)
+    return
+  const line = window.innerHeight * 0.3
+  let current = toc[0].id
+  for (const item of toc) {
+    const el = document.getElementById(item.id)
+    if (el && el.getBoundingClientRect().top <= line)
+      current = item.id
+  }
+  // У низа страницы последний раздел может не дойти до линии — подсвечиваем его.
+  if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4)
+    current = toc[toc.length - 1].id
+  active.value = current
+}
+
+onMounted(() => {
+  ui.syncTheme()
+  updateActive()
+  window.addEventListener('scroll', updateActive, { passive: true })
+  window.addEventListener('resize', updateActive)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', updateActive)
+  window.removeEventListener('resize', updateActive)
+})
 
 const toc = [
   { id: 'start', label: 'Как всё началось' },
@@ -85,7 +126,15 @@ const facts = [
       <div class="post__layout">
         <aside class="toc" aria-label="Содержание">
           <span class="toc__head mono">Содержание</span>
-          <a v-for="(item, i) in toc" :key="item.id" :href="`#${item.id}`" class="toc__link">
+          <a
+            v-for="(item, i) in toc"
+            :key="item.id"
+            :href="`#${item.id}`"
+            class="toc__link"
+            :class="{ 'toc__link--active': active === item.id }"
+            :aria-current="active === item.id ? 'location' : undefined"
+            @click="pick(item.id)"
+          >
             <span class="mono">{{ String(i + 1).padStart(2, '0') }}</span>{{ item.label }}
           </a>
         </aside>
@@ -175,20 +224,13 @@ const facts = [
               блок о собственном копчении, условия для оптовиков с формой заявки, отзывы, новости и форма вопроса.
             </p>
           </section>
-        </article>
-      </div>
-
-      <CasesBeforeAfter
-        slug="olimpfish"
-        shot="home"
-        title="Главная"
-        before="Первый экран — новости магазина."
-        after="Первый экран — «Отрез»: вес выбирается ножом, сумма считается сразу."
-      />
-
-      <div class="post__layout">
-        <div />
-        <article class="post__body">
+          <CasesBeforeAfter
+            slug="olimpfish"
+            shot="home"
+            title="Главная"
+            before="Первый экран — новости магазина."
+            after="Первый экран — «Отрез»: вес выбирается ножом, сумма считается сразу."
+          />
           <section class="block block--cont">
             <h3>Шапка и меню</h3>
             <p>
@@ -206,20 +248,13 @@ const facts = [
               ещё» — штатные, WooCommerce и WoodMart.
             </p>
           </section>
-        </article>
-      </div>
-
-      <CasesBeforeAfter
-        slug="olimpfish"
-        shot="catalog"
-        title="Каталог: раздел «Икра»"
-        before="Разделы плитками, фильтры и сортировка темы."
-        after="Заголовок с числом товаров, чипы подразделов, вес и цена в карточке."
-      />
-
-      <div class="post__layout">
-        <div />
-        <article class="post__body">
+          <CasesBeforeAfter
+            slug="olimpfish"
+            shot="catalog"
+            title="Каталог: раздел «Икра»"
+            before="Разделы плитками, фильтры и сортировка темы."
+            after="Заголовок с числом товаров, чипы подразделов, вес и цена в карточке."
+          />
           <section class="block block--cont">
             <h3>Карточка товара</h3>
             <p>
@@ -230,20 +265,13 @@ const facts = [
               155 товаров, у остальных текст выводится как был.
             </p>
           </section>
-        </article>
-      </div>
-
-      <CasesBeforeAfter
-        slug="olimpfish"
-        shot="product"
-        title="Карточка товара: балык белуги"
-        before="Вес — в выпадающем списке, состав — текстом в описании."
-        after="Вес чипами, цена за кг, доставка рядом с кнопкой, состав отдельным блоком."
-      />
-
-      <div class="post__layout">
-        <div />
-        <article class="post__body">
+          <CasesBeforeAfter
+            slug="olimpfish"
+            shot="product"
+            title="Карточка товара: балык белуги"
+            before="Вес — в выпадающем списке, состав — текстом в описании."
+            after="Вес чипами, цена за кг, доставка рядом с кнопкой, состав отдельным блоком."
+          />
           <section class="block block--cont">
             <h3>Корзина и оформление</h3>
             <p>
@@ -253,28 +281,21 @@ const facts = [
               заказа, расчёт доставки и проверка полей — прежние. Проверял тестовыми заказами на копии.
             </p>
           </section>
-        </article>
-      </div>
+          <CasesBeforeAfter
+            slug="olimpfish"
+            shot="cart"
+            title="Корзина"
+            before="Таблица товаров, доставка — списком в итоге."
+            after="Вес и цена за кг у позиций, доставка карточками, итог закреплён справа."
+          />
 
-      <CasesBeforeAfter
-        slug="olimpfish"
-        shot="cart"
-        title="Корзина"
-        before="Таблица товаров, доставка — списком в итоге."
-        after="Вес и цена за кг у позиций, доставка карточками, итог закреплён справа."
-      />
-
-      <CasesBeforeAfter
-        slug="olimpfish"
-        shot="checkout"
-        title="Оформление заказа"
-        before="Поля, доставка и итог — стандартный вид темы."
-        after="Те же поля и способы доставки, сгруппированные карточками, итог рядом."
-      />
-
-      <div class="post__layout">
-        <div />
-        <article class="post__body">
+          <CasesBeforeAfter
+            slug="olimpfish"
+            shot="checkout"
+            title="Оформление заказа"
+            before="Поля, доставка и итог — стандартный вид темы."
+            after="Те же поля и способы доставки, сгруппированные карточками, итог рядом."
+          />
           <section class="block block--cont">
             <h3>Контакты и остальные страницы</h3>
             <p>
@@ -290,20 +311,13 @@ const facts = [
               оптовый каталог.
             </p>
           </section>
-        </article>
-      </div>
-
-      <CasesBeforeAfter
-        slug="olimpfish"
-        shot="contacts"
-        title="Контакты"
-        before="Контакты и реквизиты текстом."
-        after="Телефоны, мессенджеры, самовывоз и время работы карточками, карта рядом."
-      />
-
-      <div class="post__layout">
-        <div />
-        <article class="post__body">
+          <CasesBeforeAfter
+            slug="olimpfish"
+            shot="contacts"
+            title="Контакты"
+            before="Контакты и реквизиты текстом."
+            after="Телефоны, мессенджеры, самовывоз и время работы карточками, карта рядом."
+          />
           <section id="fixes" class="block">
             <h2><span class="mono">05</span>Что поправили попутно</h2>
             <p>
@@ -411,6 +425,10 @@ const facts = [
 .post {
   padding: 28px 0 96px;
 
+  > .shell {
+    max-width: 1280px;
+  }
+
   &__crumbs {
     display: flex;
     flex-wrap: wrap;
@@ -462,9 +480,10 @@ const facts = [
     margin-top: 24px;
   }
 
+  // Содержание слева липкое на всю статью; текст и пары скриншотов — в правой колонке.
   &__layout {
     display: grid;
-    grid-template-columns: 200px minmax(0, 720px);
+    grid-template-columns: 200px minmax(0, 1fr);
     gap: 56px;
   }
 
@@ -525,6 +544,7 @@ const facts = [
 
   &__head {
     margin-bottom: 8px;
+    padding-left: 14px;
     color: var(--h-faint);
     font-size: 11px;
     text-transform: uppercase;
@@ -532,9 +552,10 @@ const facts = [
   }
 
   &__link {
+    position: relative;
     display: flex;
     gap: 10px;
-    padding: 5px 0;
+    padding: 5px 0 5px 14px;
     color: var(--h-muted);
     font-size: 14px;
     line-height: 1.35;
@@ -550,6 +571,34 @@ const facts = [
 
     &:hover {
       color: var(--h-text);
+    }
+
+    // Полоска слева, как подчёркивание активного пункта в шапке.
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 7px;
+      bottom: 7px;
+      width: 2px;
+      border-radius: 1px;
+      background: var(--h-accent);
+      opacity: 0;
+      transform: scaleY(0.4);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    &--active {
+      color: var(--h-text);
+
+      .mono {
+        color: var(--h-accent);
+      }
+
+      &::before {
+        opacity: 1;
+        transform: none;
+      }
     }
   }
 }
@@ -593,6 +642,15 @@ const facts = [
 
   > h3:first-child {
     margin-top: 0;
+  }
+
+  h2,
+  h3,
+  p,
+  .list,
+  .steps,
+  .numbers {
+    max-width: 720px;
   }
 
   p {
@@ -704,6 +762,7 @@ const facts = [
 }
 
 .cta {
+  max-width: 720px;
   margin-top: 48px;
   padding: 28px;
   border: 1px solid var(--h-line);
@@ -746,10 +805,6 @@ const facts = [
   .post__layout {
     grid-template-columns: minmax(0, 1fr);
     gap: 0;
-
-    > div:empty {
-      display: none;
-    }
   }
 
   .toc {

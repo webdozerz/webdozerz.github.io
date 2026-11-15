@@ -52,10 +52,8 @@ onBeforeUnmount(() => {
 
 <template>
   <figure class="ba" :class="`ba--${device}`">
-    <div class="ba__bar">
-      <figcaption class="ba__title">
-        {{ title }}
-      </figcaption>
+    <figcaption class="ba__bar">
+      <span class="ba__title">{{ title }}</span>
       <div class="ba__switch" role="group" aria-label="Устройство">
         <button type="button" :aria-pressed="device === 'd'" @click="device = 'd'">
           Компьютер
@@ -64,7 +62,7 @@ onBeforeUnmount(() => {
           Телефон
         </button>
       </div>
-    </div>
+    </figcaption>
 
     <div class="ba__pair">
       <div v-for="side in sides" :key="side.key" class="ba__side">
