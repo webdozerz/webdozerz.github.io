@@ -13,6 +13,7 @@ const pages: Record<string, string> = {
   effort: '/effort',
   ipr: '/ipr',
   redesign: '/redesign',
+  cases: '/cases/',
 }
 
 const lines = ref<Line[]>([])
@@ -98,9 +99,9 @@ const commands: Record<string, { help?: string, run: (args: string[]) => void }>
     help: 'файлы и страницы',
     run: (args) => {
       if (args.includes('-a') || args.includes('-la'))
-        out('.  ..  .secrets  resume.txt  resume/  effort/  ipr/  redesign/')
+        out('.  ..  .secrets  resume.txt  resume/  effort/  ipr/  redesign/  cases/')
       else
-        out('resume.txt  resume/  effort/  ipr/  redesign/')
+        out('resume.txt  resume/  effort/  ipr/  redesign/  cases/')
     },
   },
   cat: {

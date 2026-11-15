@@ -24,6 +24,7 @@ const commands = computed<Command[]>(() => [
   { id: 'projects', group: 'Разделы', label: 'Проекты', run: () => ui.scrollTo('projects') },
   { id: 'skills', group: 'Разделы', label: 'Навыки и образование', run: () => ui.scrollTo('skills') },
   { id: 'contact', group: 'Разделы', label: 'Контакты', run: () => ui.scrollTo('contact') },
+  { id: 'cases', group: 'Разделы', label: 'Кейсы', hint: 'до и после', run: () => router.push('/cases/') },
   { id: 'email', group: 'Связаться', label: 'Скопировать email', hint: contacts.email, run: ui.copyEmail },
   { id: 'tg', group: 'Связаться', label: 'Написать в Telegram', hint: contacts.telegramHandle, run: () => open(contacts.telegram) },
   { id: 'gh', group: 'Связаться', label: 'Открыть GitHub', run: () => open(contacts.github) },

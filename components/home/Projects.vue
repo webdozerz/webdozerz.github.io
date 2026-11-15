@@ -1,5 +1,22 @@
 <script setup lang="ts">
+import { cases } from '~/data/cases'
 import { petProjects } from '~/data/profile'
+import type { PetProject } from '~/data/profile'
+
+// Кейсы для заказчиков идут первыми; в резюме (petProjects) они не попадают.
+const items: PetProject[] = [
+  ...cases.map(c => ({
+    title: c.title,
+    kind: 'Кейс · ' + c.date,
+    description: c.lead,
+    stack: c.tags,
+    links: [
+      { label: 'Читать кейс', href: `/cases/${c.slug}/`, internal: true },
+      { label: 'Все кейсы', href: '/cases/', internal: true },
+    ],
+  })),
+  ...petProjects,
+]
 
 // Мягкий блик следует за курсором внутри карточки.
 function onPointerMove(event: PointerEvent) {
@@ -12,7 +29,7 @@ function onPointerMove(event: PointerEvent) {
 
 <template>
   <ul class="projects-grid">
-    <li v-for="project in petProjects" :key="project.title" class="project" @pointermove="onPointerMove">
+    <li v-for="project in items" :key="project.title" class="project" @pointermove="onPointerMove">
       <span class="project__kind mono">{{ project.kind }}</span>
       <h3 class="project__title">
         {{ project.title }}
