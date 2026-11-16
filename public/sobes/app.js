@@ -1,4 +1,4 @@
-/* App: hash router + three views (home, section, topic) and search. A cheat sheet, nothing to score. */
+/* App: hash router — interview questions (home, branch) and the cheat sheet (topics, section, topic) — plus search. */
 (() => {
 const S = window.SOBES;
 const { $, $$, h, esc, codeBlock, SECTIONS, secOf, LEVEL_NAME, byId, recall } = S;
@@ -16,11 +16,84 @@ const plural = (n, a, b, c) => n % 10 === 1 && n % 100 !== 11 ? a : n % 10 >= 2 
 const fmt = s => esc(s || '').replace(/`([^`]+)`/g, '<code>$1</code>');
 const paras = s => String(s || '').split(/\n\n+/).map(p => h('p', { html: fmt(p) }));
 
+/* ---------- interview plan (board questions) ---------- */
+const PLAN = S.plan || { tips: [], branches: [] };
+const bvar = b => ({ '--c': ['bad', 'warn'].includes(b.color) ? 'var(--' + b.color + ')' : 'var(--c-' + b.color + ')' });
+PLAN.branches.forEach(b => { let n = 0; b.groups.forEach(g => g.items.forEach(it => { it.id = b.id + '-' + (++n); it.branch = b; })); b.items = b.groups.flatMap(g => g.items); });
+const allQ = PLAN.branches.flatMap(b => b.items);
+const known = (() => {
+  let set; try { set = new Set(JSON.parse(localStorage.getItem('sobes:known') || '[]')); } catch (e) { set = new Set(); }
+  const save = () => { try { localStorage.setItem('sobes:known', JSON.stringify([...set])); } catch (e) {} };
+  return { has: id => set.has(id), toggle: id => { set.has(id) ? set.delete(id) : set.add(id); save(); }, count: items => items.filter(i => set.has(i.id)).length, clear: () => { set.clear(); save(); } };
+})();
+let planFilter = 'all';
+try { planFilter = localStorage.getItem('sobes:filter') || 'all'; } catch (e) {}
+const progress = items => { const k = known.count(items); return h('span.prog', h('i', h('b', { style: { width: (items.length ? k / items.length * 100 : 0) + '%' } })), h('small', 'готово ' + k + ' из ' + items.length)); };
+
+function questionItem(it, open) {
+  const box = h('input', { type: 'checkbox', checked: known.has(it.id) || null, 'aria-label': 'Готов ответить', onchange: () => { known.toggle(it.id); item.classList.toggle('is-known', known.has(it.id)); refreshProgress(); } });
+  const links = it.links.map(id => byId[id]).filter(Boolean);
+  const item = h('details.qa' + (known.has(it.id) ? '.is-known' : ''), { id: 'q-' + it.id, open: open || null },
+    h('summary', h('span', { html: fmt(it.q) })),
+    h('div.qa__a', paras(it.a),
+      it.code ? h('div.stack', it.code.map(c => codeBlock(c.src, c.lang, c.title))) : null,
+      h('div.qa__foot',
+        h('label.qa__known', box, h('span', 'Готов ответить')),
+        links.length ? h('div.qa__links', h('small', 'Подробнее:'), links.map(t => h('a', { href: '#/t/' + t.id, style: cvar(t.section) }, t.title))) : null)));
+  return item;
+}
+function refreshProgress() {
+  $$('[data-prog]').forEach(el => { const id = el.dataset.prog; el.replaceChildren(progress(id === 'all' ? allQ : PLAN.branches.find(b => b.id === id).items)); });
+  renderSideCounts();
+}
+function filterBar(holder) {
+  const seg = h('div.seg');
+  const apply = () => { holder.classList.toggle('only-todo', planFilter === 'todo'); [...seg.children].forEach(b => b.setAttribute('aria-pressed', String(b.dataset.k === planFilter))); };
+  seg.append(...[['all', 'Все вопросы'], ['todo', 'Только неготовые']].map(([k, label]) => h('button', { type: 'button', 'data-k': k, onclick: () => { planFilter = k; try { localStorage.setItem('sobes:filter', k); } catch (e) {} apply(); } }, label)));
+  queueMicrotask(apply);
+  const toggle = h('button.link-btn', { type: 'button', onclick: () => { const all = $$('details.qa', holder); const open = !all.every(d => d.open); all.forEach(d => { d.open = open; }); toggle.textContent = open ? 'Свернуть ответы' : 'Развернуть ответы'; } }, 'Развернуть ответы');
+  return h('div.qbar', seg, toggle);
+}
+function planHome() {
+  return [
+    h('header.hero',
+      h('p.eyebrow', 'Подготовка к собеседованию · Senior Frontend'),
+      h('h1', 'Вопросы с собеседования'),
+      h('p.hero__lead', 'Технические вопросы с доски «Frontend интервью», ветки Angular и React заменены на Vue 3 и Nuxt. Сначала ответьте вслух сами, потом откройте ответ. Отметка «Готов ответить» сохраняется в браузере.'),
+      h('div.hero__prog', { 'data-prog': 'all' }, progress(allQ))),
+    PLAN.tips.length ? h('aside.simple', { style: { '--c': 'var(--warn)' } }, h('span', 'Перед собесом'), h('ul.tips', PLAN.tips.map(t => h('li', { html: fmt(t) })))) : null,
+    h('div.branches', PLAN.branches.map(b => h('a.branch', { href: '#/q/' + b.id, style: bvar(b) },
+      h('div.branch__head', h('i.dot'), h('b', b.name)),
+      h('p', b.groups.map(g => g.name.replace(/\s*\(.*\)$/, '')).join(' · ')),
+      h('div', { 'data-prog': b.id }, progress(b.items))))),
+    h('p.legend', 'Подробная шпаргалка по темам — ', h('a', { href: '#/topics' }, 'все темы'), '.'),
+  ];
+}
+function planBranch(arg) {
+  const [id, openId] = (arg || '').split('/');
+  const i = PLAN.branches.findIndex(b => b.id === id); const b = PLAN.branches[i];
+  if (!b) return notFound();
+  const prev = PLAN.branches[i - 1], next = PLAN.branches[i + 1];
+  const holder = h('div.qlist', b.groups.map(g => h('section.group', h('h2', g.name), h('div.faq', g.items.map(it => questionItem(it, it.id === openId))))));
+  if (openId) setTimeout(() => document.getElementById('q-' + openId)?.scrollIntoView({ block: 'start' }), 0);
+  return [h('div.qpage', { style: bvar(b) },
+    h('header.page-head', h('p.eyebrow', h('a', { href: '#/' }, h('i.dot'), 'Вопросы'), h('span', '/'), h('span', b.items.length + ' ' + plural(b.items.length, 'вопрос', 'вопроса', 'вопросов'))), h('h1', b.name), b.note ? h('p.note', b.note) : null, h('div', { 'data-prog': b.id }, progress(b.items))),
+    filterBar(holder), holder,
+    h('nav.pager', prev ? h('a', { href: '#/q/' + prev.id }, h('small', '← Назад'), h('b', prev.name)) : h('a', { href: '#/' }, h('small', '← Назад'), h('b', 'Все вопросы')), next ? h('a.pager__next', { href: '#/q/' + next.id }, h('small', 'Дальше →'), h('b', next.name)) : h('a.pager__next', { href: '#/' }, h('small', 'Конец'), h('b', 'Все вопросы'))))];
+}
+
 /* ---------- sidebar ---------- */
+function renderSideCounts() { $$('[data-side-count]').forEach(el => { const b = PLAN.branches.find(x => x.id === el.dataset.sideCount); el.textContent = known.count(b.items) + '/' + b.items.length; }); }
 function renderSide(route, topic) {
   const nav = $('#sideNav'); nav.innerHTML = '';
   const cur = topic ? topic.section : route.startsWith('s/') ? route.slice(2) : null;
-  nav.append(h('a.side__link', { href: '#/', 'aria-current': route === '' ? 'page' : null }, 'Все темы'));
+  const curB = route.startsWith('q/') ? route.slice(2).split('/')[0] : null;
+  nav.append(h('p.side__title', 'Вопросы с собеса'));
+  nav.append(h('a.side__link', { href: '#/', 'aria-current': route === '' ? 'page' : null }, 'Все вопросы'));
+  PLAN.branches.forEach(b => nav.append(h('a.side__link', { href: '#/q/' + b.id, style: bvar(b), 'aria-current': curB === b.id ? 'page' : null }, h('i.dot'), h('span', b.name), h('small', { 'data-side-count': b.id }))));
+  renderSideCounts();
+  nav.append(h('p.side__title', 'Шпаргалка'));
+  nav.append(h('a.side__link', { href: '#/topics', 'aria-current': route === 'topics' ? 'page' : null }, 'Все темы'));
   SECTIONS.forEach(s => {
     const ts = topicsOf(s.id);
     const open = s.id === cur;
@@ -37,7 +110,7 @@ function home() {
   const last = byId[recall.last];
   return [
     h('header.hero',
-      h('p.eyebrow', 'Шпаргалка перед собеседованием'),
+      h('p.eyebrow', h('a', { href: '#/' }, '← Вопросы с собеса'), h('span', '/'), h('span', 'Шпаргалка')),
       h('h1', 'Что это, зачем и чем отличается'),
       h('p.hero__lead', 'JavaScript, браузер, Vue 3, Nuxt 3, TypeScript, тестирование, производительность и принципы проектирования. В каждой теме точное определение и механизм, где это встречается, чем отличается от похожего, пример и вопросы с собеседования с готовыми ответами.'),
       h('p.note', h('b', 'Версии. '), 'Материал рассчитан на Vue 3.5+ и Nuxt 3. Где возможность появилась позже или ведёт себя иначе в Nuxt 4, это указано в теме. Примеры сверяйте с версией своего проекта.'),
@@ -122,29 +195,32 @@ function notFound() { return [h('div.empty', h('p', 'Такой страницы
 /* ---------- router ---------- */
 function render() {
   const raw = location.hash.replace(/^#\/?/, '');
-  if (raw.startsWith('b-')) return; // in-page anchors
+  if (raw.startsWith('b-') || raw.startsWith('q-')) return; // in-page anchors
   const [name, arg] = raw.split('?')[0].split(/\/(.*)/);
-  const fn = { '': home, s: section, t: topic }[name];
+  const fn = { '': planHome, q: planBranch, topics: home, s: section, t: topic }[name];
   view.replaceChildren(...[].concat(fn ? fn(arg) : notFound()));
   renderSide(raw, name === 't' ? byId[arg] : null);
   const title = view.querySelector('h1');
-  document.title = (name && title ? title.textContent + ' · ' : '') + 'Шпаргалка';
+  document.title = (name && title ? title.textContent + ' · ' : '') + 'Собес';
   closeSide();
-  window.scrollTo(0, 0);
+  if (!(name === 'q' && arg && arg.includes('/'))) window.scrollTo(0, 0);
 }
 window.addEventListener('hashchange', render);
 
 /* ---------- search ---------- */
 const q = $('#q'); const sr = $('#searchResults');
 let srIdx = 0, idx = null;
-const searchIndex = () => idx || (idx = S.topics.map(t => ({ t, text: [t.title, t.summary, t.analogy || t.simple, t.what, t.group, ...(t.questions || []).map(x => x.q)].join(' ').toLowerCase() })));
+const searchIndex = () => idx || (idx = [...allQ.map(it => ({ it, text: [it.q, it.a, it.branch.name].join(' ').toLowerCase() })), ...S.topics.map(t => ({ t, text: [t.title, t.summary, t.analogy || t.simple, t.what, t.group, ...(t.questions || []).map(x => x.q)].join(' ').toLowerCase() }))]);
 q.addEventListener('input', () => {
   const v = q.value.trim().toLowerCase();
   if (!v) { sr.hidden = true; return; }
   const words = v.split(/\s+/);
-  const res = searchIndex().filter(x => words.every(w => x.text.includes(w))).map(x => [x.t, x.t.title.toLowerCase().includes(v) ? 2 : 1]).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  const res = searchIndex().filter(x => words.every(w => x.text.includes(w))).map(x => [x, (x.t ? x.t.title : x.it.q).toLowerCase().includes(v) ? 2 : 1]).sort((a, b) => b[1] - a[1]).slice(0, 12);
   srIdx = 0;
-  sr.replaceChildren(...(res.length ? res.map(([t], i) => h('a.sr' + (i === 0 ? '.is-active' : ''), { href: '#/t/' + t.id, style: cvar(t.section), onclick: () => { sr.hidden = true; q.value = ''; } }, h('i.dot'), h('b', t.title), h('small', secOf(t.section).name + ' · ' + t.summary.replace(/`/g, '')))) : [h('p.sr__empty', 'Ничего не нашлось')]));
+  const close = () => { sr.hidden = true; q.value = ''; };
+  sr.replaceChildren(...(res.length ? res.map(([x], i) => x.t
+    ? h('a.sr' + (i === 0 ? '.is-active' : ''), { href: '#/t/' + x.t.id, style: cvar(x.t.section), onclick: close }, h('i.dot'), h('b', x.t.title), h('small', 'Шпаргалка · ' + secOf(x.t.section).name + ' · ' + x.t.summary.replace(/`/g, '')))
+    : h('a.sr' + (i === 0 ? '.is-active' : ''), { href: '#/q/' + x.it.branch.id + '/' + x.it.id, style: bvar(x.it.branch), onclick: close }, h('i.dot'), h('b', x.it.q.replace(/`/g, '')), h('small', 'Вопрос · ' + x.it.branch.name))) : [h('p.sr__empty', 'Ничего не нашлось')]));
   sr.hidden = false;
 });
 q.addEventListener('keydown', e => {
