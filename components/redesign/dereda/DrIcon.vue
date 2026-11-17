@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { RD_ICON_CATALOG } from '~/utils/redesignIcons'
 // Иконки концепта одной стилистики: линия 1,8 px, скруглённые концы, цвет — currentColor.
 // (набор взят из концепта fermaaltaya, дополнен мессенджерами, фермером и корзинкой)
 const props = withDefaults(defineProps<{ name: string; size?: number; fill?: boolean }>(), { size: 22, fill: false })
@@ -36,7 +37,7 @@ const paths: Record<string, string> = {
   gift: 'M4 9.5h16v3H4zM5.5 12.5h13V20h-13zM12 9.5V20M12 9.5c-1-3-5-4-5-1.5S12 9.5 12 9.5zM12 9.5c1-3 5-4 5-1.5S12 9.5 12 9.5z',
   egg: 'M12 3.5c3.5 0 6.5 6 6.5 10a6.5 6.5 0 0 1-13 0c0-4 3-10 6.5-10z',
   timer: 'M12 6.5a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM12 10v3.5l2.5 1.5M9.5 3.5h5',
-  grid: 'M4.5 4.5h6v6h-6zM13.5 4.5h6v6h-6zM4.5 13.5h6v6h-6zM13.5 13.5h6v6h-6z',
+  grid: RD_ICON_CATALOG,
   rows: 'M4.5 5h15M4.5 12h15M4.5 19h15',
   filter: 'M4 6h16M7 12h10M10 18h4',
   vk: 'M3.5 7h3c.3 3.8 2 5.6 3.3 5.9V7h2.8v3.3c1.3-.1 2.6-1.6 3.1-3.3h2.7c-.4 2.1-2 3.6-3.1 4.3 1.1.5 2.9 1.9 3.5 4.2h-3c-.6-1.6-1.9-2.8-3.2-2.9v2.9h-.3C6.6 15.5 3.7 12.3 3.5 7z',

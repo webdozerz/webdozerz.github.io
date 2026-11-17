@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { RD_ICON_CATALOG } from '~/utils/redesignIcons'
 // Иконки концепта одной стилистики: линия 1,8 px, скруглённые концы, цвет — currentColor.
 // Роза — контур Lucide (ISC, lucide.dev), как и в логотипе «Мне розы» — роза в букве «О».
 const props = withDefaults(defineProps<{ name: string; size?: number }>(), {
@@ -15,7 +16,7 @@ const paths: Record<string, string> = {
   right: 'M9 6l6 6-6 6',
   down: 'M6 9l6 6 6-6',
   check: 'M5 12.5l4.5 4.5L19 7.5',
-  grid: 'M4.5 4.5h6v6h-6zM13.5 4.5h6v6h-6zM4.5 13.5h6v6h-6zM13.5 13.5h6v6h-6z',
+  grid: RD_ICON_CATALOG,
   phone: 'M6.5 3.5h3l1.5 4-2 1.3a10 10 0 0 0 6.2 6.2l1.3-2 4 1.5v3a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.5 5.7a2 2 0 0 1 2-2.2z',
   search: 'M10.5 4a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM20 20l-4.8-4.8',
   bag: 'M5 8.5h14l-1 11.5H6zM9 8.5V7a3 3 0 0 1 6 0v1.5',

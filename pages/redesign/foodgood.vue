@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { RD_ICON_CATALOG } from '~/utils/redesignIcons'
 import FgSearch from '~/components/redesign/foodgood/FgSearch.vue'
 import FgLeaf from '~/components/redesign/foodgood/FgLeaf.vue'
 
@@ -107,7 +108,7 @@ onBeforeUnmount(() => {
           @click="menuOpen = !menuOpen"
         >
           <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-            <path v-if="!menuOpen" d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v6H4zM14 15h6v6h-6z" />
+            <path v-if="!menuOpen" :d="RD_ICON_CATALOG" />
             <path v-else d="M6 6l12 12M18 6L6 18" />
           </svg>
           Каталог

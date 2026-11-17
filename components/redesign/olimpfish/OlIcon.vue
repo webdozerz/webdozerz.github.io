@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { RD_ICON_CATALOG } from '~/utils/redesignIcons'
 // Линейные иконки одной стилистики (24×24, обводка currentColor)
 const props = defineProps<{ name: string }>()
 const paths: Record<string, string> = {
@@ -8,7 +9,7 @@ const paths: Record<string, string> = {
   user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 20a7.5 7.5 0 0 1 15 0',
   phone: 'M6 3h3l1.5 4.5-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2L21 15v3a3 3 0 0 1-3 3A15 15 0 0 1 3 6a3 3 0 0 1 3-3Z',
   menu: 'M4 7h16M4 12h16M4 17h16',
-  grid: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z',
+  grid: RD_ICON_CATALOG,
   close: 'M6 6l12 12M18 6 6 18',
   down: 'M6 9l6 6 6-6',
   right: 'M9 6l6 6-6 6',

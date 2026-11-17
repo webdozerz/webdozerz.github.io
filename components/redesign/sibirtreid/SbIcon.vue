@@ -1,9 +1,10 @@
 <script lang="ts" setup>
+import { RD_ICON_CATALOG } from '~/utils/redesignIcons'
 // Иконки концепта одной линией (по мотивам Lucide), цвет — currentColor.
 const props = withDefaults(defineProps<{ name: string; size?: number }>(), { size: 20 })
 
 const paths: Record<string, string> = {
-  grid: 'M5.5 3.5h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2zM15.5 3.5h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2zM5.5 13.5h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2zM14 17h7M17.5 13.5v7',
+  grid: RD_ICON_CATALOG,
   search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-3.6-3.6',
   phone: 'M5 4h3.5l1.7 4.3-2.2 1.4a11 11 0 0 0 6.3 6.3l1.4-2.2L20 15.5V19a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z',
   list: 'M7 3h7l4 4v14H7zM14 3v4h4M10 12h5M10 16h5',
@@ -28,7 +29,7 @@ const paths: Record<string, string> = {
   clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
   copy: 'M9 9h11v11H9zM5 15H4V4h11v1',
   download: 'M12 4v11M7 10l5 5 5-5M5 20h14',
-  tiles: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  tiles: RD_ICON_CATALOG,
   rows: 'M4 6h16M4 12h16M4 18h16',
   bag: 'M5 8h14l-1.3 10.2a2 2 0 0 1-2 1.8H8.3a2 2 0 0 1-2-1.8L5 8zM9 8V7a3 3 0 0 1 6 0v1',
 }

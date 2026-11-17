@@ -155,7 +155,7 @@ watch(secId, () => {
             <button v-for="n in [12, 24, 36]" :key="n" type="button" :class="{ 'is-on': per === n }" @click="setQuery({ per: n })">{{ n }}</button>
           </div>
           <div class="fa-cat__view" role="group" aria-label="Вид">
-            <button type="button" :class="{ 'is-on': view === 'grid' }" aria-label="Плиткой" @click="view = 'grid'"><FaIcon name="grid" :size="18" /></button>
+            <button type="button" :class="{ 'is-on': view === 'grid' }" aria-label="Плиткой" @click="view = 'grid'"><FaIcon name="tiles" :size="18" /></button>
             <button type="button" :class="{ 'is-on': view === 'rows' }" aria-label="Списком" @click="view = 'rows'"><FaIcon name="rows" :size="18" /></button>
           </div>
         </div>

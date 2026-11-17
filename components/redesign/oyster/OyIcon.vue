@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { RD_ICON_CATALOG } from '~/utils/redesignIcons'
 // Иконки концепта: линия 1,8 px, скруглённые концы, цвет — currentColor.
 const props = withDefaults(defineProps<{ name: string; size?: number }>(), { size: 22 })
 
@@ -32,7 +33,7 @@ const paths: Record<string, string> = {
   knife: 'M4 20l8.5-8.5M12.5 11.5l6-6.5a2 2 0 0 1 1.5 3l-5.5 6.5zM6.5 17.5l-2-2',
   shield: 'M12 3.5l7.5 3v5.5c0 4.5-3.2 7.7-7.5 9-4.3-1.3-7.5-4.5-7.5-9V6.5zM8.5 12l2.5 2.5 4.5-5',
   home: 'M4 11l8-6.5 8 6.5M6 9.5v10h12v-10M10 19.5v-5h4v5',
-  grid: 'M4.5 4.5h6v6h-6zM13.5 4.5h6v6h-6zM4.5 13.5h6v6h-6zM13.5 13.5h6v6h-6z',
+  grid: RD_ICON_CATALOG,
   ext: 'M14 4.5h5.5V10M19.5 4.5L11 13M17 14v5.5H4.5V7H10',
   quote: 'M10 7H6.5v5H10v1.5c0 1.5-1 2.5-3 3M18 7h-3.5v5H18v1.5c0 1.5-1 2.5-3 3',
   gift: 'M4 9.5h16v4H4zM5.5 13.5v7h13v-7M12 9.5v11M12 9.5c-1.5-4-6-4-5-1 .5 1 2.5 1 5 1zM12 9.5c1.5-4 6-4 5-1-.5 1-2.5 1-5 1z',

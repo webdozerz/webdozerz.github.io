@@ -130,7 +130,7 @@ const title = computed(() => (g.value ? izGroup(g.value)?.title : section.value?
             </select>
           </label>
           <div class="iz-seg iz-cat__view">
-            <button type="button" :class="{ 'is-on': view === 'grid' }" aria-label="Плиткой" @click="view = 'grid'"><IzIcon name="grid" :size="18" /></button>
+            <button type="button" :class="{ 'is-on': view === 'grid' }" aria-label="Плиткой" @click="view = 'grid'"><IzIcon name="tiles" :size="18" /></button>
             <button type="button" :class="{ 'is-on': view === 'rows' }" aria-label="Списком" @click="view = 'rows'"><IzIcon name="rows" :size="18" /></button>
           </div>
         </div>

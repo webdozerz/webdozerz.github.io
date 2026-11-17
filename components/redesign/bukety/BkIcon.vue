@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { RD_ICON_CATALOG } from '~/utils/redesignIcons'
 // Иконки концепта одной стилистики: линия 1,7 px, скруглённые концы, цвет — currentColor.
 const props = withDefaults(defineProps<{ name: string; size?: number }>(), {
   size: 22,
@@ -14,7 +15,7 @@ const paths: Record<string, string> = {
   right: 'M9 6l6 6-6 6',
   down: 'M6 9l6 6 6-6',
   check: 'M5 12.5l4.5 4.5L19 7.5',
-  grid: 'M4.5 4.5h6v6h-6zM13.5 4.5h6v6h-6zM4.5 13.5h6v6h-6zM13.5 13.5h6v6h-6z',
+  grid: RD_ICON_CATALOG,
   phone: 'M6.5 3.5h3l1.5 4-2 1.3a10 10 0 0 0 6.2 6.2l1.3-2 4 1.5v3a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.5 5.7a2 2 0 0 1 2-2.2z',
   mail: 'M3.5 6h17v12h-17zM3.5 7l8.5 6.5L20.5 7',
   search: 'M10.5 4a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM20 20l-4.8-4.8',

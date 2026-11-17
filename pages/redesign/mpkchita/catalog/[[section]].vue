@@ -164,7 +164,7 @@ onMounted(() => {
                 <MkIcon name="down" :size="16" />
               </label>
               <div class="mk-view" role="group" aria-label="Вид">
-                <button type="button" :class="{ 'is-on': view === 'grid' }" aria-label="Плиткой" @click="setView('grid')"><MkIcon name="grid" :size="20" /></button>
+                <button type="button" :class="{ 'is-on': view === 'grid' }" aria-label="Плиткой" @click="setView('grid')"><MkIcon name="tiles" :size="20" /></button>
                 <button type="button" :class="{ 'is-on': view === 'list' }" aria-label="Списком" @click="setView('list')"><MkIcon name="list" :size="20" /></button>
               </div>
             </div>
