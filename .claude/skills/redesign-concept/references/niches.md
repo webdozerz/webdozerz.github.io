@@ -21,7 +21,7 @@
 | Мясное производство + обеды в офис + кафе | `niches/meat-lunch.md` | tomich |
 | Мясная лавка с доставкой | `niches/meat-shop.md` | sanych |
 | Цветы и подарки | `niches/flowers.md` | bukety, mnerozy |
-| Кондитерская: готовые торты + заказные по весу к дате | `niches/confectionery.md` | naslagdenia |
+| Кондитерская: готовые торты + заказные по весу к дате; производство без цен с сезонными коллекциями | `niches/confectionery.md` | naslagdenia, sovelan |
 | Кафе, рестораны, доставка еды — **черновик** | `niches/cafe.md` | — |
 | Услуги по записи: салоны, клиники, автосервисы — **черновик** | `niches/services.md` | — |
 | Стройматериалы, B2B-каталоги — **черновик** | `niches/b2b-building.md` | — |
