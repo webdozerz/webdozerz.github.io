@@ -29,17 +29,28 @@ const key = (e: KeyboardEvent) => {
   }
 }
 
-// один раз показываем, что шторка двигается: 62 → 38 → 50
+// один раз показываем, что шторка двигается: 62 → 38 → 50. Анимируем само значение x (rAF), а не CSS-переходом:
+// клип картинки и линия берут одно число и не расходятся ни в фоновой вкладке, ни на скриншоте.
 onMounted(() => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-  const steps = [38, 50]
-  let i = 0
-  const go = () => {
-    if (touched.value || i >= steps.length) return
-    x.value = steps[i++]
-    setTimeout(go, 900)
-  }
-  setTimeout(go, 700)
+  const tween = (from: number, to: number, ms: number) =>
+    new Promise<void>((done) => {
+      const t0 = performance.now()
+      const step = (t: number) => {
+        if (touched.value) return done()
+        const k = Math.min(1, (t - t0) / ms)
+        const e = k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2
+        x.value = from + (to - from) * e
+        if (k < 1) requestAnimationFrame(step)
+        else done()
+      }
+      requestAnimationFrame(step)
+    })
+  setTimeout(async () => {
+    await tween(62, 38, 800)
+    await new Promise((r) => setTimeout(r, 150))
+    if (!touched.value) await tween(38, 50, 700)
+  }, 700)
 })
 </script>
 
@@ -100,11 +111,6 @@ onMounted(() => {
     &--top {
       clip-path: inset(0 0 0 var(--x));
     }
-  }
-  &__stage:not(.is-touched) &__img--top,
-  &__stage:not(.is-touched) &__line,
-  &__stage:not(.is-touched) &__handle {
-    transition: clip-path 0.8s cubic-bezier(0.6, 0, 0.3, 1), left 0.8s cubic-bezier(0.6, 0, 0.3, 1);
   }
   &__line {
     position: absolute;

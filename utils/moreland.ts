@@ -112,5 +112,5 @@ export const mlSrcNews = (p: MlProduct) => (p.srcUrl ? mlNews.find((n) => n.url 
 export const mlBatches = [
   { news: 'balyk-kety-novogo-urozhaya', product: 'keta-balyk', price: 1500, unit: 'кг', box: '10 кг' },
   { news: 'golets-kh-k-1', product: 'golets-kh-k', price: 1200, unit: 'кг', box: '3 кг' },
-  { news: 'forel-kusochki', product: '', price: 2600, unit: 'ведёрко', box: '2 кг, нетто 1,5 кг' },
+  { news: 'forel-kusochki', product: '', price: 2600, unit: 'ведёрко', box: '2 кг' },
 ]
