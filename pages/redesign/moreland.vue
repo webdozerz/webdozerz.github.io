@@ -264,6 +264,9 @@ onBeforeUnmount(() => {
   color: var(--ml-text);
   font: 400 15px/1.55 'Nunito Sans', system-ui, sans-serif;
   min-height: 100vh;
+  // подвал прижат к низу на коротких страницах (контакты, подписка, вход, 404)
+  display: flex;
+  flex-direction: column;
   -webkit-font-smoothing: antialiased;
 
   :where(&) p,
@@ -1054,6 +1057,7 @@ onBeforeUnmount(() => {
 
 /* подвал */
 .ml-main {
+  flex: 1 0 auto;
   padding-bottom: 88px;
   @media (max-width: 768px) {
     padding-bottom: 64px;
