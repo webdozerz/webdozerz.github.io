@@ -8,8 +8,10 @@
                                                  (<dir> — out_dir ArtifactData list коллекций
                                                  sites и removed: sites/*.json, removed/*.json)
   python3 -I leads.py validate <file.json>       проверка JSON агента: поля, ниши, fit, дубли
-  python3 -I leads.py catalog <с> <по> [seen.md] страницы <с>..<по> списка производителей
-                                                 aboutpartner.ru: компании с сайтом,
+  python3 -I leads.py catalog <с> <по> [seen.md] [регион]
+                                                 страницы <с>..<по> списка производителей
+                                                 aboutpartner.ru (или /regions/<регион>,
+                                                 Москва+МО — moskovskaya-oblast): компании с сайтом,
                                                  TSV домен (punycode)/регион/город/название/карточка,
                                                  без доменов из seen.md
 
@@ -271,7 +273,8 @@ AP_SKIP = re.compile(r'aboutpartner|vk\.com|vkontakte|t\.me|telegram|yandex|goog
                      r'schema\.org|2gis|avito|ozon|wildberries', re.I)
 
 
-def catalog(first, last, seen_path=None):
+def catalog(first, last, seen_path=None, region=None):
+    lst = AP + '/regions/' + region + '?page=%d' if region else AP_LIST
     from concurrent.futures import ThreadPoolExecutor
     skip = set()
     if seen_path:
@@ -281,7 +284,7 @@ def catalog(first, last, seen_path=None):
 
     def page(n):
         try:
-            return decode(fetch(AP_LIST % n)[2])[0]
+            return decode(fetch(lst % n)[2])[0]
         except Exception:
             return ''
 
@@ -332,7 +335,7 @@ if __name__ == '__main__':
         seen(*args)
     elif cmd == 'validate' and args:
         validate(args[0])
-    elif cmd == 'catalog' and len(args) in (2, 3):
+    elif cmd == 'catalog' and len(args) in (2, 3, 4):
         catalog(*args)
     else:
         print(__doc__)
