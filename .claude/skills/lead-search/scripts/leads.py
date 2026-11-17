@@ -8,6 +8,10 @@
                                                  (<dir> — out_dir ArtifactData list коллекций
                                                  sites и removed: sites/*.json, removed/*.json)
   python3 -I leads.py validate <file.json>       проверка JSON агента: поля, ниши, fit, дубли
+  python3 -I leads.py catalog <с> <по> [seen.md] страницы <с>..<по> раздела «Продукты питания»
+                                                 aboutpartner.ru: пищевые компании с сайтом,
+                                                 TSV домен (punycode)/регион/город/название/карточка,
+                                                 без доменов из seen.md
 
 Решений скрипт не принимает: печатает наблюдения, отбор делает сессия по criteria.md.
 """
@@ -260,6 +264,68 @@ def validate(path):
     print('Проверено %d, с ошибками %d' % (len(leads), bad))
 
 
+AP = 'https://www.aboutpartner.ru'
+AP_LIST = AP + '/producers/catalog-produkty-pitaniia?page=%d'
+# В разделе вперемешку двери и химия: пищевых по названию ~10%.
+FOOD = re.compile(r'рыб|мяс|молоч|молок|колбас|фермер|ферма|сыр|пасек|мёд|мед[ао ]|кфх|птиц|'
+                  r'яйц|фрукт|овощ|продукт|хозяйств|агро|деликатес|копчен|пельмен|хлеб|крупа|'
+                  r'икр|морепродукт|халял|бойн|говяд|свин|баран', re.I)
+# Не сайт компании: соцсети, карты, мессенджеры, сам каталог.
+AP_SKIP = re.compile(r'aboutpartner|vk\.com|vkontakte|t\.me|telegram|yandex|google|ok\.ru|'
+                     r'whatsapp|wa\.me|instagram|youtube|rutube|dzen|max\.ru|resize-web|'
+                     r'schema\.org|2gis|avito|ozon|wildberries', re.I)
+
+
+def catalog(first, last, seen_path=None):
+    from concurrent.futures import ThreadPoolExecutor
+    skip = set()
+    if seen_path:
+        for groups in seen_groups(seen_path).values():
+            for g in groups:
+                skip |= g
+
+    def page(n):
+        try:
+            return decode(fetch(AP_LIST % n)[2])[0]
+        except Exception:
+            return ''
+
+    def card(pid):
+        try:
+            html = decode(fetch('%s/producer/%s' % (AP, pid))[2])[0]
+        except Exception:
+            return None
+        site = next((u for u in re.findall(r'href="(https?://[^"]+)"', html)
+                     if not AP_SKIP.search(u)), None)
+        if not site:
+            return None
+        reg = re.search(r'"addressRegion":"([^"]*)"', html)
+        city = re.search(r'"addressLocality":"([^"]*)"', html)
+        return site, reg.group(1) if reg else '', city.group(1) if city else ''
+
+    with ThreadPoolExecutor(10) as ex:
+        pages = list(ex.map(page, range(int(first), int(last) + 1)))
+        found = {}
+        for html in pages:
+            for pid, name in re.findall(r'/producer/(pc-producer-\d+)">([^<]{3,120})<', html):
+                if FOOD.search(name):
+                    found[pid] = re.sub(r'&quot;|&amp;', '"', name).strip()
+        cards = dict(zip(found, ex.map(card, found)))
+    total, out = 0, {}
+    for pid, c in cards.items():
+        if not c:
+            continue
+        total += 1
+        d = norm(c[0])
+        if d in skip or d in out:
+            continue
+        out[d] = '\t'.join([d, c[1], c[2], found[pid], '%s/producer/%s' % (AP, pid)])
+    for line in out.values():
+        print(line)
+    print('# страницы %s–%s: пищевых по названию %d, с сайтом %d, новых доменов %d'
+          % (first, last, len(found), total, len(out)), file=sys.stderr)
+
+
 if __name__ == '__main__':
     cmd, args = (sys.argv[1], sys.argv[2:]) if len(sys.argv) > 1 else ('', [])
     if cmd == 'norm':
@@ -272,6 +338,8 @@ if __name__ == '__main__':
         seen(*args)
     elif cmd == 'validate' and args:
         validate(args[0])
+    elif cmd == 'catalog' and len(args) in (2, 3):
+        catalog(*args)
     else:
         print(__doc__)
         sys.exit(1)
