@@ -131,12 +131,6 @@ composables/use<Slug>Cart.ts              useState + localStorage, persist() в 
 Стиль сообщений — conventional commits, как в истории репо:
 `feat(redesign): add <slug> redesign concept`, `fix(redesign): <slug> …`.
 
-После пуша:
-
-```bash
-gh run list --limit 1                         # найти запуск по коммиту
-gh run watch <id> --exit-status
-curl -sL https://andryushov.me/redesign/<slug>/ | grep -c '<уникальная строка нового кода>'
-```
-
-Ссылку для письма отдавай только после того, как живая страница отдаёт новую версию.
+Деплой после пуша не жди и живую страницу не проверяй: то, что проверено локально (аудит, функции,
+`nuxt generate`), так же работает и после деплоя (пользователь, 17.11.2026). Ссылка готова сразу после
+пуша. Смотреть запуск (`gh run list`) — только если пользователь сам скажет, что сайт не обновился.
