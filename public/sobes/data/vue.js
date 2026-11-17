@@ -6,46 +6,42 @@ window.SOBES.topics.push(
     group: 'Основы',
     title: 'Options API vs Composition API',
     level: 'junior',
-    summary: 'Два стиля описания компонента: объект с опциями (`data`, `methods`) или функция `setup` с кодом, сгруппированным по фичам',
-    what: 'Options API описывает компонент объектом с фиксированными разделами: `data`, `computed`, `methods`, `watch`, хуки; доступ к состоянию идёт через `this`. Composition API описывает логику внутри `setup()` — обычно через `<script setup>` — функциями `ref`, `computed`, `watch`, `onMounted`. Под капотом у обоих одна система реактивности, и оба официально поддерживаются во Vue 3. Options API во Vue 3 фактически реализован поверх тех же механизмов, поэтому стили можно сочетать.',
-    analogy: '',
-    where: 'В новых проектах на Vue 3 и Nuxt почти весь код пишут на `<script setup>`. Options API встречается в легаси, перенесённом с Vue 2, и в небольших компонентах.',
-    why: 'Composition API позволяет держать код одной фичи рядом и выносить его в composables. TypeScript выводит типы из обычных переменных, без магии `this`.',
-    when: 'Новый код — на `<script setup>`. Options API допустим в легаси и простых компонентах; переписывать рабочий код только ради стиля не нужно.',
-    diff: [
-      { vs: 'Миксины', text: 'В Options API логику переиспользуют миксинами, в Composition API — composables. Composable вызывается явно, и видно, откуда пришла каждая переменная.' }
-    ],
-    code: [
-      { title: 'Options API', lang: 'vue', src: `<script>
+    summary: 'Два стиля одного компонента: объект с опциями и `this` или `<script setup>` с кодом, сгруппированным по фичам. Реактивность под ними одна и та же.',
+    points: [
+      { title: 'Options API раскладывает код по типам опций, Composition API — по фичам', text: 'В Options API логика одной фичи размазана по `data`, `computed`, `methods` и `watch`, всё доступно через `this`. В `<script setup>` код фичи пишут подряд, и его легко вынести в composable. TypeScript выводит типы из обычных переменных, без магии `this`.', code: `// Options API
 export default {
-  data() {
-    return { count: 0 }         // состояние
-  },
-  computed: {
-    double() { return this.count * 2 }
-  },
-  methods: {
-    inc() { this.count++ }      // всё доступно через this
-  }
+  data: () => ({ count: 0 }),
+  computed: { double() { return this.count * 2 } },
+  methods: { inc() { this.count++ } }
 }
-</script>` },
-      { title: 'То же на <script setup>', lang: 'vue', src: `<script setup lang="ts">
-import { ref, computed } from 'vue'
 
-const count = ref(0)                          // состояние
+// <script setup>
+const count = ref(0)
 const double = computed(() => count.value * 2)
-const inc = () => count.value++
+const inc = () => count.value++` },
+      { title: '`<script setup>` — сахар над `setup()`: всё верхнего уровня сразу видно в шаблоне', text: 'Компилятор разворачивает его в `setup()`, `return` не нужен, импортированные компоненты доступны без регистрации. `defineProps`, `defineEmits`, `defineModel` — макросы компилятора, их не импортируют.', code: `<script setup lang="ts">
+import UserCard from './UserCard.vue' // в шаблоне сразу <UserCard />
+const props = defineProps<{ id: number }>() // без импорта
+const user = ref(null)                      // без return
+</script>`, lang: 'vue' },
+      { title: 'Компонент на `<script setup>` закрыт: наружу — только через `defineExpose`', text: 'Родитель через template ref ничего не видит, пока компонент сам не откроет нужное.', code: `// Child.vue
+const input = useTemplateRef('input')
+defineExpose({ focus: () => input.value?.focus() })
+
+// Parent.vue
+const child = useTemplateRef('child')
+child.value?.focus() // доступно только то, что в defineExpose`, lang: 'ts' },
+      { title: 'После `await` в `<script setup>` хуки и вотчеры ещё можно регистрировать', text: 'Компилятор восстанавливает контекст компонента после `await`. В обычной функции `setup()` после `await` текущего экземпляра уже нет, и хук не привяжется.', code: `<script setup>
+const data = await api.load()
+onMounted(() => {})   // ок: контекст восстановлен компилятором
 </script>
 
-<template>
-  <button @click="inc">{{ count }} / {{ double }}</button>
-</template>` }
+// setup() { await api.load(); onMounted(...) } — не привяжется`, lang: 'vue' },
+      { title: 'Миксины заменены composables', text: 'Composable вызывается явно, видно, откуда пришла каждая переменная, а конфликт имён решается переименованием при деструктуризации.', code: `// mixins: [paginationMixin] — откуда this.loading?
+const { loading: listLoading, load } = usePagination(api.getOrders)` },
+      { title: 'Ловушка: писать `<script setup>` «как Options API»', text: 'Все `ref` сверху, все функции снизу — и главный плюс, группировка по фичам, пропадает. Смешивать оба API в одном компоненте без причины тоже не стоит: непонятно, где что искать.' }
     ],
-    pitfalls: [
-      'Смешивать оба API в одном компоненте без причины: часть состояния в `data`, часть в `setup`, и непонятно, где что искать.',
-      'Писать `<script setup>` «как Options API»: все `ref` сверху, все функции снизу. Тогда теряется главный плюс — группировка по фичам.',
-      'Считать Options API устаревшим и удалённым. Он поддерживается, и читать его на легаси-проектах придётся.'
-    ],
+    takeaway: 'Новый код — `<script setup>`. Options API не удалён: в легаси его читать придётся, а переписывать рабочий код ради стиля не нужно.',
     questions: [
       { q: 'Чем Composition API лучше Options API и когда вы бы всё-таки взяли Options API?', a: 'Главное — код одной фичи лежит рядом, а не размазан по `data`, `methods` и `watch`. Такой фрагмент легко вынести в composable — функцию с явным входом и выходом. В Options API для этого были миксины с конфликтами имён и неявным происхождением полей. Плюс TypeScript в `setup` работает почти без усилий. Options API оставлю в легаси и в совсем простых компонентах — переписывать работающий код смысла нет.' },
       { q: 'Что такое <script setup> и чем он отличается от обычной функции setup()?', a: 'Это синтаксический сахар: компилятор разворачивает его в `setup()`. Всё объявленное на верхнем уровне, включая импорты компонентов, сразу доступно в шаблоне, `return` не нужен. Пропсы и события объявляются макросами `defineProps` и `defineEmits`, их не импортируют. Такой компонент по умолчанию закрыт: родитель через template ref ничего не видит, пока не открыть нужное через `defineExpose`. Ещё одно отличие — после `await` в `<script setup>` компилятор восстанавливает контекст компонента, поэтому хуки и вотчеры там можно регистрировать и после `await`.' }
@@ -57,55 +53,35 @@ const inc = () => count.value++
     group: 'Основы',
     title: 'ref vs reactive',
     level: 'junior',
-    summary: '`ref` — реактивная обёртка с `.value` для любого значения; `reactive` — Proxy над объектом без `.value`',
-    what: '`ref()` возвращает объект с полем `.value`, чтение и запись которого Vue отслеживает. Если положить в `ref` объект, он будет обёрнут в `reactive()` и станет глубоко реактивным. `reactive()` возвращает Proxy, который перехватывает чтение и запись свойств; работает только с объектами, массивами, `Map` и `Set`. В шаблоне ref верхнего уровня разворачиваются автоматически, `.value` не пишут.',
-    analogy: '',
-    where: 'Везде: состояние компонентов, composables, setup-сторы Pinia. Флаги вроде `isOpen`, данные с сервера, поля формы.',
-    why: 'Это базовые примитивы реактивности. На них построены `computed`, `watch` и всё состояние приложения.',
-    when: 'По умолчанию берут `ref`: он работает с примитивами, его можно заменить целиком и безопасно вернуть из composable. `reactive` удобен для группы связанных полей, например формы, которую не заменяют целиком. Для больших данных, которые только заменяют, — `shallowRef`.',
-    diff: [
-      { vs: 'reactive', text: '`ref` можно заменить целиком через `.value`, подписчики увидят новое значение. Переменную с `reactive` переприсвоить нельзя: новый объект — это другой Proxy, а шаблон и вотчеры следят за старым.' },
-      { vs: 'shallowRef', text: '`shallowRef` отслеживает только замену `.value`, внутрь объекта не заглядывает. Это дешевле для больших данных и сторонних объектов.' }
+    summary: '`ref` — коробка с `.value` для любого значения. `reactive` — Proxy над объектом, без `.value`.',
+    points: [
+      { title: '`ref` работает с чем угодно, `reactive` — только с объектами', text: 'Proxy умеет оборачивать только объекты, поэтому для примитива нужна обёртка: объект с геттером и сеттером `value`. Объект внутри `ref` Vue сам превращает в `reactive`. В шаблоне `.value` не пишут, он разворачивается автоматически.', code: `const count = ref(0)          // ок: число в коробке
+const user = ref({ name: 'Аня' }) // объект внутри станет reactive
+const state = reactive({ count: 0 }) // ок
+reactive(0)                   // не работает: нужен объект` },
+      { title: 'Деструктуризация `reactive` рвёт связь — нужен `toRefs`', text: 'Деструктуризация один раз читает значения. Примитив превращается в обычную строку или число, реактивности больше нет.', code: `const state = reactive({ email: '' })
+
+const { email } = state           // просто строка, связи нет
+const { email: e } = toRefs(state) // ref, пишет в state
+e.value = 'a@b.ru'                 // state.email === 'a@b.ru'` },
+      { title: '`reactive` нельзя заменить целиком, `ref` — можно', text: 'Новый `reactive` — это другой Proxy, а шаблон и вотчеры продолжают следить за старым.', code: `let state = reactive({ list: [] })
+state = reactive({ list: data })  // шаблон показывает старый объект
+
+const list = ref([])
+list.value = data                 // ок, все подписчики увидят` },
+      { title: 'За полем `reactive` следят через геттер', text: 'В `watch` и composable передают источник, а не значение: `state.count` — это уже просто число.', code: `watch(state.count, cb)        // не сработает: передали число
+watch(() => state.count, cb)  // ок
+useSomething(() => state.id)  // в composable тоже геттер или ref` },
+      { title: 'Большие данные — `shallowRef`, сторонние объекты — `markRaw`', text: '`shallowRef` следит только за заменой `.value` и не оборачивает содержимое в Proxy: дешевле для тысяч строк из API. `markRaw` запрещает делать объект реактивным — для экземпляров графиков, карт, редакторов, которые Proxy ломает.', code: `const rows = shallowRef([])
+rows.value = await api.getRows() // замена — Vue заметит
+rows.value[0].name = 'x'         // правка внутри — не заметит
+triggerRef(rows)                 // уведомить вручную
+
+const chart = markRaw(new Chart(el))` },
+      { title: 'Ловушка: `ref` в `if` без `.value` всегда истинен', text: '`ref` — это объект, а объект в условии всегда `true`.', code: `if (isOpen) {}        // всегда true
+if (isOpen.value) {}  // ок` }
     ],
-    code: [
-      { title: 'Деструктуризация reactive и toRefs', lang: 'js', src: `import { reactive, toRefs, watch } from 'vue'
-
-const state = reactive({ email: '', user: { name: 'Аня' } })
-
-// email — примитив: в переменную попала строка, связи со state нет
-const { email } = state
-
-// user прочитан через Proxy — это реактивный Proxy вложенного объекта,
-// user.name = 'Боря' отследится. Но если заменить state.user целиком,
-// переменная user продолжит указывать на старый объект
-const { user } = state
-
-// связь со свойствами сохраняют toRefs / toRef
-const { email: emailRef } = toRefs(state)
-emailRef.value = 'a@b.ru'
-console.log(state.email) // 'a@b.ru'
-
-// за полем reactive следят через геттер
-watch(() => state.email, (v) => console.log(v))` },
-      { title: 'shallowRef для больших данных', lang: 'ts', src: `import { shallowRef, triggerRef } from 'vue'
-
-const rows = shallowRef<Row[]>([])
-
-async function load() {
-  rows.value = await api.getRows() // замена целиком — Vue заметит
-}
-
-function patchFirst() {
-  rows.value[0].name = 'x' // правка внутри — Vue не заметит
-  triggerRef(rows)          // поэтому уведомляем вручную
-}` }
-    ],
-    pitfalls: [
-      'Деструктурировать `reactive` и ждать, что переменные останутся связаны с исходными свойствами. Примитивы превращаются в обычные значения; вложенные объекты остаются реактивными, но замену свойства целиком не увидят. Нужны `toRefs`/`toRef`.',
-      'Переприсвоить `reactive` целиком (`state = reactive({...})`) — шаблон продолжит показывать старый объект.',
-      'Забыть `.value` в скрипте: `if (isOpen)` с ref всегда истинно, потому что ref — это объект.',
-      'Сравнивать reactive-объект с исходным: `reactive(obj) !== obj`, это разные ссылки.'
-    ],
+    takeaway: 'По умолчанию `ref`. `reactive` — для формы, которую не заменяют целиком.',
     questions: [
       { q: 'Чем ref отличается от reactive и что вы используете по умолчанию?', a: '`ref` — контейнер с `.value`, в него кладут любое значение, включая примитивы, и его можно заменить целиком. `reactive` оборачивает объект в Proxy: к полям обращаешься без `.value`, но саму переменную переприсвоить нельзя, а при деструктуризации теряется связь со свойствами. По умолчанию беру `ref` — меньше сюрпризов, и из composable его безопасно вернуть. `reactive` использую там, где удобно писать `form.email`, например для формы.' },
       { q: 'Что происходит при деструктуризации reactive и как это исправить?', a: 'Деструктуризация один раз читает свойства через Proxy и кладёт результат в обычные переменные, поэтому связь с исходными свойствами теряется. Если значение примитив, в переменной просто строка или число, реактивности нет. Если вложенный объект — Vue возвращает его реактивный Proxy, и изменения вида `user.name` отслеживаются, но замену `state.user` целиком переменная не увидит. Чтобы сохранить связь, использую `toRefs(state)` или `toRef(state, \'email\')` — получаются ref, которые читают и пишут в исходный объект. С пропсами с Vue 3.5 деструктуризация `defineProps` реактивна за счёт компилятора, но в `watch` и composables такие значения всё равно передаю геттером.' },
@@ -118,50 +94,36 @@ function patchFirst() {
     group: 'Основы',
     title: 'computed vs watch',
     level: 'junior',
-    summary: '`computed` — кешируемое производное значение; `watch` — побочный эффект в ответ на изменение источника',
-    what: '`computed` вычисляет значение из реактивных данных и кеширует его: пересчёт происходит только при изменении зависимостей и лениво — при следующем чтении. `watch` следит за явно указанным источником (ref, геттер, reactive-объект или массив из них) и вызывает колбэк с новым и старым значением. Опции `watch`: `immediate`, `deep`, `flush`, `once` (Vue 3.4+); с Vue 3.5 `deep` может быть числом — максимальной глубиной обхода.',
-    analogy: '',
-    where: 'В каталоге отфильтрованный список и сумма корзины — `computed`. Перезапрос товаров при смене фильтров и запись фильтров в URL — `watch`.',
-    why: '`computed` нужен для данных, которые выводятся на экран или используются дальше. `watch` — для побочных эффектов: запрос к API, запись в `localStorage`, вызов сторонней библиотеки.',
-    when: 'Нужно значение — `computed`. Нужно что-то сделать при изменении — `watch`. Если `watch` только копирует одно значение в другое, это почти всегда должен быть `computed`.',
-    diff: [
-      { vs: 'метод в шаблоне', text: 'Метод в шаблоне вызывается при каждом рендере компонента. `computed` возвращает закешированный результат, пока зависимости не изменились.' },
-      { vs: 'watch', text: '`computed` возвращает значение и не должен иметь побочных эффектов. `watch` ничего не возвращает, он реагирует действием.' }
-    ],
-    code: [
-      { title: 'computed для производных данных', lang: 'ts', src: `import { ref, computed } from 'vue'
-
-const items = ref([{ title: 'Хлеб', done: true }])
-const filter = ref<'all' | 'done'>('all')
-
-// пересчитается только при смене items или filter
-const visible = computed(() =>
-  filter.value === 'done' ? items.value.filter(i => i.done) : items.value
+    summary: '`computed` — производное значение с кешем. `watch` — побочный эффект в ответ на изменение источника.',
+    points: [
+      { title: 'Нужно значение — `computed`, нужно действие — `watch`', text: 'Отфильтрованный список и сумма корзины — `computed`. Перезапрос товаров при смене фильтров, запись в URL или `localStorage` — `watch`.', code: `const visible = computed(() =>
+  items.value.filter(i => i.done)
 )
-const doneCount = computed(() => items.value.filter(i => i.done).length)` },
-      { title: 'watch с опциями', lang: 'ts', src: `import { ref, watch } from 'vue'
 
-const query = ref('')
-const filters = ref({ city: '', price: [0, 1000] })
-
-// immediate — вызвать колбэк сразу при создании
 watch(query, async (q) => {
   results.value = await search(q)
-}, { immediate: true })
-
-// deep — реагировать на изменения внутри объекта
-// (Vue 3.5+: deep: 1 — только на один уровень вглубь)
-watch(filters, () => saveToUrl(filters.value), { deep: true })
-
-// flush: 'post' — вызвать после обновления DOM
-watch(results, () => scrollToTop(), { flush: 'post' })` }
+})`, lang: 'ts' },
+      { title: '`computed` кеширует и пересчитывается лениво', text: 'Пересчёт — только когда изменились зависимости, и не сразу, а при следующем чтении. Метод в шаблоне, наоборот, выполняется на каждом рендере компонента.', code: `const total = computed(() => sum(cart.value))
+// {{ total }} {{ total }} — один расчёт, дальше кеш
+// {{ calcTotal() }} — заново при каждом рендере` },
+      { title: 'Ловушка: побочные эффекты внутри `computed`', text: '`computed` вызывается лениво: может не вызваться вовсе или вызваться в неожиданный момент. Запросы и изменение состояния — только в `watch`.', code: `const user = computed(() => {
+  fetchUser(id.value)  // нельзя: эффект в computed
+  return users.value[id.value]
+})` },
+      { title: 'Ловушка: `watch`, который копирует одно значение в другое', text: 'Получается лишнее состояние, которое рано или поздно разойдётся с источником. Это должен быть `computed`.', code: `watch(firstName, (v) => {
+  fullName.value = v + ' ' + lastName.value  // плохо
+})
+const fullName = computed(() =>
+  firstName.value + ' ' + lastName.value)  // ок` },
+      { title: 'Опции `watch`: `immediate`, `deep`, `flush`, `once`', text: '`immediate` вызывает колбэк сразу, старое значение тогда `undefined`. `deep` — реагировать на изменения внутри объекта; с Vue 3.5 можно число, глубину обхода. `flush: \'post\'` — после обновления DOM, `\'sync\'` — синхронно на каждое изменение, им не злоупотреблять. `once` (3.4+) — сработать один раз.', code: `watch(query, load, { immediate: true })
+watch(filters, saveToUrl, { deep: true }) // 3.5+: deep: 1
+watch(results, scrollToTop, { flush: 'post' })
+watch(token, init, { once: true })`, lang: 'ts' },
+      { title: 'Поле `reactive` передают в `watch` геттером', text: '`state.count` — это просто число, Vue предупредит. Сам reactive-объект отслеживается глубоко автоматически, а `deep: true` на большом объекте — обход всего дерева при каждом срабатывании.', code: `watch(state.count, cb)                 // не сработает
+watch(() => state.count, cb)           // ок
+watch([a, () => state.b], ([a, b]) => {}) // несколько источников` }
     ],
-    pitfalls: [
-      'Менять состояние или ходить в API внутри `computed` — он вызывается лениво, может не вызваться вовсе или вызваться в неожиданный момент.',
-      'Писать `watch`, который копирует одно значение в другое: лишнее состояние, которое рано или поздно разойдётся. Нужен `computed`.',
-      'Ставить `deep: true` на большой объект — при каждом срабатывании Vue обходит его целиком.',
-      'Передать в `watch` свойство reactive напрямую (`watch(state.count, ...)`) — это просто число, Vue предупредит. Нужен геттер `() => state.count`.'
-    ],
+    takeaway: 'Значение — `computed`, действие — `watch`. `watch` только для копирования значения — почти всегда ошибка.',
     questions: [
       { q: 'Чем computed отличается от watch и от метода в шаблоне?', a: '`computed` — производное значение: Vue кеширует результат и пересчитывает его, только когда изменились зависимости, причём лениво, при следующем чтении. Метод в шаблоне выполняется при каждом рендере компонента, даже если его данные не менялись. `watch` нужен не для значений, а для побочных эффектов: запрос, запись в storage, вызов сторонней библиотеки. Правило: нужно значение — `computed`, нужно действие — `watch`.' },
       { q: 'Расскажите про опции watch: deep, immediate, flush, once.', a: '`immediate` вызывает колбэк сразу при создании, старое значение при этом `undefined`. `deep` заставляет реагировать на изменения внутри объекта; если передать в `watch` сам reactive-объект, он и так глубокий. С Vue 3.5 `deep` можно задать числом — глубиной обхода. `once` (Vue 3.4+) срабатывает один раз и останавливает вотчер. `flush` задаёт момент вызова: `pre` по умолчанию — до обновления DOM компонента, `post` — после, когда нужен новый DOM, `sync` — синхронно на каждое изменение, им лучше не злоупотреблять.' }
@@ -173,64 +135,41 @@ watch(results, () => scrollToTop(), { flush: 'post' })` }
     group: 'Основы',
     title: 'watchEffect vs watch',
     level: 'middle',
-    summary: '`watchEffect` запускается сразу и сам собирает зависимости при выполнении; `watch` следит за явным источником и даёт старое значение',
-    what: '`watchEffect` выполняет функцию сразу и отслеживает все реактивные значения, прочитанные во время её выполнения; при их изменении функция перезапускается. Зависимости собираются только во время синхронной части: в async-функции всё, что прочитано после первого `await`, не отслеживается. Для очистки перед следующим запуском есть два способа: аргумент `onCleanup`, который передаётся в эффект `watchEffect` или третьим параметром в колбэк `watch`, и функция `onWatcherCleanup` (Vue 3.5+), импортируемая из `vue`.',
-    analogy: '',
-    where: 'Поиск с подсказками, загрузка данных по нескольким параметрам, подписки на сокеты, синхронизация `document.title`.',
-    why: 'Не нужно вручную перечислять зависимости, если их много. Очистка решает проблему гонки запросов: старый ответ, пришедший позже нового, не перезапишет его.',
-    when: '`watchEffect` — когда зависимостей много, старое значение не нужно и эффект должен выполниться сразу. `watch` — когда нужно точно указать источник, нужно предыдущее значение или эффект не должен стартовать сразу.',
-    diff: [
-      { vs: 'watch', text: '`watch` по умолчанию ленивый: срабатывает только при изменении указанного источника. `watchEffect` выполняется сразу и следит за всем, что прочитал синхронно.' },
-      { vs: 'onCleanup и onWatcherCleanup', text: 'Назначение одно — зарегистрировать очистку. `onCleanup` приходит аргументом и привязан к своему вотчеру, поэтому его можно вызвать и после `await`. `onWatcherCleanup` (Vue 3.5+) импортируется из `vue` и должен быть вызван синхронно, до первого `await`.' }
-    ],
-    code: [
-      { title: 'Что отслеживается в async-эффекте', lang: 'ts', src: `import { ref, watchEffect } from 'vue'
-
-const userId = ref(1)
-const lang = ref('ru')
-
-// плохо
-watchEffect(async () => {
-  // userId прочитан до await — попал в зависимости
-  const res = await fetch('/api/users/' + userId.value)
-  // lang прочитан после await — НЕ отслеживается:
-  // смена lang эффект не перезапустит
-  user.value = localize(await res.json(), lang.value)
+    summary: '`watchEffect` запускается сразу и сам собирает зависимости по ходу выполнения. `watch` ленивый, следит за явным источником и даёт старое значение.',
+    points: [
+      { title: '`watchEffect` следит за всем, что прочитал, и стартует сразу', text: 'Зависимости не перечисляют: всё реактивное, прочитанное при выполнении, становится поводом для перезапуска. `watch` срабатывает только на изменение указанного источника и отдаёт `(new, old)`.', code: `watchEffect(() => {
+  document.title = user.value.name + ' — ' + page.value
 })
 
-// хорошо: всё нужное читаем до первого await
-watchEffect(async () => {
-  const id = userId.value
-  const l = lang.value
-  const res = await fetch('/api/users/' + id + '?lang=' + l)
-  user.value = await res.json()
-})` },
-      { title: 'Отмена устаревшего запроса: два способа', lang: 'ts', src: `import { watch, onWatcherCleanup } from 'vue'
+watch(userId, (id, oldId) => { /* только по userId */ })`, lang: 'ts' },
+      { title: 'В async-эффекте отслеживается только то, что прочитано до первого `await`', text: 'Зависимости собираются в синхронной части. Значение, прочитанное после `await`, не перезапустит эффект.', code: `watchEffect(async () => {
+  const res = await fetch('/api/users/' + userId.value) // отслеживается
+  user.value = localize(await res.json(), lang.value)   // lang — нет
+})
 
-// 1) аргумент onCleanup: третий параметр колбэка watch
-//    (у watchEffect — первый параметр эффекта)
-watch(userId, async (id, oldId, onCleanup) => {
+watchEffect(async () => {
+  const id = userId.value, l = lang.value  // ок: всё до await
+  user.value = await getUser(id, l)
+})`, lang: 'ts' },
+      { title: 'Гонку запросов закрывает очистка с `abort()`', text: 'Очистка вызывается перед следующим запуском и при остановке вотчера. Старый ответ, пришедший позже нового, его не перезапишет. Так же снимают подписки на сокеты и таймеры.', code: `watch(userId, async (id, oldId, onCleanup) => {
   const ctrl = new AbortController()
-  onCleanup(() => ctrl.abort()) // вызовется перед следующим запуском
+  onCleanup(() => ctrl.abort())
   const res = await fetch('/api/users/' + id, { signal: ctrl.signal })
   user.value = await res.json()
-})
+})`, lang: 'ts' },
+      { title: '`onCleanup` работает и после `await`, `onWatcherCleanup` — только до него', text: '`onCleanup` приходит аргументом — первым в эффект `watchEffect`, третьим в колбэк `watch` — и привязан к своему вотчеру. `onWatcherCleanup` (Vue 3.5+) импортируют из `vue`, он находит текущий вотчер неявно, а после `await` его уже нет: очистка не зарегистрируется, в dev будет предупреждение.', code: `import { onWatcherCleanup } from 'vue'
 
-// 2) onWatcherCleanup (Vue 3.5+): импорт из vue,
-//    вызывать синхронно, до первого await
 watch(userId, async (id) => {
   const ctrl = new AbortController()
-  onWatcherCleanup(() => ctrl.abort())
-  const res = await fetch('/api/users/' + id, { signal: ctrl.signal })
-  user.value = await res.json()
-})` }
+  onWatcherCleanup(() => ctrl.abort()) // ок: до первого await
+  await fetch('/api/users/' + id, { signal: ctrl.signal })
+})`, lang: 'ts' },
+      { title: 'Вотчер, созданный асинхронно, сам не остановится', text: 'Созданный в `setTimeout` или `.then()` вотчер не привязан к компоненту и переживёт его размонтирование. Его останавливают функцией, которую он вернул.', code: `let stop
+setTimeout(() => { stop = watchEffect(sync) })
+onUnmounted(() => stop?.()) // иначе утечка` },
+      { title: 'Ловушка: `watchEffect` ради одного поля', text: 'Любое случайно прочитанное значение тоже станет поводом для перезапуска. Для одного источника понятнее `watch`.' }
     ],
-    pitfalls: [
-      'Читать реактивное значение после `await` в `watchEffect` — оно не попадёт в зависимости, и эффект не перезапустится при его изменении.',
-      'Вызывать `onWatcherCleanup` после `await` — к этому моменту активного вотчера уже нет, очистка не зарегистрируется (в dev Vue предупредит). После `await` используйте аргумент `onCleanup`.',
-      'Создавать вотчер асинхронно, например в `setTimeout` или в `.then()`, — он не привяжется к компоненту и не остановится при размонтировании. Его надо остановить вручную через возвращаемую функцию `stop`.',
-      'Брать `watchEffect` ради одного поля: любое случайно прочитанное значение тоже станет поводом для перезапуска.'
-    ],
+    takeaway: '`watchEffect` — когда зависимостей много, старое значение не нужно и эффект должен выполниться сразу. Иначе `watch` с явным источником.',
     questions: [
       { q: 'Чем watchEffect отличается от watch?', a: '`watchEffect` выполняет функцию сразу и подписывается на всё реактивное, что она прочитала во время выполнения. `watch` ленивый, следит за явно указанным источником и даёт новое и старое значение. Главная ловушка `watchEffect` — зависимости собираются только синхронно: в async-эффекте всё, что прочитано после первого `await`, не отслеживается. Поэтому в async-эффекте читаю всё нужное до первого `await` или беру `watch` с явным источником, особенно если нужен точный контроль или предыдущее значение.' },
       { q: 'Как отменить устаревший запрос в вотчере? Чем onCleanup отличается от onWatcherCleanup?', a: 'В каждом запуске создаю `AbortController` и регистрирую очистку с `abort()`: Vue вызовет её перед следующим запуском и при остановке вотчера, и старый ответ не перезапишет новый. Регистрировать очистку можно двумя способами. `onCleanup` приходит аргументом — первым в эффект `watchEffect` и третьим в колбэк `watch`; он привязан к конкретному вотчеру, поэтому работает и после `await`. `onWatcherCleanup` из Vue 3.5 импортируется из `vue` и находит текущий вотчер неявно, поэтому его надо вызвать синхронно, до первого `await`. Так же снимают подписки на сокеты и чистят таймеры.' }
@@ -242,52 +181,28 @@ watch(userId, async (id) => {
     group: 'Основы',
     title: 'Хуки жизненного цикла',
     level: 'junior',
-    summary: 'Функции, которые Vue вызывает на этапах жизни компонента: создание, монтирование, обновление, размонтирование',
-    what: 'Компонент проходит этапы: `setup`, `onBeforeMount`, `onMounted`, `onBeforeUpdate`, `onUpdated`, `onBeforeUnmount`, `onUnmounted`. В Options API до них есть `beforeCreate` и `created`, их роль в Composition API играет сам `setup`. Также есть `onErrorCaptured` (ошибки потомков), `onActivated`/`onDeactivated` для `KeepAlive` и `onServerPrefetch` для SSR. Хуки регистрируются во время выполнения `setup`, синхронно; в `<script setup>` — и после `await`, потому что компилятор восстанавливает контекст компонента.',
-    analogy: '',
-    where: 'Инициализация графиков, карт и редакторов после появления DOM; подписка на `scroll` и `resize`; очистка таймеров и слушателей при уходе со страницы.',
-    why: 'Хуки дают точки, где можно работать с DOM, подписываться на внешние источники и убирать за собой.',
-    when: 'Загрузку данных можно начинать прямо в `setup`. С DOM — только начиная с `onMounted`. Очистка — в `onBeforeUnmount` или `onUnmounted`. `onUpdated` нужен редко: на изменения данных лучше реагировать через `watch`.',
-    diff: [
-      { vs: 'setup и onMounted', text: 'В `setup` уже есть пропсы и состояние, но ещё нет DOM, template refs равны `null`. В `onMounted` элементы уже в документе.' },
-      { vs: 'сервер и браузер', text: 'При SSR на сервере выполняются только `setup` (и `beforeCreate`/`created`) и `onServerPrefetch`. `onMounted` и остальные — только в браузере, поэтому `window` и `document` трогают там.' }
-    ],
-    code: [
-      { title: 'Сторонняя библиотека с очисткой', lang: 'vue', src: `<script setup lang="ts">
-import { onMounted, onBeforeUnmount, useTemplateRef } from 'vue'
-import Chart from 'chart.js/auto'
+    summary: 'Функции, которые Vue вызывает на этапах жизни компонента: создание, монтирование, обновление, размонтирование.',
+    points: [
+      { title: 'Порядок: `setup` → `onBeforeMount` → `onMounted` → `onBeforeUpdate`/`onUpdated` → `onBeforeUnmount` → `onUnmounted`', text: '`beforeCreate` и `created` из Options API в Composition API заменяет сам `setup`. Кроме основных есть `onErrorCaptured` (ошибки потомков), `onActivated`/`onDeactivated` для `KeepAlive` и `onServerPrefetch` для SSR.' },
+      { title: 'В `setup` нет DOM — элементы доступны с `onMounted`', text: 'В `setup` уже есть пропсы и состояние, но template refs равны `null`. Загрузку данных можно начинать прямо в `setup`, а графики, карты и редакторы создают в `onMounted`.', code: `const canvas = useTemplateRef('canvas') // 3.5+; раньше ref(null)
+let chart
 
-// useTemplateRef — Vue 3.5+; раньше: const canvas = ref(null)
-const canvas = useTemplateRef('canvas')
-let chart = null
-
-onMounted(() => {
-  // DOM уже есть, canvas.value заполнен
-  chart = new Chart(canvas.value, config)
-})
-
-onBeforeUnmount(() => {
-  chart?.destroy() // убираем за собой
-})
-</script>
-
-<template>
-  <canvas ref="canvas" />
-</template>` },
-      { title: 'Порядок у родителя и ребёнка', lang: 'js', src: `// Монтирование:
-// Parent setup -> Parent onBeforeMount
+onMounted(() => { chart = new Chart(canvas.value, config) })
+onBeforeUnmount(() => chart?.destroy())`, lang: 'ts' },
+      { title: 'Что создал при монтировании — убери при размонтировании', text: 'Слушатели `scroll` и `resize`, таймеры, сторонние виджеты без очистки утекают с каждой навигацией.', code: `onMounted(() => window.addEventListener('resize', onResize))
+onBeforeUnmount(() => window.removeEventListener('resize', onResize))` },
+      { title: 'Родитель монтируется последним', text: 'В `onMounted` родителя все дети уже в DOM.', code: `// Parent setup -> Parent onBeforeMount
 // Child setup  -> Child onBeforeMount -> Child onMounted
-// Parent onMounted
-//
-// Родитель монтируется последним: в его onMounted
-// дети уже в DOM` }
+// Parent onMounted`, lang: 'text' },
+      { title: 'При SSR на сервере выполняются только `setup` и `onServerPrefetch`', text: 'Монтирования на сервере нет, поэтому `onMounted` и остальные хуки вызываются только в браузере — `window`, `document`, `localStorage` трогают там. Таймер или подписка из `setup` на сервере утечёт: `onUnmounted`, чтобы их снять, не будет.', code: `const width = ref(window.innerWidth)     // на сервере упадёт
+const width = ref(0)
+onMounted(() => { width.value = window.innerWidth }) // ок
+onServerPrefetch(async () => { data.value = await load() }) // сервер ждёт промис`, lang: 'ts' },
+      { title: 'Хук регистрируют синхронно во время `setup`', text: 'В `setTimeout`, `.then()` или после `await` в обычной `setup()` текущего экземпляра уже нет: хук не привяжется, Vue предупредит. В `<script setup>` после `await` можно — компилятор восстанавливает контекст.', code: `setTimeout(() => onMounted(init)) // не привяжется
+onMounted(init)                    // ок` },
+      { title: 'Ловушка: менять состояние в `onUpdated`', text: 'Легко получить бесконечный цикл обновлений. На изменение данных реагируют через `watch`, `onUpdated` нужен редко.' }
     ],
-    pitfalls: [
-      'Регистрировать хук асинхронно (в `setTimeout`, в `.then()`, после `await` в обычной `setup()`) — активного экземпляра уже нет, хук не привяжется, Vue предупредит.',
-      'Обращаться к `window`, `document` или `localStorage` в `setup` при SSR — на сервере их нет, будет ошибка.',
-      'Не снимать слушатели, таймеры и сторонние виджеты при размонтировании — память утекает с каждой навигацией.',
-      'Менять состояние в `onUpdated` — легко получить бесконечный цикл обновлений.'
-    ],
+    takeaway: 'Данные — в `setup`, DOM и браузерные API — с `onMounted`, очистка — в `onBeforeUnmount`.',
     questions: [
       { q: 'Какие хуки жизненного цикла есть в Vue 3 и что доступно в каждом?', a: 'Сначала выполняется `setup`: есть пропсы и состояние, но нет DOM. `onBeforeMount` — перед первым рендером в DOM, `onMounted` — после, тут уже можно работать с элементами. `onBeforeUpdate` и `onUpdated` вызываются вокруг повторного рендера при изменении данных. `onBeforeUnmount` и `onUnmounted` — место для очистки: снять слушатели, остановить таймеры, уничтожить сторонние виджеты. Ещё есть `onErrorCaptured`, хуки `KeepAlive` и `onServerPrefetch`.' },
       { q: 'Какие хуки вызываются на сервере при SSR и что из этого следует?', a: 'На сервере выполняется только `setup`, в Options API ещё `beforeCreate` и `created`, и `onServerPrefetch` — он может вернуть промис, и сервер его дождётся. Монтирования на сервере нет, поэтому `onMounted`, `onUpdated` и `onUnmounted` там не вызываются. Отсюда два правила. Всё, что трогает браузерные API, делаю в `onMounted`. И не запускаю в `setup` таймеры и подписки: на сервере не будет `onUnmounted`, чтобы их снять, и они утекут.' }
@@ -299,58 +214,41 @@ onBeforeUnmount(() => {
     group: 'Основы',
     title: 'Props и emits',
     level: 'junior',
-    summary: 'Props — входные данные от родителя к ребёнку, emits — события от ребёнка к родителю; поток данных однонаправленный',
-    what: 'Props — входные параметры компонента, объявляются макросом `defineProps`. Emits — события, которыми компонент сообщает родителю о действиях, объявляются через `defineEmits`. В TypeScript оба типизируются через generic-аргумент: `defineProps<{ title: string }>()`. С Vue 3.5 деструктуризация `defineProps` реактивна: компилятор заменяет обращения к переменной на `props.x`, а значения по умолчанию задаются обычным синтаксисом деструктуризации.',
-    analogy: '',
-    where: 'Карточка товара получает `product` через props и сообщает `add-to-cart` событием. Кнопки, поля, модалки общаются с родителем так же.',
-    why: 'Однонаправленный поток делает понятным, кто владеет данными: родитель хранит, ребёнок показывает и сообщает о намерениях. Так проще искать баги и переиспользовать компоненты.',
-    when: 'Props — для всего, что компонент получает снаружи. Emits — для действий, которые должен обработать родитель. Если данные приходится протаскивать через 3 и более уровней, стоит посмотреть на provide/inject или стор.',
-    diff: [
-      { vs: 'локальное состояние', text: 'Props для ребёнка только для чтения. Своё состояние компонент меняет как хочет.' },
-      { vs: 'колбэк в пропсе', text: 'Объявленные emits документируют события компонента и не попадают в `$attrs`. Колбэк-проп технически работает, но во Vue так не принято.' }
-    ],
-    code: [
-      { title: 'Типизированные props и emits (Vue 3.5+)', lang: 'vue', src: `<script setup lang="ts">
-// деструктуризация с дефолтом реактивна с Vue 3.5;
-// раньше: const props = withDefaults(defineProps<...>(), { count: 0 })
-const { title, count = 0 } = defineProps<{
-  title: string
-  count?: number
-}>()
+    summary: 'Props — данные от родителя к ребёнку, emits — события от ребёнка к родителю. Поток однонаправленный: ребёнок не меняет проп, а просит родителя.',
+    points: [
+      { title: 'Проп для ребёнка только для чтения — изменение просят событием', text: 'Родитель владеет данными и решает, менять ли их. Объявленные emits документируют события компонента и не попадают в `$attrs`; колбэк в пропсе работает, но во Vue так не принято.', code: `function inc() {
+  emit('change', count + 1) // просим родителя
+  // count++ — нельзя: это проп
+}` },
+      { title: 'Типизация — generic-аргументом макроса', text: 'В `<script setup lang="ts">` типы пишут прямо в `defineProps` и `defineEmits`, рантайм-объявление не нужно.', code: `const props = defineProps<{ title: string; count?: number }>()
 
 const emit = defineEmits<{
   change: [value: number]
   close: []
+}>()`, lang: 'ts' },
+      { title: 'С Vue 3.5 деструктуризация `defineProps` реактивна, дефолты — синтаксисом JS', text: 'Компилятор заменяет обращения к переменной на `props.count`. `withDefaults` больше не нужен.', code: `const { title, count = 0 } = defineProps<{
+  title: string
+  count?: number
 }>()
+// раньше: withDefaults(defineProps<...>(), { count: 0 })`, lang: 'ts' },
+      { title: 'Деструктурированный проп в `watch` и composable — только геттером', text: 'Иначе туда уйдёт число, а не реактивный источник. Для `watch` Vue 3.5 прямо выдаст ошибку компиляции.', code: `watch(count, cb)          // ошибка компиляции
+watch(() => count, cb)    // ок
+useCounter(() => count)   // в composable тоже геттер` },
+      { title: 'Ловушка: мутация поля объекта из пропса тихо меняет данные родителя', text: 'На присваивание пропсу Vue в dev предупредит, а на `props.user.name = ...` — нет. Потом трудно найти, кто поменял данные. Для локального редактирования — копия или `computed` с `get`/`set`, который отправляет событие.', code: `props.user.name = 'x'   // тихо меняет объект родителя
 
-function inc() {
-  emit('change', count + 1) // просим родителя, а не меняем проп
-}
-</script>
-
-<template>
-  <h3>{{ title }}</h3>
-  <button @click="inc">{{ count }}</button>
-</template>` },
-      { title: 'Проверка пропсов в рантайме', lang: 'js', src: `const props = defineProps({
-  size: {
-    type: String,
-    default: 'md',
-    // предупреждение выводится только в dev-режиме
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
-  },
-  items: {
-    type: Array,
-    default: () => [] // для массивов и объектов — фабрика
-  }
+const name = computed({
+  get: () => props.user.name,
+  set: (v) => emit('update', { ...props.user, name: v })
+})` },
+      { title: 'Ловушка: копия пропса в `ref` не обновляется вместе с ним', text: '`ref` один раз берёт начальное значение. Если нужна синхронизация — `computed` или `watch`.', code: `const local = ref(props.value)          // застынет
+const shown = computed(() => props.value) // ок` },
+      { title: 'Рантайм-объявление: дефолт объекта — фабрикой, `validator` — только в dev', text: 'Без фабрики все экземпляры получат один и тот же массив.', code: `defineProps({
+  size: { type: String, default: 'md',
+    validator: (v) => ['sm', 'md', 'lg'].includes(v) },
+  items: { type: Array, default: () => [] } // фабрика
 })` }
     ],
-    pitfalls: [
-      'Менять проп или поле объекта из пропса. На присваивание пропсу Vue предупредит в dev-режиме, а мутация вложенного объекта тихо изменит данные родителя.',
-      'Скопировать проп в `ref` при создании и ждать, что копия обновится вместе с пропсом. Не обновится — нужен `computed` или `watch`.',
-      'Задать `default` для массива или объекта в объектном синтаксисе без фабрики — все экземпляры получат один и тот же объект.',
-      'Передать деструктурированный проп в `watch` напрямую — Vue 3.5 выдаст ошибку компиляции. Нужен геттер `() => count`.'
-    ],
+    takeaway: 'Данные вниз пропсами, намерения вверх событиями. Если проп протаскивают через 3+ уровня — смотреть на provide/inject или стор.',
     questions: [
       { q: 'Что такое однонаправленный поток данных и почему нельзя менять props?', a: 'Родитель владеет данными и передаёт их вниз через props. Если ребёнок хочет что-то изменить, он отправляет событие, а родитель решает, менять ли. Прямое присваивание пропсу Vue в dev-режиме пресекает с предупреждением, да и при следующем рендере родителя значение перезапишется. А если проп — объект, мутация его полей тихо изменит данные родителя, и потом трудно найти, кто это сделал. Для локального редактирования делаю копию в `ref` или `computed` с `get`/`set`, который отправляет событие.' },
       { q: 'Что изменилось с деструктуризацией props в Vue 3.5?', a: 'Теперь можно писать `const { count = 0 } = defineProps<...>()`, и `count` останется реактивным: компилятор заменит обращения на `props.count`. Значения по умолчанию задаются синтаксисом деструктуризации, `withDefaults` больше не нужен. Но если передать `count` в `watch` или composable как есть, туда уйдёт число, а не реактивный источник. Поэтому туда передаю геттер `() => count`; для `watch` компилятор прямо подскажет ошибкой.' }
@@ -362,54 +260,30 @@ function inc() {
     group: 'Основы',
     title: 'v-model на компонентах',
     level: 'middle',
-    summary: '`v-model` на компоненте — сокращение для пропа `modelValue` и события `update:modelValue`; с Vue 3.4 объявляется через `defineModel`',
-    what: 'На компоненте `v-model` компилируется в проп `modelValue` и слушатель `update:modelValue`. С аргументом, например `v-model:title`, — в проп `title` и событие `update:title`, поэтому на один компонент можно повесить несколько `v-model`. Макрос `defineModel` (Vue 3.4+) объявляет проп и событие одной строкой и возвращает ref: чтение отдаёт значение пропа, присваивание отправляет событие. Модификаторы приходят пропом `modelModifiers` (или `titleModifiers` для `v-model:title`).',
-    analogy: '',
-    where: 'Свои поля ввода, селекты и переключатели в дизайн-системе. Модалка с `v-model:open`, чтобы родитель мог открыть её и узнать, что её закрыли крестиком.',
-    why: 'Свои компоненты ввода становятся такими же удобными, как нативный `input`.',
-    when: 'Для компонентов, которые редактируют значение родителя. Если компонент только показывает данные, `v-model` не нужен.',
-    diff: [
-      { vs: 'ручная запись', text: '`defineModel` заменяет связку `defineProps` + `defineEmits` + `computed` с `get`/`set`. До Vue 3.4 писали именно так.' },
-      { vs: 'Vue 2', text: 'Во Vue 2 были `value`/`input` и модификатор `.sync`. Во Vue 3 всё это объединено в `v-model` с аргументом.' }
-    ],
-    code: [
-      { title: 'defineModel и несколько v-model (Vue 3.4+)', lang: 'vue', src: `<!-- UserForm.vue -->
+    summary: '`v-model` на компоненте — сокращение для пропа `modelValue` и события `update:modelValue`. С Vue 3.4 объявляется одной строкой через `defineModel`.',
+    points: [
+      { title: '`v-model` = проп `modelValue` + событие `update:modelValue`', text: 'С аргументом `v-model:title` — проп `title` и событие `update:title`, поэтому на одном компоненте может быть несколько `v-model`. Во Vue 2 были `value`/`input` и `.sync`, во Vue 3 всё это — `v-model` с аргументом.', code: `<MyInput v-model="name" />
+<!-- то же самое: -->
+<MyInput :modelValue="name" @update:modelValue="v => name = v" />`, lang: 'vue' },
+      { title: '`defineModel` (3.4+) возвращает ref: чтение даёт проп, запись отправляет событие', text: 'Заменяет связку `defineProps` + `defineEmits` + `computed` с `get`/`set`, которую писали раньше.', code: `<!-- UserForm.vue -->
 <script setup lang="ts">
 const firstName = defineModel<string>('firstName', { required: true })
 const lastName = defineModel<string>('lastName')
 </script>
 
-<template>
-  <input v-model="firstName" />
-  <input v-model="lastName" />
-</template>
-
-<!-- Родитель -->
-<UserForm v-model:first-name="user.first" v-model:last-name="user.last" />` },
-      { title: 'Свой модификатор', lang: 'vue', src: `<script setup lang="ts">
-// modifiers — объект вида { capitalize: true }
-const [model, modifiers] = defineModel<string, 'capitalize'>({
-  set(value) {
-    // преобразуем значение перед отправкой родителю
-    if (modifiers.capitalize) {
-      return value.charAt(0).toUpperCase() + value.slice(1)
-    }
-    return value
+<!-- родитель -->
+<UserForm v-model:first-name="user.first" v-model:last-name="user.last" />`, lang: 'vue' },
+      { title: 'Модификаторы приходят пропом `modelModifiers` — свои реализуют в `set`', text: 'Для `v-model:title` проп называется `titleModifiers`. `.trim` и `.number` Vue применяет к аргументу `update:*` сам, а `.lazy` и собственные модификаторы надо делать в компоненте.', code: `const [model, modifiers] = defineModel<string, 'capitalize'>({
+  set(v) {
+    return modifiers.capitalize ? v[0].toUpperCase() + v.slice(1) : v
   }
 })
-</script>
-
-<template>
-  <input v-model="model" />
-</template>
-<!-- <MyInput v-model.capitalize="name" /> -->` }
+// <MyInput v-model.capitalize="name" />`, lang: 'ts' },
+      { title: 'Ловушка: правка вложенного поля обходит событие', text: '`model.value.name = ...` не отправит `update:modelValue`, а объект родителя изменится напрямую. Присваивают новый объект.', code: `model.value.name = 'x'                    // событие не уйдёт
+model.value = { ...model.value, name: 'x' } // ок` },
+      { title: 'Ловушка: без `v-model` у родителя `defineModel` — просто локальный ref', text: 'Компонент вроде бы работает, но родитель ничего не получает. И нельзя вешать `v-model` на проп внутри ребёнка — это попытка изменить проп.' }
     ],
-    pitfalls: [
-      'Менять вложенное поле объекта из `v-model` (`model.value.name = ...`) — событие не отправится, а объект родителя изменится напрямую. Нужно присваивать новый объект.',
-      'Вешать `v-model` на проп внутри дочернего компонента — это попытка изменить проп.',
-      'Ждать, что `.lazy` заработает на своём компоненте. `.trim` и `.number` Vue применяет к аргументу события `update:*` сам, а `.lazy` и собственные модификаторы нужно реализовать в компоненте.',
-      'Не заметить, что без `v-model` у родителя `defineModel` работает как локальный ref: компонент «работает», но родитель ничего не получает.'
-    ],
+    takeaway: 'Компонент редактирует значение родителя — `defineModel`. Только показывает — обычный проп.',
     questions: [
       { q: 'Как работает v-model на компоненте и что делает defineModel?', a: '`v-model` на компоненте — сокращение: родитель передаёт проп `modelValue` и слушает `update:modelValue`. С аргументом, например `v-model:title`, будет проп `title` и событие `update:title`, поэтому на одном компоненте может быть несколько `v-model`. `defineModel` из Vue 3.4 объявляет и проп, и событие и возвращает ref: чтение даёт проп, присваивание отправляет событие. Раньше то же самое писали руками через `defineProps`, `defineEmits` и `computed` с `get`/`set`.' },
       { q: 'Как поддержать модификатор v-model на своём компоненте?', a: 'Модификаторы приходят отдельным пропом: `modelModifiers` для обычного `v-model` или `titleModifiers` для `v-model:title`, это объект вида `{ capitalize: true }`. С `defineModel` проще: деструктурирую `[model, modifiers]` и в опции `set` преобразую значение перед отправкой. Для `.trim` и `.number` Vue сам обрабатывает аргумент события `update:*`, а `.lazy` и свои модификаторы реализую в компоненте сам.' }
@@ -421,47 +295,33 @@ const [model, modifiers] = defineModel<string, 'capitalize'>({
     group: 'Основы',
     title: 'Слоты',
     level: 'junior',
-    summary: 'Слот — место в шаблоне компонента, куда родитель передаёт разметку; scoped-слот вдобавок получает данные от ребёнка',
-    what: 'Слот (`<slot>`) — точка в шаблоне ребёнка, куда подставляется контент родителя. Слот по умолчанию один; именованные слоты (`<slot name="header">`) позволяют передать контент в разные области. Scoped-слот передаёт данные из ребёнка в разметку родителя через атрибуты на `<slot>`, родитель получает их через `v-slot` (`#default="{ item }"`). Контент слота компилируется в области видимости родителя.',
-    analogy: '',
-    where: 'Модалки, карточки, лейауты, таблицы в админке с особой отрисовкой ячеек, списки с кастомным пустым состоянием.',
-    why: 'Компонент становится гибким без десятков пропсов: модалка не знает, что у неё внутри, таблица не знает, как рисовать ячейку.',
-    when: 'Когда разметка внутри компонента меняется от места к месту. Если вариантов два и они простые, иногда проще проп. Scoped-слот — когда компонент владеет данными и логикой, а внешний вид определяет потребитель.',
-    diff: [
-      { vs: 'props', text: 'Props передают данные, слоты — разметку (точнее, функции, которые её рендерят).' },
-      { vs: 'обычный слот', text: 'Обычный слот видит только данные родителя. Scoped-слот получает ещё и данные от ребёнка — аналог render props в React.' }
-    ],
-    code: [
-      { title: 'Именованные и scoped-слоты', lang: 'vue', src: `<!-- DataList.vue -->
-<script setup lang="ts" generic="T extends { id: number }">
-defineProps<{ items: T[] }>()
-</script>
+    summary: 'Слот — место в шаблоне компонента, куда родитель передаёт разметку. Scoped-слот вдобавок получает данные от ребёнка.',
+    points: [
+      { title: 'Props передают данные, слоты — разметку', text: 'Модалка не знает, что у неё внутри, таблица не знает, как рисовать ячейку. Вместо пропа под каждый вариант разметки — слот, иначе API компонента разрастается.', code: `<!-- Modal.vue -->
+<div class="modal">
+  <header><slot name="header" /></header>
+  <slot />                       <!-- слот по умолчанию -->
+  <footer v-if="$slots.footer"><slot name="footer" /></footer>
+</div>`, lang: 'vue' },
+      { title: 'Контент слота компилируется в области видимости родителя', text: 'Обычный слот видит только данные родителя. Данные ребёнка туда попадают только через scoped-слот.', code: `<DataList :items="users">
+  {{ item.name }}  <!-- ошибка: item — данные ребёнка -->
+</DataList>`, lang: 'vue' },
+      { title: 'Scoped-слот: ребёнок отдаёт данные атрибутами `<slot>`, родитель берёт через `v-slot`', text: 'Компонент владеет данными и логикой (список, пагинация, таблица), а как рисовать элемент, решает потребитель. Аналог render props в React. Типизируют через `defineSlots`.', code: `<!-- DataList.vue -->
+<li v-for="(item, i) in items" :key="item.id">
+  <slot :item="item" :index="i" />
+</li>
+<slot v-if="!items.length" name="empty">Ничего нет</slot>
 
-<template>
-  <ul v-if="items.length">
-    <li v-for="(item, index) in items" :key="item.id">
-      <!-- передаём родителю item и index -->
-      <slot :item="item" :index="index" />
-    </li>
-  </ul>
-  <!-- запасной контент, если слот empty не передали -->
-  <slot v-else name="empty">Ничего нет</slot>
-</template>` },
-      { title: 'Использование', lang: 'vue', src: `<DataList :items="users">
-  <template #default="{ item }">
-    <b>{{ item.name }}</b> — {{ item.email }}
-  </template>
-  <template #empty>
-    <p>Пользователей пока нет</p>
-  </template>
-</DataList>` }
+<!-- родитель -->
+<DataList :items="users">
+  <template #default="{ item }">{{ item.name }}</template>
+  <template #empty>Пользователей пока нет</template>
+</DataList>`, lang: 'vue' },
+      { title: 'Передан ли слот — `$slots` в шаблоне, `useSlots()` в скрипте', text: 'Так не рендерят пустую обёртку, например футер модалки с отступами. Флаг-проп «есть футер» не нужен. Если нужно просто значение по умолчанию — запасной контент внутри `<slot>`.', code: `<footer v-if="$slots.footer"><slot name="footer" /></footer>
+<slot name="empty">Ничего нет</slot> <!-- запасной контент -->`, lang: 'vue' },
+      { title: 'Ловушка: `v-slot` на компоненте вместе с `<template #name>`', text: 'Когда слотов несколько, все, включая default, оформляют через `<template>`, иначе ошибка компиляции.' }
     ],
-    pitfalls: [
-      'Обращаться к данным ребёнка в обычном слоте — контент слота компилируется в области видимости родителя.',
-      'Смешивать `v-slot` на самом компоненте и `<template #name>` внутри — при нескольких слотах все должны быть в `<template>`, иначе ошибка компиляции.',
-      'Заводить проп-флаг «есть ли футер» вместо проверки `$slots.footer` или `useSlots()`.',
-      'Делать проп под каждый вариант разметки вместо слота — API компонента разрастается.'
-    ],
+    takeaway: 'Разметка меняется от места к месту — слот. Компонент владеет данными, а вид решает потребитель — scoped-слот.',
     questions: [
       { q: 'Что такое scoped-слоты и когда они нужны?', a: 'Обычный слот рендерится с данными родителя и ничего не знает о данных ребёнка. В scoped-слоте ребёнок передаёт данные атрибутами на `<slot>`, а родитель принимает их через `#default="{ item }"`. Это нужно, когда компонент владеет данными и логикой — список с пагинацией, таблица, — а как рисовать каждый элемент, решает потребитель. В TypeScript слоты типизируют через `defineSlots`.' },
       { q: 'Как проверить, передан ли слот, и зачем это нужно?', a: 'В шаблоне есть `$slots`, в `<script setup>` — `useSlots()`. Это нужно, чтобы не рендерить обёртку без контента: например, не выводить пустой футер модалки с отступами — пишу `v-if="$slots.footer"`. Если нужно просто значение по умолчанию, достаточно положить запасной контент внутрь тега `<slot>`.' }
@@ -473,56 +333,27 @@ defineProps<{ items: T[] }>()
     group: 'Основы',
     title: 'provide / inject',
     level: 'middle',
-    summary: 'Механизм внедрения зависимостей: предок предоставляет значение по ключу, любой потомок получает его без пропсов',
-    what: '`provide(key, value)` в компоненте-предке регистрирует значение, `inject(key, default?)` в любом потомке его получает — Vue ищет ближайшего предка с таким ключом. Ключ — строка или `Symbol`; в TypeScript используют `InjectionKey<T>`, чтобы `inject` знал тип. Само значение не становится реактивным: чтобы потомки видели изменения, передают `ref` или `reactive`. `app.provide` делает значение доступным во всём приложении.',
-    analogy: 'Как Wi-Fi в квартире: роутер в одной комнате, подключиться можно из любой, не протягивая провод через каждую дверь. В соседней квартире свой роутер и своя сеть.',
-    where: 'Составные компоненты UI-кита: `Tabs` и `Tab`, `Accordion` и `AccordionItem`, форма и её поля. Плагины, которые через `app.provide` отдают сервис всему приложению.',
-    why: 'Убирает prop drilling — когда проп передают через несколько компонентов, которым он не нужен, только чтобы он дошёл до нужного.',
-    when: 'Для контекста внутри поддерева: составные компоненты, форма, настройки плагина. Для глобальных бизнес-данных обычно лучше Pinia: devtools, SSR и одна точка входа.',
-    diff: [
-      { vs: 'props', text: 'Props явные и видны в шаблоне. `inject` неявный: по шаблону не понять, откуда пришли данные.' },
-      { vs: 'Pinia', text: 'Стор Pinia — один экземпляр на приложение. provide/inject привязан к поддереву: у двух форм на странице будут два разных контекста.' }
+    summary: 'Внедрение зависимостей: предок предоставляет значение по ключу, любой потомок получает его без пропсов. Убирает prop drilling.',
+    points: [
+      { title: '`inject` ищет ближайшего предка с таким ключом', text: 'Поэтому контекст привязан к поддереву: у двух форм на странице будут два разных контекста. `app.provide` делает значение доступным во всём приложении — так плагины отдают сервисы.', code: `// предок
+provide('theme', theme)
+// любой потомок, сколько угодно уровней ниже
+const theme = inject('theme', 'light') // второй аргумент — дефолт` },
+      { title: '`provide` не делает значение реактивным — передают сам ref', text: 'Если передать `.value`, потомки получат снимок, который не обновится.', code: `provide(Key, count.value) // снимок, не обновляется
+provide(Key, count)       // ок: потомки видят изменения` },
+      { title: 'Наружу — `readonly` и функции для изменений', text: 'Так все правки остаются у владельца, и не нужно искать, какой потомок поменял состояние.', code: `provide(FormKey, {
+  disabled: readonly(disabled),         // читать можно, менять нельзя
+  register: (name) => fields.add(name)  // менять — только через функцию
+})` },
+      { title: 'Ключ — `Symbol` с типом `InjectionKey<T>`', text: 'Строковые ключи в большом приложении могут совпасть и не дают типов. С `InjectionKey` `inject` вернёт `T | undefined`; `undefined` закрывают дефолтом или явной ошибкой.', code: `export const FormKey: InjectionKey<FormContext> = Symbol('Form')
+
+const form = inject(FormKey) // FormContext | undefined
+if (!form) throw new Error('AppField должен быть внутри AppForm')`, lang: 'ts' },
+      { title: '`inject` работает только в `setup` или внутри `app.runWithContext()`', text: 'В обработчике события или `setTimeout` текущего экземпляра нет. Значение достают заранее, в `setup`.', code: `const api = inject(ApiKey)       // ок: в setup
+function onClick() { inject(ApiKey) } // не сработает` },
+      { title: 'provide/inject vs Pinia: поддерево против одного экземпляра на приложение', text: 'Для составных компонентов (`Tabs`/`Tab`, форма и поля) — provide/inject. Для бизнес-данных, нужных в разных ветках дерева, — стор: devtools, SSR, плагины. Минус inject — неявность: по шаблону не видно, откуда пришли данные.' }
     ],
-    code: [
-      { title: 'Типизированный ключ', lang: 'ts', src: `// form-context.ts
-import type { InjectionKey, Ref } from 'vue'
-
-export interface FormContext {
-  disabled: Readonly<Ref<boolean>>
-  register: (name: string) => void
-}
-
-// Symbol гарантирует, что ключ ни с чем не совпадёт
-export const FormKey: InjectionKey<FormContext> = Symbol('Form')` },
-      { title: 'provide в форме, inject в поле', lang: 'vue', src: `<!-- AppForm.vue -->
-<script setup lang="ts">
-import { provide, ref, readonly } from 'vue'
-import { FormKey } from './form-context'
-
-const disabled = ref(false)
-const fields = new Set<string>()
-
-provide(FormKey, {
-  disabled: readonly(disabled),        // читать можно, менять нельзя
-  register: (name) => fields.add(name) // менять — только через функцию
-})
-</script>
-
-<!-- AppField.vue -->
-<script setup lang="ts">
-import { inject } from 'vue'
-import { FormKey } from './form-context'
-
-const form = inject(FormKey) // тип: FormContext | undefined
-if (!form) throw new Error('AppField должен быть внутри AppForm')
-</script>` }
-    ],
-    pitfalls: [
-      'Передать в `provide` значение, а не ref (`provide(key, count.value)`) — потомки получат снимок, который не обновляется.',
-      'Разрешить потомкам менять состояние напрямую — лучше отдавать `readonly` и отдельные функции для изменений.',
-      'Использовать строковые ключи в большом приложении — возможны совпадения и нет типов. `Symbol` с `InjectionKey` надёжнее.',
-      'Вызывать `inject` вне `setup` (например, в обработчике события или `setTimeout`) — он работает только при наличии текущего экземпляра или внутри `app.runWithContext()`.'
-    ],
+    takeaway: 'Контекст внутри поддерева — provide/inject с `InjectionKey`, ref и `readonly`. Глобальные бизнес-данные — Pinia.',
     questions: [
       { q: 'Как сохранить реактивность при provide/inject и как его типизировать?', a: '`provide` не делает значение реактивным, поэтому передаю сам `ref` или reactive-объект, а не его текущее значение. Чтобы потомки не меняли состояние как попало, отдаю `readonly`-версию и отдельные функции для изменений — так все правки остаются у владельца. Для типов делаю ключ `Symbol` с типом `InjectionKey<T>`, тогда `inject` вернёт `T | undefined`. `undefined` обрабатываю значением по умолчанию во втором аргументе или явной ошибкой, если без провайдера компонент не имеет смысла.' },
       { q: 'Когда provide/inject, а когда Pinia?', a: 'provide/inject привязан к дереву компонентов: у двух форм на странице будут два разных контекста, и для составных компонентов вроде `Tabs` это то, что нужно. Стор Pinia один на приложение, с devtools, поддержкой SSR и плагинами — туда кладу бизнес-данные: пользователя, корзину. Если состояние нужно в разных ветках дерева — стор. Если только внутри одного поддерева — provide/inject.' }
@@ -534,51 +365,24 @@ if (!form) throw new Error('AppField должен быть внутри AppForm'
     group: 'Основы',
     title: 'Динамические компоненты',
     level: 'middle',
-    summary: '`<component :is>` рендерит компонент, выбранный во время выполнения; сам объект компонента не делают глубоко реактивным',
-    what: '`<component :is="...">` рендерит то, что передано в `is`: объект компонента, имя зарегистрированного компонента или строку с нативным тегом вроде `\'a\'`. При смене `is` старый экземпляр размонтируется, новый создаётся, и состояние старого теряется — если не обернуть в `<KeepAlive>`. Объект компонента хранят в `shallowRef` или помечают `markRaw`, чтобы Vue не превращал его в реактивный Proxy.',
-    analogy: '',
-    where: 'Вкладки, шаги мастера, виджеты из конфига, блоки страницы из CMS, полиморфная кнопка, которая рендерится как ссылка или кнопка.',
-    why: 'Позволяет выбирать компонент по данным, а не перечислять все варианты в шаблоне.',
-    when: 'Когда набор компонентов определяется данными или конфигом. Если вариантов два-три и они фиксированы, `v-if`/`v-else` читается проще.',
-    diff: [
-      { vs: 'v-if/v-else', text: '`v-if` перечисляет варианты прямо в шаблоне. `:is` выбирает по данным, вариантов может быть сколько угодно.' },
-      { vs: 'ref', text: 'Если положить объект компонента в `ref` или `reactive`, Vue сделает его глубоко реактивным и выдаст предупреждение. Его кладут в `shallowRef` или оборачивают в `markRaw`.' }
-    ],
-    code: [
-      { title: 'Вкладки через shallowRef', lang: 'vue', src: `<script setup lang="ts">
-import { shallowRef } from 'vue'
-import TabProfile from './TabProfile.vue'
-import TabOrders from './TabOrders.vue'
-
-const tabs = { profile: TabProfile, orders: TabOrders }
-// shallowRef: отслеживаем только то, КАКОЙ компонент выбран
-const current = shallowRef(TabProfile)
-</script>
-
-<template>
-  <button v-for="(c, name) in tabs" :key="name" @click="current = c">
-    {{ name }}
-  </button>
-  <component :is="current" />
-</template>` },
-      { title: 'Блоки из CMS с markRaw', lang: 'ts', src: `import { reactive, markRaw, defineAsyncComponent } from 'vue'
-
-// markRaw: этот объект никогда не оборачивать в Proxy
-const registry = {
-  hero: markRaw(defineAsyncComponent(() => import('./blocks/Hero.vue'))),
-  gallery: markRaw(defineAsyncComponent(() => import('./blocks/Gallery.vue')))
+    summary: '`<component :is>` рендерит компонент, выбранный во время выполнения. Сам объект компонента держат в `shallowRef` или под `markRaw`.',
+    points: [
+      { title: '`:is` принимает объект компонента, имя зарегистрированного компонента или нативный тег', text: 'Выбор идёт по данным, вариантов сколько угодно: вкладки, шаги мастера, блоки из CMS. Если вариантов два-три и они фиксированы, `v-if`/`v-else` читается проще.', code: `<component :is="current" />          <!-- объект компонента -->
+<component :is="'a'" href="/">Ссылка</component> <!-- тег -->`, lang: 'vue' },
+      { title: 'Компонент держат в `shallowRef`, а не в `ref`', text: 'Объект компонента — неизменное описание. `ref` сделает его глубоко реактивным, и Vue выдаст предупреждение. `shallowRef` следит только за тем, какой компонент выбран.', code: `const tabs = { profile: TabProfile, orders: TabOrders }
+const current = shallowRef(TabProfile) // ок
+// ref(TabProfile) — предупреждение` },
+      { title: 'Внутри reactive-структуры компонент оборачивают в `markRaw`', text: '`markRaw` запрещает Vue делать объект реактивным, даже если он лежит в reactive.', code: `const registry = {
+  hero: markRaw(defineAsyncComponent(() => import('./Hero.vue')))
 }
-
-const page = reactive({
-  blocks: [{ type: 'hero', props: { title: 'Привет' } }]
-})
-// в шаблоне: <component :is="registry[b.type]" v-bind="b.props" />` }
+// <component :is="registry[b.type]" v-bind="b.props" />` },
+      { title: 'При смене `:is` старый экземпляр размонтируется вместе с состоянием', text: 'Заполненная форма во вкладке пропадёт. Сохранить состояние — обернуть в `<KeepAlive>`.', code: `<KeepAlive>
+  <component :is="current" />
+</KeepAlive>`, lang: 'vue' },
+      { title: 'Ловушка: строка с именем локального компонента в `<script setup>`', text: 'Строка работает только для глобально зарегистрированных компонентов. Импортированный в `<script setup>` компонент передают объектом.', code: `<component is="TabProfile" />   <!-- не найдёт локальный импорт -->
+<component :is="TabProfile" />  <!-- ок -->`, lang: 'vue' }
     ],
-    pitfalls: [
-      'Хранить компоненты в `ref` или `reactive` — Vue обернёт объект компонента в Proxy и выдаст предупреждение.',
-      'Ждать, что состояние вкладки сохранится при переключении без `KeepAlive`.',
-      'Передавать в `:is` строку с именем локально импортированного компонента в `<script setup>` — строка работает только для глобально зарегистрированных компонентов, нужно передавать сам импортированный объект.'
-    ],
+    takeaway: 'Выбор компонента по данным — `<component :is>` + `shallowRef`/`markRaw`. Нужно сохранить состояние — `KeepAlive`.',
     questions: [
       { q: 'Как работает <component :is> и почему компоненты хранят в shallowRef или markRaw?', a: '`<component :is>` рендерит то, что передано: объект компонента, имя зарегистрированного компонента или нативный тег. При смене значения старый экземпляр размонтируется, новый создаётся, и состояние теряется, если нет `KeepAlive`. Объект компонента — неизменное описание, отслеживать его поля незачем, и Vue предупреждает, если сделать его реактивным. Поэтому текущий компонент держу в `shallowRef`, а если он лежит внутри reactive-структуры — оборачиваю в `markRaw`.' },
       { q: 'Как бы вы сделали полиморфный компонент кнопки, который рендерится как a, RouterLink или button?', a: 'Делаю один компонент с `<component :is>` и `computed`, который выбирает тег: есть `to` — `RouterLink`, есть `href` — `a`, иначе `button`. Остальные атрибуты как fallthrough-атрибуты падают на корневой элемент. Для `button` ставлю `type="button"`, чтобы кнопка внутри формы случайно её не отправила. В итоге в дизайн-системе одна кнопка со стилями, а HTML в каждом месте семантически правильный.' }
@@ -590,45 +394,22 @@ const page = reactive({
     group: 'Основы',
     title: 'Teleport',
     level: 'middle',
-    summary: '`<Teleport>` рендерит часть шаблона в другой узел DOM, сохраняя её логическое место в дереве компонентов',
-    what: '`<Teleport to="body">` монтирует содержимое в указанный элемент DOM (CSS-селектор или сам элемент). Логически контент остаётся частью компонента: пропсы, события компонентов и provide/inject работают как обычно. `disabled` отключает перенос, а `defer` (Vue 3.5+) откладывает поиск цели до момента, когда смонтирована остальная часть приложения в этом же цикле.',
-    analogy: '',
-    where: 'Модалки, тосты, тултипы, выпадающие и контекстные меню. В Nuxt при SSR телепорты в `body` рендерятся в специальный контейнер `#teleports`.',
-    why: 'Модалка или выпадашка внутри блока с `overflow: hidden` или `transform` обрезается или ломает позиционирование, и `z-index` не спасает из-за контекста наложения. Teleport выносит её в `body`.',
-    when: 'Для всего, что визуально должно быть поверх страницы. Для обычного контента не нужен.',
-    diff: [
-      { vs: 'appendChild', text: 'Ручной `appendChild` Vue не контролирует. Teleport управляется Vue: обновляется, удаляется вместе с компонентом и остаётся в его дереве.' },
-      { vs: 'React', text: 'Аналог `createPortal` в React.' }
-    ],
-    code: [
-      { title: 'Модалка в body', lang: 'vue', src: `<script setup lang="ts">
-const open = defineModel<boolean>('open', { default: false })
-</script>
-
-<template>
-  <!-- в DOM окажется в body, но для Vue — обычный ребёнок -->
-  <Teleport to="body">
-    <div v-if="open" class="overlay" @click.self="open = false">
-      <div class="modal" role="dialog" aria-modal="true">
-        <slot />
-        <button @click="open = false">Закрыть</button>
-      </div>
-    </div>
-  </Teleport>
-</template>` },
-      { title: 'disabled и defer', lang: 'vue', src: `<!-- на мобильном рендерим на месте, на десктопе — в сайдбаре -->
-<Teleport to="#sidebar" :disabled="isMobile">
+    summary: '`<Teleport>` рендерит часть шаблона в другой узел DOM, но для Vue она остаётся на своём месте в дереве компонентов.',
+    points: [
+      { title: 'Модалку выносят в `body`, чтобы её не обрезал `overflow` и не ломал `transform`', text: 'Внутри блока с `overflow: hidden` или `transform` модалка обрезается или съезжает, и `z-index` не спасает из-за контекста наложения. Для модалок, тостов, тултипов, выпадающих меню.', code: `<Teleport to="body">
+  <div v-if="open" class="overlay" @click.self="open = false">
+    <div class="modal" role="dialog" aria-modal="true"><slot /></div>
+  </div>
+</Teleport>`, lang: 'vue' },
+      { title: 'Для Vue контент остаётся на месте: props, события и provide/inject работают', text: 'Меняется только положение в DOM. Поэтому нативные DOM-события всплывают уже по новому месту, а не через исходного родителя. Ручной `appendChild` Vue не контролирует, а Teleport обновляется и удаляется вместе с компонентом. Аналог `createPortal` в React.' },
+      { title: '`disabled` выключает перенос', text: 'Контент рендерится там, где написан. Удобно для блока, который на десктопе в сайдбаре, а на мобильном — в потоке.', code: `<Teleport to="#sidebar" :disabled="isMobile">
   <FiltersPanel />
-</Teleport>
-
-<!-- Vue 3.5+: цель рендерит сам Vue позже в том же цикле -->
-<Teleport defer to="#late-container">...</Teleport>` }
+</Teleport>`, lang: 'vue' },
+      { title: 'Цели ещё нет в DOM — предупреждение; если её рендерит Vue, поможет `defer` (3.5+)', text: 'С `defer` Teleport ищет цель после того, как смонтирована остальная часть приложения в этом цикле.', code: `<Teleport defer to="#late-container">...</Teleport>`, lang: 'vue' },
+      { title: 'SSR: телепорты рендерятся отдельно', text: 'Цель `body` требует особой обработки при гидрации. В Nuxt телепорты в `body` уходят в контейнер `#teleports`.' },
+      { title: 'Ловушка: стили определяются новым местом в DOM', text: 'Scoped-классы работают, но наследуемые стили и позиционирование берутся уже от нового родителя в DOM.' }
     ],
-    pitfalls: [
-      'Указать в `to` элемент, которого ещё нет в DOM на момент монтирования, — Vue выдаст предупреждение. Если цель рендерит сам Vue, помогает `defer` (3.5+).',
-      'Забыть, что при SSR телепорты рендерятся отдельно, и цель `body` требует особой обработки при гидрации. В Nuxt для этого есть `#teleports`.',
-      'Удивляться стилям: scoped-классы работают, но наследуемые стили и позиционирование определяются уже новым местом в DOM.'
-    ],
+    takeaway: 'Всё, что визуально поверх страницы, — в `<Teleport to="body">`. Для обычного контента не нужен.',
     questions: [
       { q: 'Зачем нужен Teleport и что происходит с событиями и provide/inject у телепортированного контента?', a: 'Teleport физически переносит разметку в другое место DOM, обычно в `body`. Это нужно для модалок и выпадашек, которые иначе обрежет `overflow: hidden` или сломает родитель с `transform`. Для Vue контент остаётся на прежнем месте дерева: получает пропсы, эмитит события родителю и видит его `provide`. Меняется только положение в DOM, поэтому нативные DOM-события всплывают уже по новому месту, а не через исходного родителя.' },
       { q: 'Что делают disabled и defer у Teleport?', a: '`disabled` выключает перенос, и контент рендерится там, где написан. Удобно, например, для фильтров: на десктопе они в сайдбаре, на мобильном — прямо в потоке страницы. `defer` появился в Vue 3.5: Teleport ищет цель не сразу, а после того, как смонтирована остальная часть приложения в этом цикле. Это нужно, когда целевой контейнер рендерит сам Vue, но позже по дереву.' }
@@ -640,49 +421,24 @@ const open = defineModel<boolean>('open', { default: false })
     group: 'Основы',
     title: 'KeepAlive',
     level: 'middle',
-    summary: '`<KeepAlive>` кеширует экземпляры динамических компонентов: при переключении они деактивируются, а не размонтируются',
-    what: '`<KeepAlive>` оборачивает динамический компонент или `RouterView`. При переключении компонент не размонтируется: его DOM убирается из документа, а экземпляр с состоянием хранится в памяти. `include` и `exclude` фильтруют кеширование по имени компонента, `max` ограничивает размер кеша — при переполнении вытесняется давно не использованный (LRU). Вместо монтирования и размонтирования у таких компонентов вызываются `onActivated` и `onDeactivated`.',
-    analogy: 'Как гардероб в театре: сдал пальто, вернулся — получил то же самое, с ключами в кармане. Без KeepAlive пальто выбрасывают и выдают новое.',
-    where: 'Вкладки с формами, каталог с фильтрами, к которому возвращаются из карточки товара кнопкой «назад».',
-    why: 'Сохраняет заполненную форму, позицию прокрутки внутри компонента и загруженные данные. Не нужно заново создавать компонент и перезапрашивать данные.',
-    when: 'Вкладки с формами, связка «список — карточка». Кешировать всё подряд не стоит: растёт память и показываются устаревшие данные.',
-    diff: [
-      { vs: 'v-show', text: '`v-show` тоже сохраняет состояние, но держит элемент в DOM всегда, скрытым через `display: none`. `KeepAlive` убирает DOM из документа, а экземпляр хранит в памяти.' },
-      { vs: 'без KeepAlive', text: 'Без него `:is` и `RouterView` при каждом переключении создают компонент заново.' }
-    ],
-    code: [
-      { title: 'Кеш страниц', lang: 'vue', src: `<template>
-  <RouterView v-slot="{ Component }">
-    <!-- кешируем только две страницы и не больше 5 экземпляров -->
-    <KeepAlive :include="['ProductList', 'OrderForm']" :max="5">
-      <component :is="Component" />
-    </KeepAlive>
-  </RouterView>
-</template>` },
-      { title: 'Обновление при возврате', lang: 'vue', src: `<script setup lang="ts">
-import { onActivated, onDeactivated } from 'vue'
-
-// имя нужно для include; без него берётся имя файла (3.2.34+)
-defineOptions({ name: 'ProductList' })
-
-onActivated(() => {
-  // и при первом монтировании, и при каждом возврате из кеша
+    summary: '`<KeepAlive>` кеширует экземпляры динамических компонентов: при переключении они деактивируются, а не размонтируются.',
+    points: [
+      { title: 'Неактивный компонент убирается из DOM, экземпляр с состоянием живёт в памяти', text: 'Сохраняются заполненная форма, прокрутка внутри компонента, загруженные данные. Без `KeepAlive` `:is` и `RouterView` при каждом переключении создают компонент заново.', code: `<RouterView v-slot="{ Component }">
+  <KeepAlive :include="['ProductList', 'OrderForm']" :max="5">
+    <component :is="Component" />
+  </KeepAlive>
+</RouterView>`, lang: 'vue' },
+      { title: '`include`/`exclude` фильтруют по имени, `max` ограничивает кеш (LRU)', text: 'При переполнении вытесняется давно не использованный экземпляр. Без `max` кеш карточек по id растёт бесконечно. В `<script setup>` имя выводится из имени файла (3.2.34+) или задаётся явно.', code: `defineOptions({ name: 'ProductList' }) // для include`, lang: 'ts' },
+      { title: 'Вместо mount/unmount — `onActivated` и `onDeactivated`', text: '`onActivated` срабатывает и при первом монтировании, и при каждом возврате из кеша — тут обновляют устаревшие данные.', code: `onActivated(() => {
   refreshIfStale()
   window.addEventListener('scroll', onScroll)
 })
-
-onDeactivated(() => {
-  // экземпляр жив, но скрыт — снимаем глобальные слушатели
-  window.removeEventListener('scroll', onScroll)
-})
-</script>` }
+onDeactivated(() => window.removeEventListener('scroll', onScroll))`, lang: 'ts' },
+      { title: 'Ловушка: глобальные слушатели из `onMounted` работают и в кеше', text: 'Деактивированный компонент не размонтирован, `onUnmounted` не вызывается. Подписки на `window` снимают в `onDeactivated`.' },
+      { title: 'KeepAlive vs `v-show`', text: '`v-show` держит элемент в DOM всегда, скрывая через `display: none`, и он продолжает обновляться. `KeepAlive` убирает DOM из документа и не перерисовывает компонент до активации. `v-show` — для частого переключения пары блоков, `KeepAlive` — для вкладок и страниц.', code: `<Panel v-show="tab === 'a'" />  <!-- в DOM всегда -->
+<KeepAlive><component :is="tabs[tab]" /></KeepAlive>`, lang: 'vue' }
     ],
-    pitfalls: [
-      'Ждать, что `include` сработает без имени компонента. В `<script setup>` имя выводится из имени файла или задаётся через `defineOptions`.',
-      'Забыть, что подписки из `onMounted` продолжают работать, пока компонент деактивирован, — глобальные слушатели снимают в `onDeactivated`.',
-      'Кешировать без `max` при большом числе вариантов (например, карточки по id) — память растёт.',
-      'Показывать устаревшие данные после возврата, не обновив их в `onActivated`.'
-    ],
+    takeaway: 'Кешировать точечно: вкладки с формами и связку «список — карточка», всегда с `max` и обновлением в `onActivated`.',
     questions: [
       { q: 'Как работает KeepAlive и какие хуки появляются у закешированного компонента?', a: '`KeepAlive` при переключении не размонтирует компонент, а убирает его DOM из документа и держит экземпляр в памяти. `include` и `exclude` фильтруют по имени компонента, `max` ограничивает кеш — при переполнении вытесняется давно не использованный. При переключениях вызываются `onActivated` и `onDeactivated` вместо монтирования и размонтирования, причём `onActivated` срабатывает и при первом монтировании. В них обновляю данные и снимаю глобальные слушатели.' },
       { q: 'Чем KeepAlive отличается от v-show?', a: '`v-show` рендерит элемент сразу и скрывает его через `display: none` — DOM остаётся в документе и продолжает обновляться. `KeepAlive` работает с динамическими компонентами и страницами: неактивный компонент убирается из DOM, но экземпляр и состояние живут в памяти, а реактивные обновления его не перерисовывают до активации. `v-show` хорош для частого переключения пары блоков, `KeepAlive` — для вкладок и страниц, где надо сохранить состояние и не рендерить всё заранее.' }
@@ -694,52 +450,40 @@ onDeactivated(() => {
     group: 'Архитектура',
     title: 'Composables',
     level: 'middle',
-    summary: 'Composable — функция `useXxx`, инкапсулирующая реактивное состояние и логику на Composition API для переиспользования',
-    what: 'Composable — обычная функция, внутри которой используются `ref`, `computed`, `watch` и хуки жизненного цикла; она возвращает состояние и методы. По соглашению называется `useXxx` и вызывается синхронно в `setup` (в `<script setup>` — и после `await`, компилятор восстанавливает контекст). Каждый вызов создаёт своё состояние, если оно объявлено внутри функции. Аргументы удобно принимать как `MaybeRefOrGetter` и читать через `toValue()` (Vue 3.3+).',
-    analogy: '',
-    where: '`useFetch`, `usePagination`, `useEventListener`, `usePermissions`, доменные `useCart` и `useOrderForm`. Много готового в библиотеке VueUse.',
-    why: 'Компонент становится тоньше: загрузка данных, работа с формой, подписки уезжают в отдельные функции, которые можно переиспользовать и тестировать.',
-    when: 'Когда логика с состоянием нужна в нескольких местах или когда в разросшемся компоненте видны независимые куски. Функцию без реактивности делать composable не нужно — это обычная утилита.',
-    diff: [
-      { vs: 'миксины', text: 'У composable явный вход и выход: видно, откуда пришла переменная, конфликты имён решаются переименованием при деструктуризации.' },
-      { vs: 'стор', text: 'Каждый вызов composable создаёт своё состояние. Стор Pinia — один экземпляр на приложение.' }
-    ],
-    code: [
-      { title: 'useFetch с отменой', lang: 'ts', src: `import { ref, toValue, watchEffect, type MaybeRefOrGetter } from 'vue'
-
-// url может быть строкой, ref или геттером
-export function useFetch<T>(url: MaybeRefOrGetter<string>) {
+    summary: 'Composable — функция `useXxx`, которая прячет реактивное состояние и логику на Composition API и возвращает их для переиспользования.',
+    points: [
+      { title: 'Composable — обычная функция с `ref`, `computed`, `watch` и хуками внутри', text: 'Компонент становится тоньше: загрузка данных, форма, подписки уезжают в отдельные функции, которые можно переиспользовать и тестировать. Функцию без реактивности делать composable не нужно — это обычная утилита. Много готового есть в VueUse.', code: `export function useCounter(start = 0) {
+  const count = ref(start)
+  const inc = () => count.value++
+  return { count, inc }
+}`, lang: 'ts' },
+      { title: 'Вызывать синхронно в `setup`, не по условию и не в колбэке', text: 'Хуки и вотчеры внутри привязываются к текущему компоненту. В `setTimeout`, обработчике или после `await` в обычной `setup()` экземпляра нет. В `<script setup>` после `await` можно: компилятор восстанавливает контекст.', code: `const { data } = useFetch(url)        // ок
+function onClick() { useFetch(url) } // не привяжется к компоненту
+if (isAdmin) usePermissions()         // плохо: вызов по условию` },
+      { title: 'Аргументы — `MaybeRefOrGetter`, читать через `toValue()` внутри вотчера', text: 'Тогда composable заметит смену параметра. Если принять готовое значение, он навсегда запомнит первое. `toValue` есть с Vue 3.3.', code: `export function useFetch<T>(url: MaybeRefOrGetter<string>) {
   const data = ref<T | null>(null)
-  const loading = ref(false)
-
   watchEffect(async (onCleanup) => {
     const ctrl = new AbortController()
-    onCleanup(() => ctrl.abort())  // отменяем прошлый запрос
-    const u = toValue(url)          // читаем ДО await — попадёт в зависимости
-    loading.value = true
-    try {
-      const res = await fetch(u, { signal: ctrl.signal })
-      data.value = await res.json()
-    } finally {
-      loading.value = false
-    }
+    onCleanup(() => ctrl.abort())
+    const u = toValue(url)  // до await — попадёт в зависимости
+    data.value = await (await fetch(u, { signal: ctrl.signal })).json()
   })
+  return { data }
+}
 
-  return { data, loading } // обычный объект из ref — можно деструктурировать
+const { data: user } = useFetch(() => '/api/users/' + id)`, lang: 'ts' },
+      { title: 'Возвращать обычный объект из ref, а не `reactive`', text: 'Потребитель деструктурирует результат. У `reactive` примитивы при этом потеряют связь, а объект из ref можно разбирать и переименовывать.', code: `return { data, loading }           // ок
+return reactive({ data, loading }) // деструктуризация сломает связь` },
+      { title: 'Каждый вызов — своё состояние; общее — только если ref на уровне модуля', text: 'Модульный ref — мини-стор, в SPA это работает. Но при SSR модуль живёт на сервере между запросами, и данные одного пользователя утекут другому. Для глобального состояния — Pinia или `useState` в Nuxt.', code: `const user = ref(null)       // уровень модуля: общий на всех
+export function useUser() {
+  return { user }            // при SSR — утечка между запросами
 }` },
-      { title: 'Использование', lang: 'vue', src: `<script setup lang="ts">
-const { id } = defineProps<{ id: number }>()
-
-// геттер: при смене id запрос повторится
-const { data: user, loading } = useFetch(() => '/api/users/' + id)
-</script>` }
+      { title: 'Что composable подписал, он сам и снимает', text: 'Слушатели и таймеры убирают в `onUnmounted` внутри composable, тогда потребителю не надо об этом помнить.', code: `export function useEventListener(target, event, cb) {
+  onMounted(() => target.addEventListener(event, cb))
+  onUnmounted(() => target.removeEventListener(event, cb))
+}` }
     ],
-    pitfalls: [
-      'Вызывать composable по условию или асинхронно (в `setTimeout`, обработчике, после `await` в обычной `setup()`) — хуки и вотчеры внутри не привяжутся к компоненту.',
-      'Возвращать `reactive`-объект — при деструктуризации у потребителя примитивы теряют связь с состоянием. Надёжнее вернуть обычный объект из ref.',
-      'Принимать только готовое значение, а не ref или геттер, — composable не заметит, что аргумент поменялся.',
-      'Не снимать слушатели и таймеры при размонтировании компонента.'
-    ],
+    takeaway: 'Синхронный вызов в `setup`, аргументы через `toValue`, на выходе объект из ref, очистка внутри. Глобальное состояние — не модульный ref, а Pinia.',
     questions: [
       { q: 'Что такое composable и как правильно его писать?', a: 'Это функция, которая инкапсулирует реактивное состояние и логику на Composition API и возвращает их. Вызываю её синхронно в `setup`, иначе хуки и вотчеры внутри не привяжутся к компоненту. Возвращаю обычный объект из ref, чтобы потребитель мог деструктурировать его без потери связи. Аргументы принимаю как `MaybeRefOrGetter` и читаю через `toValue` внутри `watch` или `watchEffect` — тогда composable реагирует на смену параметров. И всё, на что composable подписался, он сам снимает при размонтировании.' },
       { q: 'Как сделать composable с общим состоянием на всё приложение и чем это рискованно?', a: 'Если объявить ref не внутри функции, а на уровне модуля, все вызовы будут делить одно состояние — получается мини-стор. В клиентском SPA это работает. Но при SSR модуль живёт на сервере между запросами, и данные одного пользователя могут утечь другому. Поэтому для глобального состояния беру Pinia или `useState` в Nuxt — они создают состояние на каждый запрос. Модульный синглтон оставляю только для чисто клиентских вещей.' }
@@ -751,57 +495,29 @@ const { data: user, loading } = useFetch(() => '/api/users/' + id)
     group: 'Архитектура',
     title: 'Миксины',
     level: 'middle',
-    summary: 'Механизм переиспользования в Options API: опции миксина сливаются с опциями компонента; во Vue 3 заменён composables',
-    what: 'Миксин — объект с опциями компонента (`data`, `methods`, `computed`, хуки), который подключается через `mixins: [...]`. Опции сливаются по правилам: `data` объединяется рекурсивно, при совпадении ключей побеждает компонент; `methods` и `computed` компонента перекрывают одноимённые из миксина; хуки и вотчеры не перекрываются, а вызываются все — сначала миксина, потом компонента. Во Vue 3 миксины поддерживаются, но для нового кода рекомендуют composables.',
-    analogy: '',
-    where: 'В основном в легаси на Vue 2 и при миграции на Vue 3: `authMixin`, `formMixin`, `tableMixin`.',
-    why: 'Во Vue 2 это был основной способ переиспользовать логику. Сейчас их нужно понимать, чтобы читать старый код и переносить его на composables.',
-    when: 'В новом коде не использовать. В легаси — понимать правила слияния и постепенно переносить логику в composables.',
-    diff: [
-      { vs: 'composables', text: 'Composable вызывается явно, принимает параметры и возвращает именованные значения, которые можно переименовать. Миксин неявно добавляет поля в `this`, конфликтует по именам и может зависеть от полей другого миксина.' }
-    ],
-    code: [
-      { title: 'Миксин и его проблемы', lang: 'js', src: `// paginationMixin.js
-export default {
-  data() {
-    return { page: 1, loading: false }
-  },
+    summary: 'Переиспользование в Options API: опции миксина сливаются с опциями компонента. Во Vue 3 поддерживаются, но для нового кода их заменили composables.',
+    points: [
+      { title: 'Миксин — объект с опциями, который подмешивается через `mixins: [...]`', text: 'Встречается в легаси на Vue 2 и при миграции: `authMixin`, `formMixin`, `tableMixin`. В новом коде не нужен.', code: `export default {
+  data: () => ({ page: 1, loading: false }),
   methods: {
     async load() {
-      this.loading = true
-      // неявно рассчитывает, что в компоненте есть fetchPage
-      this.items = await this.fetchPage(this.page)
-      this.loading = false
+      this.items = await this.fetchPage(this.page) // fetchPage — где-то в компоненте?
     }
   }
-}
-// mixins: [paginationMixin, filtersMixin]
-// откуда this.loading? а если filtersMixin тоже его объявил?` },
-      { title: 'То же как composable', lang: 'ts', src: `export function usePagination(fetchPage) {
-  const page = ref(1)
-  const items = ref([])
-  const loading = ref(false)
-
-  async function load() {
-    loading.value = true
-    items.value = await fetchPage(page.value) // зависимость передана явно
-    loading.value = false
-  }
-
-  return { page, items, loading, load }
-}
-
-// при конфликте имён просто переименовываем
-const { loading: listLoading, load } = usePagination(api.getOrders)` }
+}` },
+      { title: 'Слияние: данные и методы компонента перекрывают миксин, хуки вызываются все', text: 'При совпадении ключей в `data`, `methods`, `computed` побеждает компонент. Хуки и вотчеры не перекрываются: сначала хуки миксинов в порядке подключения, потом компонента. Во Vue 3 `data` сливается поверхностно, во Vue 2 сливался рекурсивно.', code: `// mixin: created() { log('mixin') }, data: { a: 1, b: 1 }
+// компонент: created() { log('comp') }, data: { b: 2 }
+// -> 'mixin', 'comp'; data = { a: 1, b: 2 }`, lang: 'text' },
+      { title: 'Три проблемы миксинов: откуда поле, конфликт имён, неявные зависимости', text: 'При нескольких миксинах непонятно, откуда в `this` взялось свойство. Одно поле молча перекрывает другое. Миксин рассчитывает на поле компонента или другого миксина — переименование ломает всё без ошибок компиляции.', code: `mixins: [paginationMixin, filtersMixin]
+// откуда this.loading? а если оба его объявили?` },
+      { title: 'Composable решает все три: явный вызов, параметры, переименование', text: 'Зависимость передаётся аргументом, возвращаемые значения видны и нормально типизируются.', code: `const { loading: listLoading, load } = usePagination(api.getOrders)
+const { loading: filtersLoading } = useFilters()`, lang: 'ts' },
+      { title: 'Ловушка: глобальный миксин через `app.mixin`', text: 'Он влияет на все компоненты, включая компоненты сторонних библиотек.' }
     ],
-    pitfalls: [
-      'Два миксина объявляют одно и то же поле — одно молча перекрывает другое, баг ищется долго.',
-      'Миксин рассчитывает на поле компонента или другого миксина — переименование метода ломает всё без ошибок компиляции.',
-      'Глобальный миксин через `app.mixin` влияет на все компоненты, включая компоненты сторонних библиотек.'
-    ],
+    takeaway: 'Миксины надо уметь читать в легаси и знать правила слияния. Новый код и рефакторинг — composables.',
     questions: [
       { q: 'Почему от миксинов отказались в пользу composables?', a: 'У миксинов три главные проблемы. Неясное происхождение: при нескольких миксинах непонятно, откуда в `this` взялось свойство. Конфликты имён: одно поле молча перекрывает другое. Неявные зависимости: миксин рассчитывает на поля компонента или другого миксина. Composable вызывается явно, принимает параметры, возвращает именованные значения, которые можно переименовать при деструктуризации, и нормально типизируется.' },
-      { q: 'Как сливаются опции миксина и компонента?', a: '`data` сливается рекурсивно, при совпадении ключей побеждает компонент. С `methods` и `computed` так же: одноимённый метод компонента перекрывает метод миксина. Хуки жизненного цикла не перекрываются, а вызываются все: сначала хуки миксинов в порядке подключения, потом компонента. Вотчеры на одно поле тоже срабатывают оба. Из-за этих правил поведение компонента с несколькими миксинами трудно предсказать.' }
+      { q: 'Как сливаются опции миксина и компонента?', a: 'При совпадении ключей в `data` побеждает компонент; во Vue 3 слияние `data` поверхностное, во Vue 2 было рекурсивным. С `methods` и `computed` так же: одноимённый метод компонента перекрывает метод миксина. Хуки жизненного цикла не перекрываются, а вызываются все: сначала хуки миксинов в порядке подключения, потом компонента. Вотчеры на одно поле тоже срабатывают оба. Из-за этих правил поведение компонента с несколькими миксинами трудно предсказать.' }
     ]
   },
   {
@@ -810,49 +526,36 @@ const { loading: listLoading, load } = usePagination(api.getOrders)` }
     group: 'Архитектура',
     title: 'Pinia',
     level: 'middle',
-    summary: 'Официальная библиотека глобального состояния для Vue: модульные сторы с выводом типов, devtools и поддержкой SSR',
-    what: 'Pinia — библиотека для общего состояния приложения. Стор создают через `defineStore` в одном из двух стилей: options (объект с `state`, `getters`, `actions`) или setup (функция с `ref`, `computed` и обычными функциями). Каждый стор — отдельный модуль со своим id; мутаций и вложенных модулей с namespace, как во Vuex, нет. Экземпляр стора — reactive-объект, поэтому для деструктуризации нужен `storeToRefs`.',
-    analogy: '',
-    where: 'Стор `auth` с пользователем и токеном, стор `cart` с корзиной, стор настроек интерфейса. Шапка, корзина и оформление заказа читают одни данные без проброса пропсов.',
-    why: 'Хранит данные, общие для приложения. Даёт devtools с историей изменений, поддержку SSR, HMR и плагины.',
-    when: 'Когда состояние нужно в нескольких несвязанных частях приложения или должно пережить переход между страницами. Локальное состояние компонента и данные одного поддерева в стор не кладут.',
-    diff: [
-      { vs: 'Vuex', text: 'Во Vuex были `mutations`, `actions`, модули с namespace и слабая типизация. В Pinia мутаций нет: состояние меняют напрямую или в actions, типы выводятся автоматически.' },
-      { vs: 'setup и options-стор', text: 'Setup-стор гибче: внутри можно использовать composables и `watch`. Options-стор проще и умеет `$reset()` из коробки.' }
-    ],
-    code: [
-      { title: 'Setup-стор', lang: 'ts', src: `import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-
-export const useCartStore = defineStore('cart', () => {
-  const items = ref([])                       // ref -> state
-
-  const total = computed(() =>                // computed -> getter
-    items.value.reduce((s, i) => s + i.price * i.qty, 0)
-  )
-
-  async function add(productId) {             // функция -> action
-    items.value.push(await api.addToCart(productId))
-  }
-
-  // вернуть всё состояние, иначе нет SSR и devtools
+    summary: 'Официальная библиотека глобального состояния для Vue: модульные сторы с выводом типов, devtools и поддержкой SSR.',
+    points: [
+      { title: 'В setup-сторе `ref` — state, `computed` — getter, функция — action', text: 'Каждый стор — отдельный модуль со своим id. Мутаций и вложенных модулей с namespace, как во Vuex, нет: состояние меняют напрямую или в actions, типы выводятся сами.', code: `export const useCartStore = defineStore('cart', () => {
+  const items = ref([])
+  const total = computed(() =>
+    items.value.reduce((s, i) => s + i.price * i.qty, 0))
+  async function add(id) { items.value.push(await api.addToCart(id)) }
   return { items, total, add }
-})` },
-      { title: 'storeToRefs в компоненте', lang: 'vue', src: `<script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import { useCartStore } from '@/stores/cart'
-
-const cart = useCartStore()
-const { items, total } = storeToRefs(cart) // state и getters — через storeToRefs
-const { add } = cart                       // actions — напрямую
-</script>` }
+})`, lang: 'ts' },
+      { title: 'Из setup-стора надо вернуть всё состояние', text: 'Невозвращённый ref не попадёт в devtools и не передастся с сервера на клиент при SSR.', code: `const draft = ref('')
+return { items, total, add } // draft забыт — нет в devtools и SSR` },
+      { title: 'Деструктуризация стора — только через `storeToRefs`', text: 'Стор — reactive-объект, прямая деструктуризация даёт значения на момент вызова. `storeToRefs` делает ref только из state и getters; actions берут напрямую. `toRefs` хуже: обернёт всё подряд, включая служебные свойства.', code: `const cart = useCartStore()
+const { total } = cart               // число, связи нет
+const { items, total } = storeToRefs(cart) // ок
+const { add } = cart                 // actions — напрямую`, lang: 'ts' },
+      { title: 'Options-стор проще и умеет `$reset()`, setup-стор гибче', text: 'В setup-сторе можно использовать composables, `watch`, `inject`, но `$reset` придётся написать самому.', code: `defineStore('ui', {
+  state: () => ({ theme: 'light' }),
+  getters: { isDark: (s) => s.theme === 'dark' },
+  actions: { toggle() { this.theme = this.isDark ? 'light' : 'dark' } }
+})`, lang: 'ts' },
+      { title: 'Стор вызывают после `app.use(pinia)`', text: 'На верхнем уровне модуля, до установки Pinia, будет ошибка об отсутствии активной Pinia. Внутри функций (guard, action) — можно.', code: `const cart = useCartStore()      // верх модуля — ошибка
+router.beforeEach(() => {
+  const auth = useAuthStore()    // ок: pinia уже установлена
+})`, lang: 'ts' },
+      { title: 'Плагин — функция, которую `pinia.use()` вызывает для каждого стора', text: 'Получает `{ store, app, pinia, options }`. Через `$subscribe` следит за состоянием, через `$onAction` — за вызовами actions: сохранение в `localStorage`, логирование, ошибки в мониторинг.', code: `pinia.use(({ store }) => {
+  store.$subscribe((_, state) =>
+    localStorage.setItem(store.$id, JSON.stringify(state)))
+})`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Деструктурировать стор напрямую (`const { total } = useCartStore()`) — получишь значение на момент вызова без связи со стором. Нужен `storeToRefs`.',
-      'Не вернуть часть state из setup-стора — она не попадёт в devtools и не передастся с сервера на клиент при SSR.',
-      'Вызвать стор вне компонента до `app.use(pinia)`, например на верхнем уровне модуля, — ошибка об отсутствии активной Pinia.',
-      'Складывать в стор всё подряд, включая состояние формы одного компонента.'
-    ],
+    takeaway: 'Стор — для данных, нужных в разных частях приложения. Состояние формы одного компонента туда не кладут.',
     questions: [
       { q: 'Чем setup-стор отличается от options-стора в Pinia?', a: 'Options-стор — объект с `state`, `getters` и `actions`, привычный после Vuex, и у него из коробки есть `$reset()`. Setup-стор — функция, как `setup` компонента: `ref` становятся state, `computed` — getters, функции — actions. Он гибче: внутри можно использовать composables, `watch`, `inject`. Нюанс — нужно вернуть всё состояние, иначе оно не попадёт в devtools и не передастся при SSR, а `$reset` придётся написать самому.' },
       { q: 'Зачем нужен storeToRefs?', a: 'Стор в Pinia — reactive-объект, и при деструктуризации получаешь значения на текущий момент без связи со стором. `storeToRefs` превращает state и getters в ref, связанные со стором, и их можно спокойно деструктурировать. Actions — обычные функции, их берут из стора напрямую. Обычный `toRefs` здесь хуже: он обернул бы в ref всё подряд, включая служебные свойства и методы.' },
@@ -865,54 +568,32 @@ const { add } = cart                       // actions — напрямую
     group: 'Архитектура',
     title: 'Управление состоянием',
     level: 'middle+',
-    summary: 'Состояние делят по видам — локальное, поддерева, глобальное клиентское, серверное, URL — и держат на минимально нужном уровне',
-    what: 'Состояние приложения бывает разных видов: локальное в компоненте, общее для поддерева (props, provide/inject), глобальное клиентское (Pinia), серверное — кешированная копия данных из API, и состояние в URL — фильтры, страница, вкладка. У каждого вида свой подходящий инструмент. Главное правило — держать состояние на самом низком уровне, где оно нужно, и не дублировать его.',
-    analogy: '',
-    where: 'Админки и каталоги: список заказов из API, фильтры в query-параметрах, пользователь и настройки интерфейса в сторе, флаг открытой модалки — внутри компонента.',
-    why: 'Если всё складывать в глобальный стор, появляются устаревшие данные, ручные перезапросы и связи между экранами, которые не должны знать друг о друге.',
-    when: 'Начинать с локального состояния и поднимать выше, когда появился второй потребитель. Данные с сервера — через слой запросов с кешем (TanStack Query, `useAsyncData`/`useFetch` в Nuxt), а не вручную в сторе.',
-    diff: [
-      { vs: 'серверное', text: 'Клиентское состояние принадлежит приложению и меняется только по его действиям. Серверное — копия чужих данных: оно устаревает, ему нужны кеш, дедупликация запросов и инвалидация после изменений.' },
-      { vs: 'URL', text: 'Состояние в URL переживает перезагрузку страницы, им можно поделиться ссылкой, с ним работают кнопки «назад» и «вперёд».' }
-    ],
-    code: [
-      { title: 'Серверные данные через TanStack Query', lang: 'ts', src: `import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
-
-export function useOrders(status) {
-  return useQuery({
-    queryKey: ['orders', status],      // кеш по ключу; ref в ключе отслеживается
-    queryFn: () => api.getOrders(status.value),
-    staleTime: 30_000                  // 30 секунд данные считаются свежими
-  })
-}
-
-export function useCancelOrder() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: api.cancelOrder,
-    // после отмены помечаем список устаревшим — он перезапросится
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['orders'] })
-  })
-}` },
-      { title: 'Фильтр в URL', lang: 'ts', src: `import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-
-export function useQueryParam(name, fallback = '') {
-  const route = useRoute()
-  const router = useRouter()
-  // читаем из query и пишем туда же
+    summary: 'Состояние бывает разных видов — локальное, поддерева, глобальное клиентское, серверное, URL. Держать на минимально нужном уровне и не дублировать.',
+    points: [
+      { title: 'Состояние живёт на самом низком уровне, где оно нужно', text: 'Начинают с `ref` в компоненте и поднимают выше, когда появился второй потребитель. Если всё складывать в глобальный стор, появляются устаревшие данные и связи между экранами, которые не должны знать друг о друге.', code: `// флаг модалки        -> ref в компоненте
+// контекст формы       -> props / provide-inject
+// пользователь, корзина -> Pinia
+// заказы из API        -> слой запросов с кешем
+// фильтры, страница    -> URL`, lang: 'text' },
+      { title: 'Серверное состояние — копия чужих данных, ему нужны кеш и инвалидация', text: 'Клиентское меняется только по действиям приложения. Серверное устаревает само: нужны кеш по параметрам, дедупликация запросов, инвалидация после мутаций, перезапрос при возврате на вкладку. В Pinia это пишется вручную — берут TanStack Query или `useAsyncData`/`useFetch` в Nuxt.', code: `const { data } = useQuery({
+  queryKey: ['orders', status],   // кеш по ключу, ref отслеживается
+  queryFn: () => api.getOrders(status.value),
+  staleTime: 30_000
+})`, lang: 'ts' },
+      { title: 'После мутации кеш инвалидируют, а не правят руками', text: 'Список помечается устаревшим и перезапрашивается.', code: `useMutation({
+  mutationFn: api.cancelOrder,
+  onSuccess: () => qc.invalidateQueries({ queryKey: ['orders'] })
+})`, lang: 'ts' },
+      { title: 'Фильтры и пагинацию — в URL', text: 'Переживают перезагрузку, ими можно поделиться ссылкой, работают кнопки «назад» и «вперёд». Удобно обернуть query-параметр в `computed` с `get`/`set`.', code: `export function useQueryParam(name, fallback = '') {
+  const route = useRoute(), router = useRouter()
   return computed({
     get: () => route.query[name] ?? fallback,
     set: (v) => router.replace({ query: { ...route.query, [name]: v || undefined } })
   })
-}` }
+}`, lang: 'ts' },
+      { title: 'Ловушка: одно состояние в двух местах', text: 'Копия в сторе и в компоненте рано или поздно разойдётся. То, что можно вычислить, не хранят — это `computed`.' }
     ],
-    pitfalls: [
-      'Складывать ответы API в глобальный стор без стратегии обновления — устаревшие данные и ручные перезапросы повсюду.',
-      'Держать одно и то же состояние в двух местах, в сторе и в компоненте, — рано или поздно они разойдутся.',
-      'Хранить отдельно то, что можно вычислить через `computed`.',
-      'Держать фильтры и пагинацию только в памяти — ссылкой не поделиться, после перезагрузки всё сбрасывается.'
-    ],
+    takeaway: 'Локальное — в компоненте, глобальное клиентское — Pinia, серверное — слой запросов с кешем, фильтры — в URL.',
     questions: [
       { q: 'Как вы решаете, где хранить состояние во Vue-приложении?', a: 'Держу состояние на самом низком уровне, где оно нужно. Нужно одному компоненту — `ref` внутри. Нескольким в одном поддереве — props или provide/inject. Глобальное клиентское, вроде пользователя или корзины, — Pinia. Данные с сервера отдельно: им нужны кеш и инвалидация, поэтому TanStack Query или `useAsyncData` в Nuxt. Фильтры и номер страницы кладу в URL, чтобы можно было поделиться ссылкой.' },
       { q: 'Чем серверное состояние отличается от клиентского и почему его не стоит просто класть в Pinia?', a: 'Клиентское состояние принадлежит приложению: оно меняется, только когда мы его меняем. Серверное — снимок данных, которые на сервере могут поменяться в любой момент. У него свои задачи: кеш по параметрам, дедупликация одинаковых запросов, инвалидация после мутаций, перезапрос при возврате на вкладку. В Pinia всё это пишется вручную и обычно получается хуже. Поэтому серверные данные отдаю библиотеке запросов, а в сторе оставляю чисто клиентское.' }
@@ -924,55 +605,33 @@ export function useQueryParam(name, fallback = '') {
     group: 'Архитектура',
     title: 'Разделение ответственности',
     level: 'middle+',
-    summary: 'Separation of concerns: компоненты отображают, composables связывают реактивность, чистые функции считают, API-слой ходит в сеть',
-    what: 'Разделение ответственности (Separation of Concerns) — принцип, при котором у каждой части кода одна причина меняться. Во Vue это обычно слои: презентационные компоненты (только props и события), контейнеры или страницы (подключают данные), composables (реактивная связка), чистые функции с бизнес-правилами и API-слой (запросы и преобразование ответа в модели приложения). Направление зависимостей — от UI к данным, не наоборот.',
-    analogy: '',
-    where: 'Большие формы, оформление заказа, страницы админки, где в одном компоненте смешались запросы, расчёты и вёрстка.',
-    why: 'Компоненты становятся тонкими и переиспользуемыми, логику можно тестировать без монтирования, а смена API или UI-кита затрагивает одно место.',
-    when: 'Как только компонент делает больше одного дела: ходит в API, валидирует, считает цену и рисует. В маленьких экранах строгое деление на контейнер и представление бывает лишним.',
-    diff: [
-      { vs: 'контейнер', text: 'Презентационный компонент не знает, откуда данные: только props и события. Контейнер знает про сторы и API, но почти не содержит разметки.' },
-      { vs: 'SOLID', text: 'S — компонент делает одно; O — расширяется слотами и пропсами без правки исходника; D — зависит от composable или переданного через provide интерфейса, а не от конкретного HTTP-клиента.' }
-    ],
-    code: [
-      { title: 'Слои', lang: 'ts', src: `// api/orders.ts — только сеть и перевод ответа в наш формат
-export const ordersApi = {
+    summary: 'Компоненты отображают, composables связывают реактивность, чистые функции считают, API-слой ходит в сеть. У каждой части одна причина меняться.',
+    points: [
+      { title: 'API-слой переводит ответ сервера в модели приложения', text: 'Если отдавать DTO прямо в шаблоны, любое изменение бэкенда ломает интерфейс в десятке мест.', code: `export const ordersApi = {
   async list(params) {
     const dto = await http.get('/orders', { params })
-    return dto.map(toOrder)
+    return dto.map(toOrder) // наш формат, а не сырой ответ
   }
-}
-
-// domain/orders.ts — чистое правило, легко покрыть тестом
-export const canCancel = (o) =>
-  o.status === 'new' && Date.now() - o.createdAt < 3_600_000
-
-// composables/useOrders.ts — реактивная связка
-export function useOrders(filter) {
+}`, lang: 'ts' },
+      { title: 'Бизнес-правила — чистые функции без Vue', text: 'Их тестируют без монтирования и моков сети. «Сервис», который сам лезет в стор и роутер, снова привязывает логику к фреймворку.', code: `export const canCancel = (o) =>
+  o.status === 'new' && Date.now() - o.createdAt < 3_600_000`, lang: 'ts' },
+      { title: 'Composable — реактивная связка между API и UI', code: `export function useOrders(filter) {
   const orders = ref([])
   watch(filter, async (f) => { orders.value = await ordersApi.list(f) },
     { immediate: true, deep: true })
   return { orders }
-}` },
-      { title: 'Контейнер и презентационный компонент', lang: 'vue', src: `<!-- OrdersPage.vue: контейнер, знает про данные -->
-<script setup lang="ts">
+}`, lang: 'ts' },
+      { title: 'Контейнер знает про данные, презентационный компонент — только props и события', text: 'Кнопку или таблицу, которая сама зовёт API, не переиспользуешь и не протестируешь. Но дробить так каждый маленький компонент не надо — в небольших экранах это лишние файлы.', code: `<!-- OrdersPage.vue: контейнер -->
+<script setup>
 const filter = ref({ status: 'new' })
 const { orders } = useOrders(filter)
 </script>
-
 <template>
-  <OrderFilters v-model="filter" />
   <OrderTable :orders="orders" @cancel="cancelOrder" />
-</template>
-
-<!-- OrderTable.vue: только props и события, без API и сторов -->` }
+</template>`, lang: 'vue' },
+      { title: 'SOLID на компонентах', text: 'S — компонент либо рисует, либо управляет данными. O — расширяется слотами и пропсами без правки исходника. I — получает только нужные поля, а не весь объект. D — зависит от composable или интерфейса через provide, а не от конкретного HTTP-клиента, поэтому легко подменяется в тестах.' }
     ],
-    pitfalls: [
-      'Вызывать API прямо из кнопок и таблиц — такие компоненты не переиспользуешь и не протестируешь без моков сети.',
-      'Делать «сервисы», которые внутри обращаются к стору и роутеру, — логика снова привязана к фреймворку.',
-      'Дробить на контейнер и представление каждый маленький компонент — лишние файлы без пользы.',
-      'Передавать ответ сервера как есть прямо в шаблоны — любое изменение API ломает интерфейс в десятке мест.'
-    ],
+    takeaway: 'Зависимости идут от UI к данным: шаблон → composable → чистые правила и API-слой. Делить начинают, когда компонент делает больше одного дела.',
     questions: [
       { q: 'Как вы разделяете ответственность в Vue-приложении?', a: 'Раскладываю код по слоям. Внизу API-слой: запросы и преобразование ответа сервера в модели приложения, чтобы изменения бэкенда не протекали в шаблоны. Бизнес-правила — чистые функции, их легко тестировать. Реактивная связка — в composables. Страница соединяет composables и сторы и передаёт данные презентационным компонентам, которые знают только свои props и события. Так UI переиспользуется, а логика тестируется без монтирования.' },
       { q: 'Как принципы SOLID применяются к Vue-компонентам?', a: 'Single responsibility — компонент либо рисует, либо управляет данными, а не всё сразу. Open/closed — компонент расширяется слотами и пропсами, и новый вариант не требует правки исходника. Interface segregation — передаю компоненту только нужные поля, а не весь объект заказа. Dependency inversion — компонент зависит от composable или от интерфейса, переданного через provide, а не от конкретного HTTP-клиента, поэтому его легко подменить в тестах.' }
@@ -984,45 +643,36 @@ const { orders } = useOrders(filter)
     group: 'Архитектура',
     title: 'Переиспользуемые компоненты',
     level: 'middle+',
-    summary: 'Переиспользуемый компонент имеет небольшой явный контракт: props, события, слоты, `v-model` и проброс атрибутов',
-    what: 'Контракт переиспользуемого компонента — props для данных и вариантов, события, слоты для разметки, `v-model` для редактируемых значений. Атрибуты, не объявленные как props или emits (`class`, `style`, `id`, `aria-*`, слушатели), по умолчанию переносятся на корневой элемент — это fallthrough attributes; `class` и `style` при этом сливаются с собственными. Опция `inheritAttrs: false` отключает автоматический перенос, и атрибуты привязывают вручную через `v-bind="$attrs"` или `useAttrs()`.',
-    analogy: '',
-    where: 'Дизайн-система и UI-кит: `BaseInput`, `BaseButton`, `BaseSelect`, `BaseModal`.',
-    why: 'Экономит время и делает интерфейс единообразным — но только если компонент не приходится копировать и переделывать под каждый случай.',
-    when: 'Выносить в общий компонент, когда паттерн повторился 2–3 раза. Заранее делать универсальный «комбайн» с десятками пропсов не стоит.',
-    diff: [
-      { vs: 'props и слоты', text: 'Props — для данных и вариантов (`size`, `variant`). Слоты — для произвольной разметки.' },
-      { vs: 'inheritAttrs: false', text: 'Нужен, когда атрибуты должны попасть не на корень, а на внутренний элемент, например на `input` внутри обёртки. В `<script setup>` их получают через `useAttrs()`.' }
-    ],
-    code: [
-      { title: 'Инпут, где атрибуты попадают на input', lang: 'vue', src: `<script setup lang="ts">
-// не переносить атрибуты на корень (label)
+    summary: 'У переиспользуемого компонента небольшой явный контракт: props, события, слоты, `v-model` и проброс атрибутов.',
+    points: [
+      { title: 'Необъявленные атрибуты падают на корневой элемент (fallthrough)', text: '`class`, `style`, `id`, `aria-*`, слушатели — всё, что не props и не emits, переносится на корень; `class` и `style` сливаются с собственными. Поэтому `placeholder` или `maxlength` не объявляют пропсами.', code: `<BaseButton class="wide" aria-label="Сохранить" @focus="onFocus" />
+<!-- всё это окажется на корневом <button> -->`, lang: 'vue' },
+      { title: 'Атрибуты нужны не на корне — `inheritAttrs: false` и `v-bind="$attrs"`', text: 'В обёртке над `input` корень — `label`, а атрибуты нужны на `input`. В `<script setup>` их можно получить через `useAttrs()`.', code: `<script setup lang="ts">
 defineOptions({ inheritAttrs: false })
-
 const model = defineModel<string>()
 defineProps<{ label: string; error?: string }>()
 </script>
 
 <template>
-  <label class="field" :class="{ 'field--error': error }">
+  <label class="field">
     <span>{{ label }}</span>
-    <!-- placeholder, maxlength, autocomplete, @blur — попадут сюда -->
     <input v-model="model" v-bind="$attrs" />
-    <small v-if="error">{{ error }}</small>
   </label>
-</template>` },
-      { title: 'Пропсы для вариантов, слоты для разметки', lang: 'vue', src: `<!-- один проп variant вместо isPrimary, isDanger, isGhost -->
-<BaseButton variant="primary" size="sm" :loading="saving">
+</template>`, lang: 'vue' },
+      { title: 'Несколько корней — атрибуты не переносятся автоматически', text: 'Без явного `v-bind="$attrs"` на одном из элементов Vue предупредит, что атрибуты некуда перенести.' },
+      { title: 'Варианты — одним пропом с union-типом, разметка — слотами', text: 'Не `isPrimary`, `isDanger`, `isGhost`, а `variant`. Тексты и иконки не зашивают внутрь — иначе компонент придётся копировать.', code: `<!-- BaseButton.vue -->
+<script setup lang="ts">
+defineProps<{ variant?: 'primary' | 'danger' | 'ghost'; size?: 'sm' | 'md' }>()
+</script>
+
+<!-- использование -->
+<BaseButton variant="primary" size="sm">
   <template #icon><IconSave /></template>
   Сохранить
-</BaseButton>` }
+</BaseButton>`, lang: 'vue' },
+      { title: 'Не обобщать заранее', text: 'В общий компонент выносят, когда паттерн повторился 2–3 раза. Универсальный «комбайн» с десятками пропсов заранее не делают: простой случай должен укладываться в одну строку.' }
     ],
-    pitfalls: [
-      'Объявлять пропсом каждый нативный атрибут (`placeholder`, `maxlength`, `name`) вместо проброса через `$attrs`.',
-      'Сделать несколько корневых элементов без явного `v-bind="$attrs"` — Vue предупредит, что атрибуты некуда перенести.',
-      'Заводить булев флаг на каждый вариант (`isPrimary`, `isDanger`, `isGhost`) вместо одного пропа `variant`.',
-      'Зашить тексты и разметку внутрь — компонент придётся копировать, а не переиспользовать.'
-    ],
+    takeaway: 'Props для данных и вариантов, слоты для разметки, `v-model` для редактируемого значения, нативные атрибуты — через `$attrs`.',
     questions: [
       { q: 'Что такое fallthrough-атрибуты и когда нужен inheritAttrs: false?', a: 'Всё, что передали компоненту, но он не объявил в props или emits — `class`, `style`, `id`, aria-атрибуты, слушатели, — Vue переносит на корневой элемент, причём `class` и `style` сливает с собственными. Это удобно, пока корень и есть главный элемент. В обёртке над `input` корень — `label`, а атрибуты нужны на `input`, поэтому ставлю `inheritAttrs: false` и пишу `v-bind="$attrs"` на `input`. При нескольких корневых элементах автоматического переноса нет вообще, и без явной привязки Vue выдаст предупреждение.' },
       { q: 'Как вы проектируете API переиспользуемого компонента?', a: 'Начинаю с того, как его будут использовать: простой случай должен укладываться в одну строку. Варианты делаю одним пропом вроде `variant` с union-типом, а не кучей булевых флагов. Всё, что про разметку, — слоты, а не пропсы с HTML. Если компонент редактирует значение — поддерживаю `v-model`. Нативные атрибуты пробрасываю через `$attrs`. И не обобщаю заранее: выношу, когда паттерн повторился несколько раз.' }
@@ -1034,50 +684,27 @@ defineProps<{ label: string; error?: string }>()
     group: 'Архитектура',
     title: 'Архитектура больших приложений',
     level: 'senior',
-    summary: 'Код группируют по фичам, зависимости направлены в одну сторону, у модулей есть публичный API, страницы грузятся лениво',
-    what: 'В большом приложении код группируют не по типам файлов (`components`, `stores`, `utils`), а по фичам или доменам. Популярная методология — Feature-Sliced Design (FSD): слои `app`, `pages`, `widgets`, `features`, `entities`, `shared`; модуль может импортировать только из слоёв ниже, а слайсы одного слоя не импортируют друг друга. Каждый модуль отдаёт наружу публичный API через `index.ts`, глубокие импорты запрещают линтером.',
-    analogy: '',
-    where: 'Продукты с несколькими командами и сотнями экранов: каталог, заказы, биллинг как отдельные модули. Границы проверяют `eslint-plugin-boundaries` или `steiger` для FSD.',
-    why: 'При структуре по типам в большом проекте непонятно, что от чего зависит, и правка одной фичи ломает другую. Чёткие границы уменьшают связность и позволяют командам работать параллельно.',
-    when: 'Когда проект перерос пару десятков экранов или над ним работают несколько команд. Маленькому приложению строгая FSD добавляет лишних слоёв.',
-    diff: [
-      { vs: 'по типам файлов', text: 'Структура по типам проста на старте, но плохо масштабируется. По фичам — всё про фичу лежит рядом.' },
-      { vs: 'микрофронтенды', text: 'Микрофронтенды — следующий уровень изоляции с независимым деплоем частей; платой становятся сложность сборки, общих зависимостей и интеграции.' }
+    summary: 'Код группируют по фичам, зависимости направлены в одну сторону, у модулей есть публичный API, страницы грузятся лениво.',
+    points: [
+      { title: 'Группировать по фичам, а не по типам файлов', text: 'Папки `components`, `stores`, `utils` просты на старте, но в большом проекте непонятно, что от чего зависит, и правка одной фичи ломает другую. По фичам всё про заказы — компоненты, composables, API, типы — лежит рядом.', code: `src/features/orders/
+  ui/ model/ api/ types.ts
+  index.ts`, lang: 'text' },
+      { title: 'FSD: слои импортируют только вниз, слайсы одного слоя друг о друге не знают', text: 'Слои `app`, `pages`, `widgets`, `features`, `entities`, `shared`. Перекрёстные импорты внутри слоя дают циклические зависимости. `shared` — без бизнес-логики, иначе он становится вторым монолитом.', code: `src/
+  app/       # роутер, pinia, провайдеры
+  pages/     # собирают виджеты
+  widgets/   # Header, OrdersTable
+  features/  # cancel-order, add-to-cart
+  entities/  # order, user, product
+  shared/    # ui-кит, api-клиент, утилиты`, lang: 'text' },
+      { title: 'Модуль отдаёт наружу только `index.ts`, глубокие импорты запрещены линтером', text: 'Иначе граница модуля перестаёт существовать. Проверяют `eslint-plugin-boundaries` или `steiger` для FSD.', code: `import { CancelOrderButton } from '@/features/cancel-order'        // ок
+import Btn from '@/features/cancel-order/ui/CancelOrderButton.vue' // нельзя`, lang: 'ts' },
+      { title: 'Каждая страница — отдельный чанк', text: 'Ленивые маршруты грузят код раздела при переходе, так что модули ещё и не раздувают стартовый бандл.', code: `{ path: '/orders', component: () => import('@/pages/orders/OrdersPage.vue') },
+{ path: '/admin', component: () => import('@/pages/admin/AdminLayout.vue'),
+  meta: { requiresRole: 'admin' } }`, lang: 'ts' },
+      { title: 'Микрофронтенды — следующий уровень изоляции, и он дорогой', text: 'Независимый деплой частей разными командами, но платой становятся сложность сборки, общие зависимости и интеграция.' },
+      { title: 'Ловушка: полная FSD в маленьком проекте', text: 'Церемоний больше, чем пользы, и постоянные споры «это feature или entity». Строгость подбирают под размер проекта и команды.' }
     ],
-    code: [
-      { title: 'Структура FSD', lang: 'text', src: `src/
-  app/          # запуск: роутер, pinia, провайдеры, стили
-  pages/        # страницы, собирают виджеты
-    orders/
-  widgets/      # крупные блоки: Header, OrdersTable
-  features/     # действия пользователя: cancel-order, add-to-cart
-    cancel-order/
-      ui/ model/ api/
-      index.ts  # публичный API — единственная точка входа
-  entities/     # бизнес-сущности: order, user, product
-  shared/       # ui-кит, api-клиент, утилиты, без бизнес-логики` },
-      { title: 'Ленивые маршруты по модулям', lang: 'ts', src: `const routes = [
-  {
-    path: '/orders',
-    // каждая страница — отдельный чанк, грузится при переходе
-    component: () => import('@/pages/orders/OrdersPage.vue'),
-    children: [
-      { path: ':id', component: () => import('@/pages/orders/OrderPage.vue') }
-    ]
-  },
-  {
-    path: '/admin',
-    component: () => import('@/pages/admin/AdminLayout.vue'),
-    meta: { requiresRole: 'admin' }
-  }
-]` }
-    ],
-    pitfalls: [
-      'Импортировать внутренности чужой фичи в обход `index.ts` — граница модуля перестаёт существовать.',
-      'Складывать в `shared` всё подряд, включая бизнес-логику, — `shared` превращается во второй монолит.',
-      'Перекрёстные импорты между слайсами одного слоя — появляются циклические зависимости.',
-      'Тащить полную FSD в маленький проект — церемоний больше, чем пользы.'
-    ],
+    takeaway: 'Берут идею слоёв и публичного API, строгость — по размеру: пара десятков экранов или несколько команд — пора.',
     questions: [
       { q: 'Как бы вы организовали структуру большого Vue-приложения?', a: 'Группирую код по фичам, а не по типам: всё про заказы — компоненты, composables, API, типы — лежит в одном месте. Поверх этого слои с одним направлением зависимостей, например по FSD: `shared` ничего не знает о бизнесе, `entities` описывают сущности, `features` — действия пользователя, `pages` собирают всё вместе, импорт только вниз. Каждый модуль отдаёт наружу `index.ts`, глубокие импорты запрещены линтером. Страницы грузятся лениво, так что каждый раздел — отдельный чанк.' },
       { q: 'Что такое Feature-Sliced Design и какие у него минусы?', a: 'FSD — методология, где код делится на слои `app`, `pages`, `widgets`, `features`, `entities`, `shared`, а слои — на слайсы по доменам. Слой импортирует только из нижележащих, слайсы одного слоя друг о друге не знают, у каждого есть публичный API. Плюс — предсказуемые зависимости и изолированные фичи. Минусы — высокий порог входа, постоянные споры «это feature или entity» и много церемоний для небольших проектов. Я бы брал из FSD идею слоёв и публичного API, а строгость подбирал под размер команды.' }
@@ -1089,40 +716,24 @@ defineProps<{ label: string; error?: string }>()
     group: 'Производительность',
     title: 'Virtual DOM и компилятор',
     level: 'middle',
-    summary: 'Vue строит дерево VNode, сравнивает его с предыдущим и применяет к DOM только разницу; компилятор сокращает объём сравнения',
-    what: 'Шаблон компилируется в render-функцию, которая возвращает дерево VNode — лёгких JS-объектов, описывающих разметку. При изменении данных компонент перерендеривается, Vue сравнивает новое дерево со старым (patch, или reconciliation) и применяет к реальному DOM только разницу. Компилятор Vue 3 сокращает эту работу: выносит статические узлы (static hoisting), ставит patch flags — пометки, что именно может меняться у узла, — и собирает динамические узлы в плоский список (block tree). Такой подход называют compiler-informed Virtual DOM.',
-    analogy: 'Как черновик перестановки мебели: сначала рисуешь новый план, сравниваешь со старым и двигаешь только то, что поменялось. Компилятор заранее помечает мебель, прибитую к полу, — её даже не сравнивают.',
-    where: 'В каждом `v-for` с `key`, в разборе «почему тормозит список», в баге, когда текст из инпута «переехал» в соседнюю строку.',
-    why: 'Позволяет описывать интерфейс декларативно и не трогать DOM руками, сохраняя точечные обновления.',
-    when: 'Это знание нужно, чтобы правильно ставить `key`, понимать стоимость перерендера и не терять оптимизации компилятора из-за ручных render-функций.',
-    diff: [
-      { vs: 'React', text: 'В React без мемоизации перерендеривается всё поддерево компонента и сравнивается целиком. Во Vue компилятор заранее знает, что статично, а реактивность точно знает, какие компоненты обновить, поэтому `memo` обычно не нужен.' }
+    summary: 'Vue строит дерево VNode, сравнивает его с предыдущим и применяет к DOM только разницу. Компилятор заранее помечает, что может меняться, и сокращает сравнение.',
+    points: [
+      { title: 'Шаблон → render-функция → дерево VNode → patch', text: 'VNode — лёгкие JS-объекты, описывающие разметку. При изменении данных компонент строит новое дерево, Vue сравнивает его со старым (patch, reconciliation) и трогает в реальном DOM только разницу.', code: `// упрощённо, что возвращает render
+{ type: 'p', props: { class: 'title' }, children: 'Привет' }`, lang: 'js' },
+      { title: 'Компилятор помечает статику и динамику: compiler-informed Virtual DOM', text: 'Статические узлы создаются один раз и переиспользуются, длинная статика может стать одной HTML-строкой. Динамическим узлам ставятся patch flags — что именно может меняться. Block tree собирает динамические узлы в плоский массив, и Vue обходит его, а не всё дерево.', code: `<h2>Заголовок</h2>          <!-- статика: не сравнивается -->
+<p>{{ text }}</p>            <!-- flag: только текст -->
+<span :class="cls">x</span>  <!-- flag: только class -->
+<!-- скомпилированный код — play.vuejs.org, вкладка JS -->`, lang: 'vue' },
+      { title: '`key` говорит, какой старый элемент соответствует новому', text: 'По стабильному id Vue переместит элементы вместе с их состоянием. С ключом-индексом при удалении из середины состояние (текст в инпуте, данные дочернего компонента) остаётся на позиции и оказывается у соседа.', code: `<TodoItem v-for="(t, i) in todos" :key="i" :todo="t" />  <!-- плохо -->
+<TodoItem v-for="t in todos" :key="t.id" :todo="t" />   <!-- ок -->`, lang: 'vue' },
+      { title: 'Ловушка: нестабильный `key`', text: '`Math.random()` или новый id на каждом рендере — элемент пересоздаётся каждый раз.', code: `<Row v-for="r in rows" :key="Math.random()" /> <!-- пересоздаётся всегда -->`, lang: 'vue' },
+      { title: 'Virtual DOM не «быстрее DOM»', text: 'Это накладные расходы ради декларативности. Выигрыш — только по сравнению с перерисовкой всего подряд. Рукописные render-функции теряют оптимизации компилятора, поэтому без нужды их не пишут.' },
+      { title: 'Vue vs React: Vue знает, какие компоненты обновить', text: 'В React без мемоизации перерендеривается всё поддерево и сравнивается целиком. Во Vue реактивность точно знает, какие компоненты зависят от изменения, а компилятор — что статично, поэтому `memo` обычно не нужен.' }
     ],
-    code: [
-      { title: 'Что видит компилятор', lang: 'vue', src: `<template>
-  <div class="card">
-    <h2>Заголовок</h2>            <!-- статика: не сравнивается -->
-    <p>{{ text }}</p>              <!-- patch flag: меняется только текст -->
-    <span :class="cls">x</span>    <!-- patch flag: меняется только class -->
-    <li v-for="i in items" :key="i.id">{{ i.name }}</li>
-  </div>
-</template>
-<!-- результат компиляции видно на play.vuejs.org, вкладка JS -->` },
-      { title: 'Зачем key в списках', lang: 'vue', src: `<!-- плохо: при удалении первой задачи текст в инпутах «съедет» -->
-<TodoItem v-for="(t, i) in todos" :key="i" :todo="t" />
-
-<!-- хорошо: Vue сопоставит элементы по id и переместит их целиком -->
-<TodoItem v-for="t in todos" :key="t.id" :todo="t" />` }
-    ],
-    pitfalls: [
-      '`key` по индексу в списке, где элементы удаляют или переставляют, — внутреннее состояние (текст в инпуте, состояние дочернего компонента) остаётся на месте и оказывается у соседа.',
-      'Нестабильный `key` вроде `Math.random()` — элемент пересоздаётся при каждом рендере.',
-      'Считать, что Virtual DOM «быстрее DOM». Это накладные расходы ради декларативности; выигрыш — только по сравнению с перерисовкой всего подряд.',
-      'Писать render-функции вручную без необходимости — теряются оптимизации компилятора.'
-    ],
+    takeaway: 'Стабильный `key` по id, шаблоны вместо ручных render-функций — и компилятор сделает основную работу сам.',
     questions: [
       { q: 'Как работает Virtual DOM во Vue и зачем нужен key?', a: 'Шаблон компилируется в render-функцию, которая возвращает дерево VNode — лёгкие объекты, описывающие разметку. При изменении данных компонент строит новое дерево, Vue сравнивает его со старым и меняет в реальном DOM только разницу. В списках `key` определяет, какой старый элемент соответствует новому: по стабильному id Vue переместит элементы вместе с их состоянием. С ключом-индексом при удалении из середины состояние, например текст в инпуте, останется на позиции и окажется у соседа.' },
-      { q: 'Какие оптимизации делает компилятор шаблонов Vue 3?', a: 'Компилятор анализирует шаблон и понимает, что в нём не меняется. Статические узлы выносятся и не создаются заново, а длинные последовательности статики могут превратиться в одну HTML-строку. Динамическим узлам ставятся patch flags — например, «меняется только текст» или «только class», — и при обновлении проверяется только это. Block tree собирает динамические узлы в плоский массив, и Vue обходит его, а не всё дерево. Поэтому шаблоны во Vue обычно эффективнее рукописных render-функций.' }
+      { q: 'Какие оптимизации делает компилятор шаблонов Vue 3?', a: 'Компилятор анализирует шаблон и понимает, что в нём не меняется. Статические узлы создаются один раз и не пересоздаются при обновлениях, а длинные последовательности статики могут превратиться в одну HTML-строку. Динамическим узлам ставятся patch flags — например, «меняется только текст» или «только class», — и при обновлении проверяется только это. Block tree собирает динамические узлы в плоский массив, и Vue обходит его, а не всё дерево. Поэтому шаблоны во Vue обычно эффективнее рукописных render-функций.' }
     ]
   },
   {
@@ -1131,51 +742,31 @@ defineProps<{ label: string; error?: string }>()
     group: 'Производительность',
     title: 'Оптимизация рендеринга',
     level: 'middle+',
-    summary: 'Сократить число перерендеров и размер DOM: стабильные пропсы, разбиение на компоненты, `v-once`, `v-memo`, `shallowRef`, виртуализация',
-    what: 'Компонент перерендеривается, когда меняются реактивные данные, прочитанные при его рендере, или его пропсы. Оптимизация сводится к двум вещам: сузить область перерендера и уменьшить объём того, что рендерится. Инструменты: разбиение на дочерние компоненты (Vue обновляет их независимо), стабильные пропсы, `v-once`, `v-memo` (Vue 3.2+), `shallowRef`/`markRaw` для больших данных и виртуализация длинных списков.',
-    analogy: '',
-    where: 'Таблицы на тысячи строк, дашборды, живые ленты, формы рядом с большими списками.',
-    why: 'Лишние перерендеры и огромный DOM дают задержки при вводе и рывки при прокрутке.',
-    when: 'Сначала измерить в Vue DevTools или вкладке Performance браузера, потом чинить узкое место. Ставить `v-memo` «на всякий случай» не нужно.',
-    diff: [
-      { vs: 'v-once и v-memo', text: '`v-once` рендерит один раз и больше не обновляет. `v-memo` пропускает обновление поддерева, пока не изменились значения в массиве зависимостей.' },
-      { vs: 'виртуальный список', text: 'Виртуализация уменьшает количество DOM-узлов, а не число перерендеров. Разбиение на компоненты, наоборот, сужает область перерендера.' }
-    ],
-    code: [
-      { title: 'Стабильные пропсы и v-memo', lang: 'vue', src: `<!-- плохо: сменился activeId — обновились все строки -->
-<Row v-for="r in rows" :key="r.id" :row="r" :active-id="activeId" />
+    summary: 'Сузить область перерендера и уменьшить объём DOM: разбиение на компоненты, стабильные пропсы, `v-once`, `v-memo`, `shallowRef`, виртуализация.',
+    points: [
+      { title: 'Сначала замер, потом правка', text: 'Компонент перерендеривается, когда меняются реактивные данные, прочитанные при его рендере, или его пропсы. Какие компоненты обновляются и сколько это стоит — в Vue DevTools, общая картина — во вкладке Performance. `v-memo` «на всякий случай» не ставят.' },
+      { title: 'Независимые части — в отдельные компоненты', text: 'Vue обновляет дочерние компоненты по отдельности. Форма и большая таблица в одном компоненте — каждый ввод перерендеривает таблицу.', code: `<!-- плохо: всё в одном шаблоне -->
+<input v-model="query" />
+<tr v-for="r in rows">...</tr>
 
-<!-- хорошо: проп поменяется только у двух строк -->
-<Row v-for="r in rows" :key="r.id" :row="r" :active="r.id === activeId" />
+<!-- ок: таблица не зависит от query -->
+<SearchForm v-model="query" />
+<OrdersTable :rows="rows" />`, lang: 'vue' },
+      { title: 'Пропсы должны быть стабильными', text: 'Общее для всех строк значение обновляет каждую строку — передают вычисленный флаг. Объект или массив, созданный прямо в шаблоне, — новая ссылка на каждом рендере.', code: `<Row v-for="r in rows" :key="r.id" :active-id="activeId" />        <!-- все строки -->
+<Row v-for="r in rows" :key="r.id" :active="r.id === activeId" /> <!-- две строки -->
+<Chart :options="{ legend: true }" /> <!-- новый объект каждый рендер -->`, lang: 'vue' },
+      { title: '`v-once` — отрендерить один раз, `v-memo` — пропускать, пока зависимости те же', text: '`v-memo` (3.2+) — мемоизация прямо в шаблоне, главный сценарий — большой `v-for`, где при выборе меняются две строки. Забыл зависимость — строка перестанет обновляться.', code: `<footer v-once>{{ legal }}</footer>
 
-<!-- v-memo: строка не обновляется, пока эти значения те же -->
 <div v-for="r in rows" :key="r.id" v-memo="[r.id === activeId, r.updatedAt]">
-  {{ r.title }} <b v-if="r.id === activeId">*</b>
-</div>` },
-      { title: 'Виртуальный список', lang: 'vue', src: `<script setup lang="ts">
-import { shallowRef } from 'vue'
-import { useVirtualList } from '@vueuse/core'
-
-const rows = shallowRef([]) // 50 000 строк без Proxy на каждой строке
+  {{ r.title }}
+</div>`, lang: 'vue' },
+      { title: 'Большие данные — `shallowRef`, длинные списки — виртуализация', text: '`shallowRef` не создаёт Proxy на каждую строку. Виртуальный список держит в DOM только видимые строки: он уменьшает число узлов, а не число перерендеров. Готовое — `useVirtualList` из VueUse или `vue-virtual-scroller`.', code: `const rows = shallowRef([]) // 50 000 строк без Proxy
 const { list, containerProps, wrapperProps } =
   useVirtualList(rows, { itemHeight: 40 })
-</script>
-
-<template>
-  <!-- в DOM только видимые строки -->
-  <div v-bind="containerProps" style="height: 600px">
-    <div v-bind="wrapperProps">
-      <RowItem v-for="{ data } in list" :key="data.id" :row="data" />
-    </div>
-  </div>
-</template>` }
+// <div v-bind="containerProps" style="height: 600px">
+//   <div v-bind="wrapperProps"><Row v-for="{ data } in list" ... /></div>`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Передавать во все строки значение, которое меняется для всех (`activeId`), вместо вычисленного флага «активна ли эта строка».',
-      'Создавать новые объекты и массивы в пропсах прямо в шаблоне (`:options="{ ... }"`) — ребёнок каждый раз получает новую ссылку и обновляется.',
-      'Держать форму и большую таблицу в одном компоненте — каждый ввод в форме перерендеривает таблицу.',
-      'Ставить `v-memo` без замеров и забыть зависимость — строка перестанет обновляться.'
-    ],
+    takeaway: 'Замерить → разбить на компоненты → стабилизировать пропсы → `shallowRef` и виртуализация. `v-memo` и `v-once` — точечно для горячих мест.',
     questions: [
       { q: 'Как бы вы искали и устраняли лишние ререндеры во Vue?', a: 'Сначала измеряю: в Vue DevTools смотрю, какие компоненты обновляются и сколько это занимает, во вкладке Performance — общую картину. Частая причина — большой компонент, где любое изменение перерендеривает всё, поэтому выношу независимые части в дочерние компоненты: Vue обновляет их по отдельности. Дальше слежу за стабильностью пропсов: не передаю во все строки общее значение и не создаю объекты прямо в шаблоне. Большие данные кладу в `shallowRef`. `v-memo` и `v-once` — точечные инструменты для самых горячих мест.' },
       { q: 'Что делают v-once и v-memo?', a: '`v-once` рендерит элемент или компонент один раз и дальше пропускает его при обновлениях — для контента, который точно не меняется. `v-memo` принимает массив значений и пропускает обновление поддерева, пока они не изменились, — мемоизация прямо в шаблоне. Главный сценарий — большой `v-for`, где при выборе элемента реально меняются две строки: `v-memo` по флагу «выбран» пропускает остальные. Если забыть зависимость, строка перестанет обновляться, поэтому применяю его только после замеров.' },
@@ -1188,49 +779,30 @@ const { list, containerProps, wrapperProps } =
     group: 'Производительность',
     title: 'Lazy loading и code splitting',
     level: 'middle',
-    summary: 'Code splitting делит бандл на чанки, которые загружаются по требованию: ленивые маршруты, `defineAsyncComponent`, `Suspense`',
-    what: 'Code splitting — разбиение итогового JS на части (чанки), которые загружаются по требованию; основан на динамическом `import()`, который сборщик выносит в отдельный файл. Во Vue это ленивые маршруты (`component: () => import(...)`) и `defineAsyncComponent` для отдельных компонентов. `<Suspense>` (экспериментальный) показывает общий fallback, пока внутри загружаются асинхронные зависимости: компоненты с `await` в `setup` и асинхронные компоненты. В SSR с Vue 3.5 есть ленивая гидрация асинхронных компонентов (`hydrateOnVisible()` и другие стратегии).',
-    analogy: '',
-    where: 'Все страницы в роутере и тяжёлые редкие компоненты: редактор текста, карта, графики, большие модалки.',
-    why: 'Меньше JS на старте — быстрее первая загрузка и интерактивность, особенно на мобильных.',
-    when: 'Лениво грузить страницы (кроме, возможно, главной) и тяжёлые редкие компоненты. Мелкие компоненты не дробить: лишние запросы обходятся дороже экономии.',
-    diff: [
-      { vs: 'ленивый роут', text: 'Ленивая страница загружается при переходе на неё, `defineAsyncComponent` — при первом рендере компонента.' },
-      { vs: 'Suspense', text: 'Suspense не загружает код, а ждёт асинхронные зависимости дерева и показывает fallback. API по-прежнему помечен как экспериментальный.' }
-    ],
-    code: [
-      { title: 'defineAsyncComponent с заглушками', lang: 'ts', src: `import { defineAsyncComponent } from 'vue'
-
-const RichEditor = defineAsyncComponent({
-  loader: () => import('./RichEditor.vue'), // отдельный чанк
-  loadingComponent: EditorSkeleton,         // пока грузится
-  errorComponent: LoadError,                // если не загрузился
-  delay: 200,     // не мигать скелетоном, если загрузилось быстро
+    summary: 'Code splitting делит бандл на чанки, которые грузятся по требованию: ленивые маршруты, `defineAsyncComponent`, `Suspense`.',
+    points: [
+      { title: 'Основа — динамический `import()`: сборщик выносит модуль в отдельный чанк', text: 'Меньше JS на старте — быстрее первая загрузка и интерактивность, особенно на мобильных. Ленивая страница грузится при переходе на неё.', code: `const routes = [
+  { path: '/orders', component: () => import('./pages/Orders.vue') }
+]`, lang: 'ts' },
+      { title: '`defineAsyncComponent` — для тяжёлых компонентов внутри страницы', text: 'Грузится при первом рендере. `delay` не даёт скелетону мигнуть при быстрой загрузке. Для редактора, карты, графиков, больших модалок.', code: `const RichEditor = defineAsyncComponent({
+  loader: () => import('./RichEditor.vue'),
+  loadingComponent: EditorSkeleton,
+  errorComponent: LoadError,
+  delay: 200,
   timeout: 10000
-})` },
-      { title: 'Suspense и предзагрузка', lang: 'vue', src: `<!-- Dashboard.vue: await прямо в setup -->
-<script setup lang="ts">
-const stats = await api.getStats()
-</script>
-
-<!-- Родитель: один fallback на всё, что внутри -->
-<template>
-  <Suspense>
-    <Dashboard />
-    <template #fallback>
-      <Spinner />
-    </template>
-  </Suspense>
-</template>
-
-<!-- предзагрузка: вызвать () => import(...) при наведении на ссылку -->` }
+})`, lang: 'ts' },
+      { title: 'Ловушка: ошибку загрузки чанка надо обработать', text: 'После нового деплоя старые чанки могут исчезнуть с сервера, и пользователь увидит пустое место. Нужен `errorComponent` или перезагрузка страницы при ошибке импорта.' },
+      { title: 'Ловушка: лениво грузить первый экран и дробить мелочь', text: 'Контент первого экрана появится с задержкой и сдвинет вёрстку. Мелкие компоненты в чанки не выносят — цепочка мелких запросов дороже экономии. Предзагрузка: вызвать `() => import(...)` при наведении на ссылку.' },
+      { title: '`<Suspense>` не грузит код, а ждёт асинхронные зависимости поддерева', text: 'Ждёт компоненты с `await` в `setup` и асинхронные компоненты, пока показывает `#fallback` — один общий вместо спиннеров в каждом виджете. Ошибки не ловит — для них `onErrorCaptured` выше. API всё ещё экспериментальный, но Nuxt использует его под капотом. Без `Suspense` выше по дереву компонент с `await` в `setup` не отрендерится.', code: `<Suspense>
+  <Dashboard />   <!-- внутри: const stats = await api.getStats() -->
+  <template #fallback><Spinner /></template>
+</Suspense>`, lang: 'vue' },
+      { title: 'Vue 3.5: ленивая гидрация асинхронных компонентов при SSR', text: 'Компонент гидрируется не сразу, а по стратегии: когда стал виден, в простое, при взаимодействии.', code: `const Comments = defineAsyncComponent({
+  loader: () => import('./Comments.vue'),
+  hydrate: hydrateOnVisible()
+})`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Грузить лениво то, что видно на первом экране, — контент появится с задержкой и сдвинет вёрстку.',
-      'Дробить на чанки каждый мелкий компонент — получается цепочка мелких запросов.',
-      'Не обрабатывать ошибку загрузки чанка — после нового деплоя старые чанки могут исчезнуть с сервера, и пользователь видит пустое место.',
-      'Использовать `await` в `setup` без `<Suspense>` выше по дереву — компонент не отрендерится.'
-    ],
+    takeaway: 'Страницы и тяжёлые редкие компоненты — лениво, первый экран — сразу, ошибку загрузки чанка — обработать.',
     questions: [
       { q: 'Как реализовать code splitting во Vue-приложении?', a: 'Основа — динамический `import()`: сборщик выносит модуль в отдельный чанк и загружает его при первом вызове. Для страниц пишу в роутере `component: () => import(...)`, и каждая страница становится своим чанком. Для тяжёлых компонентов внутри страницы, вроде редактора или графиков, беру `defineAsyncComponent` с `loadingComponent`, `errorComponent` и `delay`, чтобы скелетон не мигал при быстрой загрузке. То, что видно на первом экране, грузится сразу, иначе будут задержка и сдвиг вёрстки.' },
       { q: 'Что такое Suspense и когда он нужен?', a: 'Suspense — встроенный компонент, который ждёт асинхронные зависимости в своём поддереве: компоненты с `await` в `setup` и асинхронные компоненты. Пока ждёт, показывает слот `#fallback`. Так вместо нескольких спиннеров в разных виджетах можно показать один общий. Ошибки сам Suspense не обрабатывает — для этого `onErrorCaptured` в родителе. API до сих пор помечен как экспериментальный, но Nuxt использует его под капотом.' }
@@ -1242,37 +814,21 @@ const stats = await api.getStats()
     group: 'Производительность',
     title: 'Vue DevTools',
     level: 'middle',
-    summary: 'Инструмент отладки Vue: дерево компонентов с состоянием, сторы Pinia, роутер и timeline событий',
-    what: 'Vue DevTools — расширение браузера или плагин Vite (`vite-plugin-vue-devtools`). Показывает дерево компонентов с пропсами и состоянием, сторы Pinia, маршруты, а на вкладке Timeline — события компонентов, изменения сторов и переходы роутера. В production-сборке по умолчанию недоступен.',
-    analogy: '',
-    where: 'Отладка «почему пришли не те данные», поиск лишних перерендеров, проверка, кто отправил событие. В Nuxt есть собственная панель Nuxt DevTools, включается `devtools: { enabled: true }` в `nuxt.config`.',
-    why: 'Позволяет увидеть состояние приложения в терминах Vue — компонентов, сторов, событий — без россыпи `console.log`.',
-    when: 'При отладке состояния, поиске медленных компонентов и разборе событий. Для общей картины производительности — вместе со вкладкой Performance браузера.',
-    diff: [
-      { vs: 'Performance браузера', text: 'Performance показывает всё — JS, layout, paint, — но не знает про компоненты Vue. DevTools знает про компоненты и сторы, но профайлер браузера не заменяет.' },
-      { vs: 'production', text: 'В production-сборке DevTools по умолчанию отключены; включаются флагом `__VUE_PROD_DEVTOOLS__` при сборке.' }
-    ],
-    code: [
-      { title: 'Плагин для Vite', lang: 'ts', src: `// vite.config.ts
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+    summary: 'Отладка в терминах Vue: дерево компонентов с состоянием, сторы Pinia, роутер и timeline событий.',
+    points: [
+      { title: 'Ставится расширением браузера или плагином Vite', text: 'В Nuxt своя панель Nuxt DevTools, включается в `nuxt.config`.', code: `// vite.config.ts
 import vueDevTools from 'vite-plugin-vue-devtools'
+export default defineConfig({ plugins: [vue(), vueDevTools()] })
 
-export default defineConfig({
-  plugins: [vue(), vueDevTools()]
-})
-// в Nuxt: devtools: { enabled: true } в nuxt.config` },
-      { title: 'Метки компонентов во вкладке Performance', lang: 'ts', src: `// main.ts
-const app = createApp(App)
-// только в dev: в production это лишняя нагрузка
-app.config.performance = import.meta.env.DEV
-app.mount('#app')` }
+// nuxt.config.ts
+export default defineNuxtConfig({ devtools: { enabled: true } })`, lang: 'ts' },
+      { title: 'Что смотреть: пропсы и состояние, сторы, timeline, маршрут', text: 'В дереве компонентов видно, какие пропсы реально пришли. Во вкладке Pinia можно поменять значение и проверить гипотезу — но это не воспроизводит реальные действия пользователя. Timeline показывает последовательность: событие → action → изменение стора → переход.' },
+      { title: 'DevTools знает про компоненты, Performance — про всё остальное', text: 'Профайлер браузера показывает JS, layout и paint, но не знает про компоненты. `app.config.performance` добавляет во вкладку Performance метки рендера и патча компонентов — только в dev.', code: `const app = createApp(App)
+app.config.performance = import.meta.env.DEV // в production — лишняя нагрузка
+app.mount('#app')`, lang: 'ts' },
+      { title: 'Итоговые замеры — на production-сборке', text: 'В dev Vue заметно медленнее из-за проверок и предупреждений. DevTools в production по умолчанию отключены, включаются флагом сборки `__VUE_PROD_DEVTOOLS__`.' }
     ],
-    pitfalls: [
-      'Искать причину тормозов по ощущениям, без замеров в DevTools и Performance.',
-      'Включать `app.config.performance` в production — лишняя нагрузка.',
-      'Поправить состояние прямо в DevTools и забыть, что это не воспроизводит реальные действия пользователя.'
-    ],
+    takeaway: 'Тормоза ищут замерами в DevTools и Performance, а не по ощущениям.',
     questions: [
       { q: 'Что вы смотрите в Vue DevTools при отладке?', a: 'В дереве компонентов смотрю, какие пропсы реально пришли и какое состояние внутри — часто проблема видна сразу. Во вкладке Pinia проверяю сторы и могу поменять значение, чтобы проверить гипотезу. Timeline показывает последовательность: какое событие отправилось, какой action вызвался, как изменился стор, какой был переход. Для роутера — текущий маршрут, `params` и `query`.' },
       { q: 'Как найти медленный компонент?', a: 'Воспроизвожу медленное действие и смотрю в Vue DevTools, какие компоненты обновляются и сколько занимает их рендер — часто видно, что перерендеривается то, что не должно. Если нужна полная картина вместе с layout и paint браузера, включаю `app.config.performance` и записываю профиль во вкладке Performance: там появляются метки рендера и патча компонентов. Итоговые замеры делаю на production-сборке, потому что в dev-режиме Vue заметно медленнее из-за проверок и предупреждений.' }

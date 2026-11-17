@@ -34,12 +34,17 @@ function h(tag, attrs, ...kids) {
 const SECTIONS = [
   { id: 'js', name: 'JavaScript', tag: 'JS', desc: 'Типы, замыкания, this, прототипы, event loop, промисы, модули и ошибки' },
   { id: 'web', name: 'Браузер и Web API', tag: 'WEB', desc: 'DOM, события, хранилища, fetch, CORS, HTTP, рендеринг, воркеры' },
+  { id: 'css', name: 'CSS и вёрстка', tag: 'CSS', desc: 'Каскад и специфичность, flex и grid, позиционирование и stacking context, адаптив, архитектура стилей' },
   { id: 'vue', name: 'Vue 3', tag: 'VUE', desc: 'Реактивность, компоненты, Pinia, архитектура, производительность' },
   { id: 'nuxt', name: 'Nuxt 3', tag: 'NUXT', desc: 'SSR, гидратация, роутинг, Nitro, useFetch и компания' },
   { id: 'ts', name: 'TypeScript', tag: 'TS', desc: 'Дженерики, utility и продвинутые типы, guards, типизация Vue и Pinia' },
   { id: 'test', name: 'Тестирование', tag: 'TEST', desc: 'Виды тестов, Vitest, моки, Vue Test Utils, Pinia, Playwright' },
   { id: 'perf', name: 'Производительность и сборка', tag: 'PERF', desc: 'Core Web Vitals, профилирование, Vite, бандл, загрузка' },
+  { id: 'realtime', name: 'Сеть и realtime', tag: 'NET', desc: 'WebSocket и SSE, переподключение, восстановление данных, HTTP/2 и HTTP/3' },
+  { id: 'security', name: 'Безопасность', tag: 'SEC', desc: 'XSS, CSRF, CSP, хранение токенов, авторизация на фронтенде' },
   { id: 'arch', name: 'Принципы и паттерны', tag: 'ARCH', desc: 'SOLID, KISS, DRY, ООП, паттерны на фронтенде' },
+  { id: 'design', name: 'Проектирование фронтенда', tag: 'SD', desc: 'Как отвечать на system design: лента, чат, автокомплит, дашборд, архитектура больших приложений' },
+  { id: 'soft', name: 'Опыт и поведенческие', tag: 'SOFT', desc: 'Рассказ о себе и проектах, сложные решения, конфликты, менторство, оценка сроков' },
 ];
 const secOf = id => SECTIONS.find(s => s.id === id);
 const LEVELS = ['junior', 'middle', 'middle+', 'senior'];

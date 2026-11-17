@@ -13,7 +13,7 @@ const topicsOf = sec => {
 const cvar = sec => ({ '--c': 'var(--c-' + sec + ')' });
 const plural = (n, a, b, c) => n % 10 === 1 && n % 100 !== 11 ? a : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? b : c;
 /* inline `code` in plain strings */
-const fmt = s => esc(s || '').replace(/`([^`]+)`/g, '<code>$1</code>');
+const fmt = s => esc(s || '').replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
 const paras = s => String(s || '').split(/\n\n+/).map(p => h('p', { html: fmt(p) }));
 
 /* ---------- interview plan (board questions) ---------- */
@@ -111,8 +111,8 @@ function home() {
   return [
     h('header.hero',
       h('p.eyebrow', h('a', { href: '#/' }, '← Вопросы с собеса'), h('span', '/'), h('span', 'Шпаргалка')),
-      h('h1', 'Что это, зачем и чем отличается'),
-      h('p.hero__lead', 'JavaScript, браузер, Vue 3, Nuxt 3, TypeScript, тестирование, производительность и принципы проектирования. В каждой теме точное определение и механизм, где это встречается, чем отличается от похожего, пример и вопросы с собеседования с готовыми ответами.'),
+      h('h1', 'Вспомнить за пару минут'),
+      h('p.hero__lead', 'JavaScript, браузер, CSS, Vue 3, Nuxt, TypeScript, тесты, производительность, сеть, безопасность, архитектура и поведенческие вопросы. Каждая тема — несколько правил, у каждого сразу короткий пример, а в конце вопросы с собеседования с готовыми ответами.'),
       h('p.note', h('b', 'Версии. '), 'Материал рассчитан на Vue 3.5+ и Nuxt 3. Где возможность появилась позже или ведёт себя иначе в Nuxt 4, это указано в теме. Примеры сверяйте с версией своего проекта.'),
       last ? h('a.resume', { href: '#/t/' + last.id, style: cvar(last.section) }, h('span', 'Вы остановились на'), h('b', last.title), h('i', '→')) : null),
     h('div.index', SECTIONS.map(s => {
@@ -146,23 +146,22 @@ function topic(id) {
   const ts = topicsOf(t.section); const i = ts.indexOf(t);
   const prev = ts[i - 1], next = ts[i + 1];
   const blocks = [], toc = [];
-  const block = (key, title, ...content) => { toc.push([key, title]); blocks.push(h('section.block', { id: 'b-' + key }, h('h2', title), ...content)); };
 
-  if (t.what) block('what', 'Что это', h('div.prose', paras(t.what)));
-  const analogy = t.analogy || t.simple;
-  if (analogy) blocks.push(h('aside.simple', h('span', 'Образ для запоминания'), h('p', { html: fmt(analogy) })));
+  /* each point is one rule with its own short example */
+  if (t.points && t.points.length) {
+    toc.push(['points', 'Суть']);
+    blocks.push(h('ol.points', { id: 'b-points' }, t.points.map(pt => h('li.point',
+      h('h3.point__title', { html: fmt(pt.title) }),
+      pt.text ? h('div.point__text', paras(pt.text)) : null,
+      pt.code ? codeBlock(pt.code, pt.lang || 'js', '', 'mini') : null))));
+    if (t.takeaway) blocks.push(h('p.takeaway', h('span', 'Главное'), h('span', { html: fmt(t.takeaway) })));
+  }
   if (S.demos[id]) {
     const holder = h('div.demo');
     toc.push(['demo', 'Как это работает']);
     blocks.push(h('section.block', { id: 'b-demo' }, h('h2', 'Как это работает'), holder));
     queueMicrotask(() => { try { S.demos[id](holder, t); } catch (e) { holder.append(h('p.demo__note', 'Пример не запустился: ' + e.message)); console.error(e); } });
   }
-  const facts = [['Где встречается', t.where], ['Зачем нужно', t.why], ['Когда брать', t.when]].filter(f => f[1]);
-  if (facts.length) { toc.push(['facts', 'Где, зачем, когда']); blocks.push(h('dl.facts', { id: 'b-facts' }, facts.map(([k, v]) => h('div', h('dt', k), h('dd', { html: fmt(v) }))))); }
-  const diff = Array.isArray(t.diff) ? t.diff : t.diff ? [{ vs: '', text: t.diff }] : [];
-  if (diff.length) block('diff', 'Чем отличается', h('div.diff', diff.map(d => h('div.diff__row', d.vs ? h('span.diff__vs', 'от ', h('code', d.vs)) : null, h('p', { html: fmt(d.text) })))));
-  if (t.code && t.code.length) block('code', 'Пример', codeExamples(t.code));
-  if (t.pitfalls && t.pitfalls.length) block('pitfalls', 'Частые ошибки', h('ul.pitfalls', t.pitfalls.map(p => h('li', { html: fmt(p) }))));
   if (t.questions && t.questions.length) {
     const list = h('div.faq', t.questions.map(q => h('details.faq__item', h('summary', h('span', { html: fmt(q.q) })), h('div.faq__a', paras(q.a)))));
     const toggle = h('button.link-btn', { type: 'button', onclick: () => { const all = $$('details', list); const open = !all.every(d => d.open); all.forEach(d => { d.open = open; }); toggle.textContent = open ? 'Свернуть ответы' : 'Показать все ответы'; } }, 'Показать все ответы');
@@ -176,19 +175,6 @@ function topic(id) {
       h('header.page-head', h('p.eyebrow', h('a', { href: '#/s/' + t.section }, h('i.dot'), secOf(t.section).name), h('span', '/'), h('span', t.group), t.level ? h('span.level', LEVEL_NAME[t.level] || t.level) : null), h('h1', t.title), h('p.page-head__lead', { html: fmt(t.summary) })),
       blocks),
     h('nav.toc', { 'aria-label': 'На странице' }, h('p', 'На странице'), toc.map(([k, title]) => h('a', { href: '#b-' + k, onclick: e => { e.preventDefault(); document.getElementById('b-' + k)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }, title))))];
-}
-function codeExamples(list) {
-  const isBad = c => /^плохо/i.test(c.title), isGood = c => /^хорошо/i.test(c.title);
-  if (!(list.some(isBad) && list.some(isGood))) return h('div.stack', list.map(c => codeBlock(c.src, c.lang, c.title)));
-  /* «Плохо / Хорошо» pairs become a toggle so the refactoring reads as one change */
-  const holder = h('div.stack'); const seg = h('div.seg');
-  const show = which => {
-    holder.replaceChildren(...list.filter(which === 'bad' ? isBad : isGood).map(c => codeBlock(c.src, c.lang, c.title.replace(/^(плохо|хорошо):?\s*/i, ''), which === 'bad' ? 'bad' : 'good')));
-    [...seg.children].forEach(b => b.setAttribute('aria-pressed', String(b.dataset.k === which)));
-  };
-  seg.append(h('button', { type: 'button', 'data-k': 'bad', onclick: () => show('bad') }, 'Плохо'), h('button', { type: 'button', 'data-k': 'good', onclick: () => show('good') }, 'Хорошо'));
-  show('bad');
-  return h('div.stack', seg, holder, list.filter(c => !isBad(c) && !isGood(c)).map(c => codeBlock(c.src, c.lang, c.title)));
 }
 function notFound() { return [h('div.empty', h('p', 'Такой страницы нет.'), h('a.btn', { href: '#/' }, 'Ко всем темам'))]; }
 
@@ -210,7 +196,7 @@ window.addEventListener('hashchange', render);
 /* ---------- search ---------- */
 const q = $('#q'); const sr = $('#searchResults');
 let srIdx = 0, idx = null;
-const searchIndex = () => idx || (idx = [...allQ.map(it => ({ it, text: [it.q, it.a, it.branch.name].join(' ').toLowerCase() })), ...S.topics.map(t => ({ t, text: [t.title, t.summary, t.analogy || t.simple, t.what, t.group, ...(t.questions || []).map(x => x.q)].join(' ').toLowerCase() }))]);
+const searchIndex = () => idx || (idx = [...allQ.map(it => ({ it, text: [it.q, it.a, it.branch.name].join(' ').toLowerCase() })), ...S.topics.map(t => ({ t, text: [t.title, t.summary, t.takeaway, t.group, ...(t.points || []).flatMap(p => [p.title, p.text]), ...(t.questions || []).map(x => x.q)].join(' ').toLowerCase() }))]);
 q.addEventListener('input', () => {
   const v = q.value.trim().toLowerCase();
   if (!v) { sr.hidden = true; return; }

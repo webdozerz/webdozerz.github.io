@@ -8,52 +8,40 @@ window.SOBES.topics.push(
     group: 'Типы',
     title: 'type vs interface',
     level: 'junior',
-    summary: '`interface` объявляет форму объекта и поддерживает слияние, `type` даёт имя любому типу, включая union и условные типы.',
-    what: '`interface` объявляет форму объекта, функции или класса. `type` — псевдоним (type alias): имя для любого типа, будь то объект, union, кортеж, примитив, mapped или условный тип. Для обычных объектов они почти взаимозаменяемы. Различаются поведением: интерфейсы с одним именем сливаются (declaration merging), `extends` проверяет совместимость полей, а пересечение `&` у псевдонимов конфликт не ловит.',
-    analogy: '',
-    where: 'Модели ответов API и пропсы компонентов часто пишут через `interface`. Статусы, варианты кнопок, состояния запроса — через `type`. Слияние интерфейсов нужно, чтобы дописать типы библиотеки: `ComponentCustomProperties` во Vue, типы плагинов и `runtimeConfig` в Nuxt.',
-    why: 'Оба дают типу имя, чтобы переиспользовать его в пропсах, ответах API и моделях. От выбора зависит, можно ли расширить тип снаружи и как рано TS заметит конфликт полей.',
-    when: '`interface` — для объектных контрактов, которые могут расширять другие модули или библиотеки. `type` — для union, кортежей, утилит и условных типов. Главное — одно правило в команде.',
-    diff: [
-      { vs: 'слияние', text: 'Два `interface` с одним именем в одной области видимости сливаются в один. Два `type` с одним именем дают ошибку Duplicate identifier.' },
-      { vs: 'extends и &', text: '`interface B extends A` сразу сообщает о несовместимом поле. `A & B` ошибки не даёт: тип конфликтующего поля становится `never`, и проблема всплывает позже.' },
-      { vs: 'индексная сигнатура', text: 'Объект, описанный через `type`, можно присвоить в `Record<string, unknown>`, а описанный через `interface` — нет: интерфейс открыт для слияния, и TS не считает его набор ключей известным.' }
-    ],
-    code: [
-      {
-        title: 'Слияние и расширение',
-        lang: 'ts',
-        src: `interface User { id: number }
+    summary: '`interface` описывает форму объекта и умеет сливаться. `type` даёт имя любому типу: union, кортежу, условному типу.',
+    points: [
+      { title: 'Union, кортеж, примитив — только через `type`', text: '`type` — просто имя для любого типа. `interface` описывает только объект, функцию или класс. Для обычного объекта они почти взаимозаменяемы.', code: `type Status = 'idle' | 'loading' | 'error' // union
+type Point = [x: number, y: number]         // кортеж
+type Id = string | number
+
+interface User { id: number; name: string } // объект — можно и так`, lang: 'ts' },
+      { title: 'Одноимённые `interface` сливаются, одноимённые `type` — ошибка', text: 'Это declaration merging. Удобно, чтобы дописать чужие типы, но два глобальных интерфейса с одним именем в разных файлах тоже молча сольются.', code: `interface User { id: number }
 interface User { name: string }
-// два объявления слились: User = { id: number; name: string }
+// User = { id: number; name: string }
 
-interface Admin extends User { role: 'admin' }
-
-type Status = 'idle' | 'loading' | 'error' // union — только через type
-type Point = [x: number, y: number]         // кортеж — тоже type
-
-type C = { id: string } & { id: number }
-// ошибки нет, но C['id'] — never: такой объект не создать`
-      },
-      {
-        title: 'Дописываем типы Vue через слияние',
-        lang: 'ts',
-        src: `// types/vue.d.ts
-export {} // файл должен быть модулем, иначе declare module заменит типы
+type A = { id: number }
+type A = { name: string } // ошибка: Duplicate identifier`, lang: 'ts' },
+      { title: 'Через слияние дописывают типы библиотек', text: 'Так во Vue добавляют глобальные свойства в `ComponentCustomProperties`, в Nuxt — типы плагинов и `runtimeConfig`. Файл обязан быть модулем, иначе `declare module` заменит типы библиотеки, а не дополнит.', code: `// types/vue.d.ts
+export {} // делает файл модулем
 
 declare module 'vue' {
-  // дописываем своё поле в интерфейс из библиотеки
   interface ComponentCustomProperties {
     $formatPrice: (value: number) => string
   }
-}`
-      }
+}`, lang: 'ts' },
+      { title: '`extends` ругается на конфликт полей, `&` тихо делает `never`', text: 'У интерфейса несовместимое поле — ошибка сразу. У пересечения ошибки нет, поле становится `never`, и проблема всплывает далеко от места, где её создали.', code: `interface A { id: string }
+interface B extends A { id: number } // ошибка сразу
+
+type C = { id: string } & { id: number }
+// ошибки нет, но C['id'] — never: такой объект не создать`, lang: 'ts' },
+      { title: 'Ловушка: `interface` не присваивается в `Record<string, unknown>`', text: 'Интерфейс открыт для слияния, поэтому TS не считает набор его ключей известным и не находит у него индексной сигнатуры. С `type` такой проблемы нет.', code: `interface I { a: string }
+type T = { a: string }
+declare const i: I, t: T
+
+const r1: Record<string, unknown> = t // ок
+const r2: Record<string, unknown> = i // ошибка`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Объявить два глобальных `interface` с одним именем в разных файлах — они молча сольются, и в типе окажутся чужие поля.',
-      'Склеить через `&` объекты с одноимёнными полями разных типов — вместо ошибки получится `never`, и проблема всплывёт далеко от места, где её создали.',
-      'Передать объект с типом-интерфейсом в функцию, ожидающую `Record<string, unknown>`, и удивиться ошибке — для таких случаев нужен `type` или явная индексная сигнатура.'
-    ],
+    takeaway: '`interface` — для объектных моделей и того, что расширяют снаружи. `type` — для union, кортежей и вычисляемых типов. Главное — одно правило в команде.',
     questions: [
       {
         q: 'Чем type отличается от interface? Когда что используете?',
@@ -71,54 +59,54 @@ declare module 'vue' {
     group: 'Типы',
     title: 'Generics',
     level: 'middle',
-    summary: 'Generic — параметр типа: функция или тип принимает тип как аргумент и сохраняет связь между входом и выходом.',
-    what: 'Generic (обобщённый тип) — тип-параметр, который подставляется при использовании. `identity<T>(x: T): T` вернёт ровно тот тип, который получила. Обычно TS выводит `T` из аргументов сам, явно его передают, когда вывести не из чего. `T extends X` — ограничение (constraint): подставить можно только тип, совместимый с `X`. `T = X` — тип по умолчанию.',
-    analogy: '',
-    where: 'Обёртка над запросами `request<T>(url): Promise<T>`, composable `useList<T>()` для таблиц и пагинации, `ref<User | null>(null)` во Vue, дженерик-компоненты с атрибутом `generic` у `script setup`.',
-    why: 'Позволяет написать код один раз и не потерять типы. Без generics пришлось бы копировать функцию под каждый тип или ставить `any` и терять проверки.',
-    when: 'Когда тип результата зависит от типа входа или нужно связать несколько параметров. Если `T` встречается в сигнатуре один раз и ничего не связывает, generic лишний — хватит обычного типа или `unknown`.',
-    diff: [
-      { vs: 'any', text: '`any` принимает что угодно, но после вызова TS о результате ничего не знает. Generic сохраняет конкретный тип: передал `User` — получил `User`.' },
-      { vs: 'union', text: 'Параметр с типом union принимает любой вариант при каждом вызове, но и вернуть может только union. `T` при каждом вызове фиксируется на одном конкретном типе.' }
-    ],
-    code: [
-      {
-        title: 'Ограничение и keyof',
-        lang: 'ts',
-        src: `// K может быть только одним из ключей T
+    summary: 'Generic — параметр типа. Функция получает тип как аргумент и сохраняет связь между входом и выходом: дал `User[]` — получил `User`.',
+    points: [
+      { title: '`<T>` — аргумент функции, только для типа', text: 'В угловых скобках объявляют параметр типа. При вызове TS подставляет туда конкретный тип, обычно выводит его из аргументов сам.', code: `function first<T>(list: T[]): T | undefined {
+  return list[0]
+}
+
+first([1, 2])     // T = number → number | undefined
+first(['a', 'b']) // T = string → string | undefined`, lang: 'ts' },
+      { title: 'Generic сохраняет тип, `any` — теряет', text: 'С `any` функция принимает что угодно, но о результате TS уже ничего не знает. Generic помнит, что пришло на вход. Union тоже не замена: параметр `string | number` и вернёт только union.', code: `function wrapAny(x: any) { return [x] } // any[]
+function wrap<T>(x: T) { return [x] }   // T[]
+
+wrapAny(5) // any[] — дальше никаких проверок
+wrap(5)    // number[]`, lang: 'ts' },
+      { title: 'Явно `T` передают, когда вывести не из чего', text: 'Если `T` есть в аргументах — не пишите его, TS выведет точнее. Явно нужен для запросов и пустых начальных значений. Частично указать нельзя: либо все параметры явно, либо все выводятся. И помните: `request<User>()` — обещание компилятору, а не проверка данных.', code: `const selected = ref<Order | null>(null) // без <> был бы Ref<null>
+
+async function request<T>(url: string): Promise<T> {
+  return $fetch<T>(url)
+}
+const orders = await request<Order[]>('/api/orders') // форму никто не проверил`, lang: 'ts' },
+      { title: '`T extends X` — ограничение: «`T` любой, но у него точно есть…»', text: 'Без ограничения о `T` ничего не известно, и обратиться к его полям нельзя. `extends` здесь не наследование, а требование к типу. Лишние поля разрешены.', code: `function getId<T>(x: T) { return x.id } // ошибка: у T может не быть id
+
+function getId<T extends { id: number }>(x: T) {
+  return x.id // ок
+}
+getId({ id: 1, name: 'Ann' }) // ок, лишнее поле можно
+getId({ name: 'Ann' })        // ошибка: нет id`, lang: 'ts' },
+      { title: '`K extends keyof T` — «`K` — один из ключей `T`», а `T[K]` — тип этого поля', text: 'Читаем по шагам. `keyof T` — union имён полей. `K extends keyof T` — `K` может быть только одним из них. `T[K]` — тип значения под этим ключом, как `obj[key]`, только для типов.', code: `type User = { id: number; name: string }
+type Keys = keyof User   // 'id' | 'name'
+type N = User['name']    // string
+
 function getProp<T, K extends keyof T>(obj: T, key: K): T[K] {
   return obj[key]
 }
+getProp(user, 'name') // T = User, K = 'name' → string
+getProp(user, 'age')  // ошибка: 'age' не ключ User`, lang: 'ts' },
+      { title: 'Длинную сигнатуру читают кусками слева направо', text: 'Сначала параметры типа в `<>`, потом аргументы, потом результат. Каждый кусок проговариваешь словами — и сигнатура перестаёт пугать.', code: `function pick<T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K>
+// T extends object   — T: какой-то объект
+// K extends keyof T  — K: имена его полей
+// (obj: T, keys: K[]) — объект и массив этих имён
+// : Pick<T, K>        — объект только с этими полями
 
-const user = { id: 1, name: 'Ann' }
-const n = getProp(user, 'name') // string — T и K выведены из аргументов
-// getProp(user, 'age')          // ошибка: 'age' не ключ user
+pick(user, ['id']) // { id: number }`, lang: 'ts' },
+      { title: 'Дефолт `T = X` и `const`-параметр (TS 5.0+)', text: '`T = unknown` — тип по умолчанию, если не передали и не вывели. `const` перед параметром заставляет выводить литералы, как будто аргумент написан с `as const`.', code: `interface ApiResponse<T = unknown> { data: T; status: number }
 
-interface ApiResponse<T = unknown> { data: T; status: number } // дефолт для T`
-      },
-      {
-        title: 'Когда T передают явно',
-        lang: 'ts',
-        src: `async function request<T>(url: string): Promise<T> {
-  return $fetch<T>(url) // это подпись типа, а не проверка данных
-}
-
-// вывести T не из чего — передаём явно
-const orders = await request<Order[]>('/api/orders')
-
-// ref(null) без параметра даст Ref<null>
-const selected = ref<Order | null>(null)
-
-// TS 5.0+: const-параметр выводит литеральные типы без as const
-function pick<const T extends readonly string[]>(keys: T) { return keys }
-const k = pick(['id', 'name']) // readonly ['id', 'name']`
-      }
+function keys<const T extends readonly string[]>(k: T) { return k }
+keys(['id', 'name']) // readonly ['id', 'name'], а не string[]`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Обращаться к полям `T` без ограничения — TS не даст, потому что о `T` ничего не известно. Нужно `T extends { id: number }`.',
-      'Ставить generic там, где он ничего не связывает, например `function log<T>(x: T): void`, — это шум, хватит `unknown`.',
-      'Считать, что `request<User>()` что-то проверяет: generic у функции запроса — обещание компилятору, данные никто не валидирует.'
-    ],
+    takeaway: 'Generic нужен, когда тип выхода зависит от типа входа. Если `T` встречается в сигнатуре один раз и ничего не связывает (`log<T>(x: T): void`) — он лишний, хватит `unknown`.',
     questions: [
       {
         q: 'Зачем нужны generics и чем они лучше any?',
@@ -140,48 +128,31 @@ const k = pick(['id', 'name']) // readonly ['id', 'name']`
     group: 'Типы',
     title: 'Union и intersection',
     level: 'junior',
-    summary: '`A | B` — значение одного из типов, `A & B` — значение, которое одновременно соответствует обоим.',
-    what: 'Union (`A | B`) — значение принадлежит хотя бы одному из типов. Пока TS не сузил тип, доступны только члены, общие для всех вариантов. Intersection (`A & B`) — значение соответствует обоим типам сразу: у объекта есть поля и `A`, и `B`. Пересечение несовместимых примитивов пустое: `string & number` — это `never`.',
-    analogy: 'Тип — множество значений. Union — объединение множеств: значений больше, а гарантированных свойств меньше. Intersection — пересечение: значений меньше, свойств больше.',
-    where: 'Union описывает состояние запроса (`idle`, `loading`, `success`, `error`), размеры кнопки, nullable-значения вроде `User | null`. Intersection собирает типы из частей: модель плюс служебные поля, свои пропсы плюс HTML-атрибуты.',
-    why: 'Union описывает варианты одного значения, и TS заставляет проверить, какой вариант пришёл. Intersection собирает тип из готовых кусков без копирования полей.',
-    when: 'Union — когда значение бывает разного вида и дальше его сужают проверкой. Intersection — чтобы смешать несколько объектных типов. Для иерархий объектов `interface` с `extends` обычно читается лучше и раньше ловит конфликты.',
-    diff: [
-      { vs: 'интуиция «union больше»', text: 'По числу возможных значений union шире, но доступных полей у него меньше — только общие. У `A & B` полей больше, а подходящих значений меньше.' },
-      { vs: 'discriminated union', text: 'Union объектов с общим полем-меткой (`status`, `type`). Проверка метки сужает тип до одного варианта, и в каждой ветке `switch` доступны его поля.' }
-    ],
-    code: [
-      {
-        title: 'Union: сначала проверка, потом доступ',
-        lang: 'ts',
-        src: `type Cat = { name: string; meow(): void }
+    summary: '`A | B` — значение одного из типов, `A & B` — значение, которое подходит под оба сразу.',
+    points: [
+      { title: 'У `A | B` доступны только общие поля — остальное после проверки', text: 'TS не знает, какой вариант пришёл, поэтому разрешает только то, что есть у всех. После сужения (`in`, `typeof`, метка) открывается остальное.', code: `type Cat = { name: string; meow(): void }
 type Dog = { name: string; bark(): void }
 
 function greet(pet: Cat | Dog) {
   pet.name                      // ок, есть у обоих
-  // pet.bark()                 // ошибка: у Cat нет bark
+  pet.bark()                    // ошибка: у Cat нет bark
   if ('bark' in pet) pet.bark() // после проверки — ок
-}
-
-type K = keyof (Cat | Dog) // 'name' — только общие ключи`
-      },
-      {
-        title: 'Intersection и ловушки',
-        lang: 'ts',
-        src: `type Timestamps = { createdAt: string; updatedAt: string }
+}`, lang: 'ts' },
+      { title: '`A & B` — объект со всеми полями обоих типов', text: 'Так собирают тип из готовых кусков без копирования полей: модель плюс служебные поля, свои пропсы плюс HTML-атрибуты.', code: `type Timestamps = { createdAt: string; updatedAt: string }
 type Product = { id: number; title: string }
-type ProductRow = Product & Timestamps // все четыре поля
+type ProductRow = Product & Timestamps // все четыре поля`, lang: 'ts' },
+      { title: 'Union шире по значениям, но уже по полям', text: 'Если смотреть на тип как на множество значений: union — объединение (значений больше, гарантированных полей меньше), intersection — пересечение (наоборот). Несовместимые примитивы дают пустое множество — `never`.', code: `type K = keyof (Cat | Dog) // 'name' — только общие ключи
+type Bad = string & number // never`, lang: 'ts' },
+      { title: 'Discriminated union: общее поле-метка сужает тип в `switch`', text: 'Варианты различаются литералом в одном поле. Проверил метку — получил поля нужного варианта. Бессмысленное состояние «грузится и уже упал» описать нельзя.', code: `type State =
+  | { status: 'loading' }
+  | { status: 'success'; data: User[] }
+  | { status: 'error'; error: string }
 
-type Bad = string & number               // never
-type Size = 'sm' | 'md' | string         // схлопнулось в string, подсказок нет
-type Size2 = 'sm' | 'md' | (string & {}) // любая строка, подсказки остаются`
-      }
+if (s.status === 'success') s.data // тут есть data`, lang: 'ts' },
+      { title: 'Ловушка: `\'sm\' | string` схлопывается в `string`', text: 'Литералы поглощаются `string`, и автодополнение пропадает. Чтобы принять любую строку и сохранить подсказки, пишут `string & {}`.', code: `type Size = 'sm' | 'md' | string         // string, подсказок нет
+type Size2 = 'sm' | 'md' | (string & {}) // любая строка, подсказки есть`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Ждать, что у `A | B` доступны поля обоих типов, — доступны только общие, остальное после сужения.',
-      'Объединять литералы со `string` (`\'sm\' | \'md\' | string`) — тип схлопнется в `string`, и автодополнение пропадёт. Обходной путь — `string & {}`.',
-      'Пересекать объекты с одноимёнными полями разных типов — вместо понятной ошибки поле станет `never`.'
-    ],
+    takeaway: 'Union — для вариантов одного значения, дальше сужение. Intersection — склеить объектные типы; для иерархий `interface extends` читается лучше и раньше ловит конфликты.',
     questions: [
       {
         q: 'Чем union отличается от intersection? Какие поля доступны у A | B и у A & B?',
@@ -199,54 +170,40 @@ type Size2 = 'sm' | 'md' | (string & {}) // любая строка, подск�
     group: 'Типы',
     title: 'Utility Types',
     level: 'middle',
-    summary: 'Встроенные generic-типы для построения новых типов из существующих: `Partial`, `Pick`, `Omit`, `Record`, `ReturnType`, `Awaited`.',
-    what: 'Utility Types — встроенные в TS generic-типы, построенные на mapped и conditional types. `Partial`, `Required`, `Readonly` меняют модификаторы полей. `Pick` и `Omit` оставляют или убирают ключи, `Record<K, V>` строит объект из union ключей. `Exclude`, `Extract`, `NonNullable` фильтруют union. `ReturnType`, `Parameters` достают типы из функции, `Awaited` — результат промиса, рекурсивно.',
-    analogy: '',
-    where: 'Из модели `Product` выводятся `ProductCreate = Omit<Product, \'id\' | \'createdAt\'>` и `ProductPatch = Partial<ProductCreate>`. `Awaited<ReturnType<typeof api.getOrders>>` даёт тип ответа без ручного описания. `Record` — для словарей вроде «статус → цвет бейджа».',
-    why: 'Модель описана один раз, а типы формы, тела запроса и превью выводятся из неё и не разъезжаются при изменениях.',
-    when: 'Когда новый тип — вариация существующего. Если производный тип сильно отличается по смыслу, лучше описать его отдельно, чем строить цепочку `Omit<Partial<Pick<...>>>`.',
-    diff: [
-      { vs: 'Pick и Omit', text: '`Pick<T, K extends keyof T>` проверяет, что ключ существует. `Omit` принимает любой ключ, поэтому опечатка пройдёт молча и ничего не уберёт.' },
-      { vs: 'Omit и Exclude', text: '`Omit` убирает ключи из объектного типа. `Exclude` убирает варианты из union: `Exclude<\'a\' | \'b\', \'a\'>` — это `\'b\'`.' }
-    ],
-    code: [
-      {
-        title: 'Производные типы от модели',
-        lang: 'ts',
-        src: `interface User { id: number; name: string; email: string; avatar?: string }
+    summary: 'Встроенные generic-типы, которые делают новый тип из готового: `Partial`, `Pick`, `Omit`, `Record`, `ReturnType`, `Awaited`.',
+    points: [
+      { title: '`Partial`, `Required`, `Readonly` меняют модификаторы полей', text: '`Partial` делает все поля необязательными, `Required` — обязательными, `Readonly` запрещает запись. Работают только на верхнем уровне, а `Readonly` — только проверка компилятора, в рантайме объект изменяем.', code: `interface User { id: number; name: string; avatar?: string }
 
-type UserPatch = Partial<Omit<User, 'id'>> // для PATCH: всё необязательно, без id
-type UserPreview = Pick<User, 'id' | 'name'>
-type Roles = Record<'admin' | 'editor', boolean>
+type Draft = Partial<User>    // все поля с ?
+type Full = Required<User>    // avatar стал обязательным
+type Frozen = Readonly<User>  // user.name = 'x' — ошибка`, lang: 'ts' },
+      { title: '`Pick` оставляет поля, `Omit` убирает', text: 'Из одной модели получают типы для превью, создания и PATCH, и они не разъезжаются при изменениях модели.', code: `type UserPreview = Pick<User, 'id' | 'name'>   // только id и name
+type UserCreate = Omit<User, 'id'>             // всё, кроме id
+type UserPatch = Partial<Omit<User, 'id'>>     // без id, всё необязательно`, lang: 'ts' },
+      { title: 'Ловушка: `Omit` не проверяет ключи, `Pick` — проверяет', text: 'У `Pick` ключ ограничен `keyof T`, у `Omit` — любой. Опечатка в `Omit` молча ничего не уберёт.', code: `type A = Pick<User, 'emial'> // ошибка: нет такого ключа
+type B = Omit<User, 'emial'> // ошибки нет, ничего не убрали`, lang: 'ts' },
+      { title: '`Record<K, V>` — объект с ключами из `K` и значениями `V`', text: 'Для словарей вида «статус → цвет». Если `K` — union литералов, TS потребует все ключи.', code: `type Status = 'draft' | 'paid' | 'refunded'
+const color: Record<Status, string> = {
+  draft: 'gray', paid: 'green', refunded: 'red' // забыть ключ нельзя
+}`, lang: 'ts' },
+      { title: '`Exclude`, `Extract`, `NonNullable` работают с union, а не с объектом', text: '`Omit` убирает ключи из объекта, `Exclude` — варианты из union. `Extract` оставляет только подходящие варианты, `NonNullable` убирает `null` и `undefined`.', code: `type Active = Exclude<Status, 'refunded'>  // 'draft' | 'paid'
+type Paid = Extract<Status, 'paid' | 'x'>  // 'paid'
+type Id = NonNullable<string | null>       // string`, lang: 'ts' },
+      { title: '`Awaited<ReturnType<typeof fn>>` читают изнутри наружу', text: '`typeof fn` — тип функции. `ReturnType<…>` — что она возвращает, у async-функции это промис. `Awaited<…>` разворачивает промис. Так получают тип ответа, не описывая его руками.', code: `async function fetchUser(id: number) { return { id, name: 'Ann' } }
 
-async function fetchUser(id: number) { return { id, name: 'Ann' } }
-type Ret = ReturnType<typeof fetchUser>           // Promise<{ id: number; name: string }>
-type Data = Awaited<ReturnType<typeof fetchUser>> // { id: number; name: string }
-type Args = Parameters<typeof fetchUser>          // [id: number]`
-      },
-      {
-        title: 'Фильтрация union и Omit на union',
-        lang: 'ts',
-        src: `type Status = 'draft' | 'paid' | 'refunded'
-type Active = Exclude<Status, 'refunded'> // 'draft' | 'paid'
-type Id = NonNullable<string | null | undefined> // string
-
-type Event =
+type F = typeof fetchUser          // (id: number) => Promise<{...}>
+type R = ReturnType<F>             // Promise<{ id: number; name: string }>
+type Data = Awaited<R>             // { id: number; name: string }
+type Args = Parameters<F>          // [id: number]`, lang: 'ts' },
+      { title: 'Ловушка: `Omit` на discriminated union склеивает варианты', text: 'Внутри `Omit` стоит `keyof T`, а у union это только общие ключи. Чтобы убрать поле из каждого варианта, нужна дистрибутивная версия.', code: `type Ev =
   | { type: 'click'; x: number; meta: string }
   | { type: 'key'; code: string; meta: string }
 
-type Bad = Omit<Event, 'meta'> // слиплось: остался только общий ключ type
-// применяем Omit к каждому варианту отдельно
+type Bad = Omit<Ev, 'meta'> // остался только { type: ... }
 type DistOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never
-type Good = DistOmit<Event, 'meta'> // union сохранился`
-      }
+type Good = DistOmit<Ev, 'meta'> // оба варианта на месте`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Ждать, что `Partial` работает вглубь, — он меняет только верхний уровень, вложенные объекты остаются строгими.',
-      'Опечататься в ключе `Omit<User, \'emial\'>` — ошибки не будет, ничего не уберётся.',
-      'Считать, что `Readonly` защищает в рантайме, — это проверка компилятора, объект остаётся изменяемым. Для рантайма есть `Object.freeze`.',
-      'Применять `Omit` к discriminated union — варианты сливаются, метка перестаёт сужать тип.'
-    ],
+    takeaway: 'Модель описана один раз, остальные типы выводятся из неё. Если получается `Omit<Partial<Pick<...>>>` — проще описать тип отдельно.',
     questions: [
       {
         q: 'Какие Utility Types используете чаще всего и для чего?',
@@ -268,57 +225,41 @@ type Good = DistOmit<Event, 'meta'> // union сохранился`
     group: 'Типы',
     title: 'Type guards и сужение типов',
     level: 'middle',
-    summary: 'Сужение (narrowing) — TS уточняет тип внутри ветки после проверки `typeof`, `instanceof`, `in`, метки или своей guard-функции.',
-    what: 'Сужение типов (narrowing) — анализ потока управления: после проверки TS уточняет тип значения в этой ветке. Встроенные проверки: `typeof` для примитивов, `instanceof` для классов, `in` для наличия свойства, сравнение с литералом и поле-метка в discriminated union. Своя проверка — функция с типом возврата `x is T` (type predicate). Assertion-функция с `asserts x is T` ничего не возвращает и бросает ошибку, если проверка не прошла.',
-    analogy: '',
-    where: 'В `catch` ошибка имеет тип `unknown`, и проверка `e instanceof FetchError` или `isAxiosError(e)` даёт доступ к статусу. В обработчике сообщений вебсокета `switch` по полю `type` даёт нужную форму `payload`.',
-    why: 'Позволяет безопасно работать со значениями разной формы: данными из API, ошибками, событиями. Без сужения пришлось бы писать `as`, то есть обещать компилятору без проверки.',
-    when: 'Когда значение может быть разных типов. Свою guard-функцию — когда проверка сложная и повторяется. `asserts` — когда при несоответствии надо сразу упасть: нет элемента в DOM, не задан конфиг.',
-    diff: [
-      { vs: 'as', text: '`as` ничего не проверяет, это утверждение разработчика. Guard выполняет проверку в рантайме и по её результату уточняет тип.' },
-      { vs: 'x is T и asserts', text: '`x is T` возвращает `boolean` и работает в условии. `asserts x is T` бросает ошибку, и после вызова тип уточнён до конца области видимости без `if`.' }
-    ],
-    code: [
-      {
-        title: 'Встроенные проверки',
-        lang: 'ts',
-        src: `function format(v: string | number | Date | null) {
+    summary: 'После проверки `typeof`, `instanceof`, `in`, метки или своей guard-функции TS уточняет тип внутри ветки (narrowing).',
+    points: [
+      { title: 'Встроенные проверки сужают тип в ветке', text: '`typeof` — для примитивов, `instanceof` — для классов, `in` — наличие свойства, `===` — сравнение с литералом или `null`. После каждого `return` TS вычёркивает проверенный вариант.', code: `function format(v: string | number | Date | null) {
   if (v === null) return '-'
-  if (typeof v === 'string') return v.trim()   // тут v — string
-  if (v instanceof Date) return v.toISOString() // тут v — Date
+  if (typeof v === 'string') return v.trim()   // v: string
+  if (v instanceof Date) return v.toISOString() // v: Date
   return v.toFixed(2)                           // осталось number
-}
-
-// осторожно: typeof null === 'object', null остаётся в типе
-function f(v: object | null) {
-  if (typeof v === 'object') v // object | null
-}`
-      },
-      {
-        title: 'Своя проверка и asserts',
-        lang: 'ts',
-        src: `function isUser(x: unknown): x is User {
+}`, lang: 'ts' },
+      { title: 'Ловушка: `typeof x === \'object\'` пропускает `null`', text: 'В JS `typeof null === \'object\'`, и TS это знает: после проверки `null` остаётся в типе.', code: `function f(v: object | null) {
+  if (typeof v === 'object') v       // object | null
+  if (v && typeof v === 'object') v  // object
+}`, lang: 'ts' },
+      { title: 'Своя проверка — функция с типом возврата `x is T`', text: 'Это type predicate: если функция вернула `true`, TS считает `x` типом `T`. Тело проверки TS с типом не сверяет — проверил только `id`, а написал `x is User`, он поверит.', code: `function isUser(x: unknown): x is User {
   return typeof x === 'object' && x !== null && 'id' in x && 'name' in x
 }
 
-function assertDefined<T>(v: T, msg: string): asserts v is NonNullable<T> {
-  if (v == null) throw new Error(msg) // не прошло — падаем
+if (isUser(data)) data.name // data: User`, lang: 'ts' },
+      { title: '`asserts x is T` — проверка, которая падает вместо `if`', text: 'Функция ничего не возвращает, а при несоответствии бросает ошибку. После вызова тип уточнён до конца области видимости. TS принимает её как assertion, только если тип функции объявлен явно: `function` подходит, стрелка в `const` без аннотации — нет.', code: `function assertDefined<T>(v: T, msg: string): asserts v is NonNullable<T> {
+  if (v == null) throw new Error(msg)
 }
 
 const el = document.querySelector('#app')
 assertDefined(el, 'нет #app')
-el.classList.add('ready') // дальше el — Element
-
-// TS 5.5+: filter сам выводит предикат из простой проверки
-const ids = [1, null, 3].filter(x => x != null) // number[]`
-      }
+el.classList.add('ready') // el: Element`, lang: 'ts' },
+      { title: 'TS 5.5+: `filter` сам выводит предикат из простой проверки', text: 'Раньше для `filter` писали `(x): x is number => ...`. Теперь TS выводит предикат сам, если функция проверяет значение напрямую.', code: `const ids = [1, null, 3].filter(x => x != null) // number[]`, lang: 'ts' },
+      { title: 'Ловушка: сужение свойства не доживает до колбэка', text: 'TS не знает, когда колбэк вызовется, и сбрасывает сужение `state.user`. Для `const` сужение сохраняется, для `let` и параметров — с TS 5.4, если после колбэка нет присваиваний. Решение — положить значение в `const`.', code: `if (state.user) {
+  items.map(i => state.user.name) // ошибка: может быть null
+  const user = state.user
+  items.map(i => user.name)       // ок
+}`, lang: 'ts' },
+      { title: 'Guard vs `as`: guard проверяет, `as` — обещает', text: '`as` в рантайме ничего не делает. Для данных из API и ошибок в `catch` нужна настоящая проверка, иначе компилятор доволен, а падает у пользователя.', code: `const u = data as User        // ничего не проверено
+if (isUser(data)) data.name   // проверено в рантайме
+if (e instanceof FetchError) e.status`, lang: 'ts' }
     ],
-    pitfalls: [
-      '`typeof x === \'object\'` пропускает `null`: после такой проверки тип всё ещё `object | null`.',
-      'Ошибиться в теле функции `x is T`: TS не сверяет проверку с заявленным типом и верит ей на слово.',
-      'Ждать, что сужение свойства (`state.user`) сохранится в колбэке: TS не знает, когда колбэк вызовется, и сбрасывает его. Для `const`-переменных сужение сохраняется, для `let` и параметров — с TS 5.4, если после колбэка нет присваиваний.',
-      'Писать `as` вместо проверки для данных из API — компилятор доволен, а в рантайме падает.'
-    ],
+    takeaway: 'Сначала проверка, потом доступ. Повторяющаяся сложная проверка — в функцию `x is T`, инвариант «должно быть, иначе падаем» — в `asserts`. Для внешних данных надёжнее схема (zod).',
     questions: [
       {
         q: 'Какие способы сужения типов знаете?',
@@ -340,48 +281,30 @@ const ids = [1, null, 3].filter(x => x != null) // number[]`
     group: 'Типы',
     title: 'any vs unknown',
     level: 'junior',
-    summary: '`any` отключает проверку типов, `unknown` принимает любое значение, но требует сузить тип перед использованием.',
-    what: '`any` — выход из системы типов: с значением можно делать что угодно, и его можно присвоить куда угодно, поэтому `any` распространяется по коду. `unknown` — верхний тип (top type): ему можно присвоить любое значение, но использовать его нельзя, пока тип не сужен проверкой. Противоположность — `never`, тип без значений. Отдельно `object` — любое не-примитивное значение.',
-    analogy: '',
-    where: '`JSON.parse`, ответ внешнего API, ошибка в `catch`, данные из `localStorage` или `postMessage` — по смыслу `unknown`. При переводе проекта с JS на TS `any` временно ставят на сложные модули и постепенно убирают.',
-    why: '`unknown` заставляет проверить внешние данные до работы с ними, и ошибка ловится на сборке, а не у пользователя.',
-    when: '`unknown` — по умолчанию для всего неизвестного. `any` — временно при миграции или там, где точная типизация стоит дороже пользы. В `strict` включён `noImplicitAny`, и параметры без типа не становятся `any` молча.',
-    diff: [
-      { vs: 'присваивание', text: '`any` присваивается куда угодно. `unknown` — только в `unknown` и `any`, в `string` без проверки не положишь.' },
-      { vs: 'catch', text: 'С флагом `useUnknownInCatchVariables` (входит в `strict`, TS 4.4+) переменная в `catch` имеет тип `unknown`, без него — `any`.' }
-    ],
-    code: [
-      {
-        title: 'any молчит, unknown требует проверки',
-        lang: 'ts',
-        src: `const a: any = JSON.parse('{"x": 1}')
+    summary: '`any` выключает проверку типов. `unknown` принимает что угодно, но пользоваться значением можно только после проверки.',
+    points: [
+      { title: '`any` молчит и расползается по коду', text: 'С `any` можно вызвать что угодно и присвоить его куда угодно. Ошибка всплывёт только при запуске, а `any` через присваивания и возвращаемые значения заражает соседний код.', code: `const a: any = JSON.parse('{"x": 1}')
 a.foo.bar()          // компилируется, падает при запуске
-const s: string = a  // тоже ок — any распространяется
-
-const u: unknown = JSON.parse('{"x": 1}')
-// u.x                // ошибка: сначала проверь
-// const t: string = u // ошибка
+const s: string = a  // тоже ок — any расползается`, lang: 'ts' },
+      { title: '`unknown` — сначала проверь, потом пользуйся', text: '`unknown` — верхний тип: в него кладётся любое значение, но наружу без сужения его не отдать — только в `unknown` или `any`.', code: `const u: unknown = JSON.parse('{"x": 1}')
+u.x                  // ошибка: сначала проверь
+const t: string = u  // ошибка
 if (typeof u === 'object' && u !== null && 'x' in u) {
-  console.log(u.x)   // после проверки — ок (u.x: unknown)
-}`
-      },
-      {
-        title: 'Ошибка в catch',
-        lang: 'ts',
-        src: `try {
+  u.x                // ок, тип u.x — unknown
+}`, lang: 'ts' },
+      { title: 'В `catch` ошибка — `unknown` (в `strict`)', text: 'Флаг `useUnknownInCatchVariables` (TS 4.4+) входит в `strict`. Бросить в JS можно что угодно, хоть строку. Аннотировать `catch (e: Error)` нельзя — разрешены только `unknown` и `any`.', code: `try {
   await saveOrder()
 } catch (e) {
-  // e: unknown — бросить могли что угодно, хоть строку
   const message = e instanceof Error ? e.message : String(e)
   toast.error(message)
-}`
-      }
+}`, lang: 'ts' },
+      { title: 'Ловушка: `as SomeType` на `unknown` — тот же `any`, только спрятанный', text: 'Приведение ничего не проверяет. Для внешних данных — guard или схема.', code: `const user = JSON.parse(raw) as User // проверки нет
+if (isUser(parsed)) parsed.name      // проверка есть`, lang: 'ts' },
+      { title: '`strict` не отключают: без `noImplicitAny` параметры молча становятся `any`', text: 'При миграции с JS `any` ставят временно на сложные модули и постепенно убирают, а не выключают проверки целиком.', code: `function sum(a, b) { return a + b }
+// strict: ошибка — параметр неявно any
+// без strict: компилируется, sum('1', 2) === '12'`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Ставить `any`, чтобы «убрать красное», — ошибка уезжает в рантайм, а `any` расходится по коду через присваивания и возвращаемые значения.',
-      'Писать `as SomeType` на `unknown` без проверки — по сути тот же `any`, только спрятанный.',
-      'Отключать `strict` ради скорости: без `noImplicitAny` параметры функций молча становятся `any`.'
-    ],
+    takeaway: 'Всё внешнее (`JSON.parse`, ответ API, `catch`, `localStorage`, `postMessage`) — `unknown`. `any` — только временно.',
     questions: [
       {
         q: 'Чем any отличается от unknown?',
@@ -399,57 +322,48 @@ if (typeof u === 'object' && u !== null && 'x' in u) {
     group: 'Типы',
     title: 'never',
     level: 'middle',
-    summary: '`never` — нижний тип без значений: функция не завершается, ветка недостижима, вариант исключён из union.',
-    what: '`never` — нижний тип (bottom type), у него нет значений. Его возвращает функция, которая всегда бросает исключение или не завершается. Его получает переменная в недостижимой ветке после исчерпывающих проверок. `never` присваивается любому типу, а в `never` можно положить только `never`. В union он исчезает: `string | never` — это `string`.',
-    analogy: '',
-    where: 'В `switch` по статусам заказа или типам сообщений вебсокета: присваивание в `never` в `default` ловит момент, когда в union добавили вариант, а обработку забыли. В условных типах `never` служит для фильтрации.',
-    why: 'Даёт проверку полноты (exhaustiveness check): компилятор укажет на необработанный вариант. В условных типах `never` означает «выкинуть вариант» — так устроены `Exclude` и `Extract`.',
-    when: 'В `default` у `switch` по union, в функциях вида `fail(msg): never`, в условных типах. Если `never` появился там, где его не ждали, обычно это конфликт типов, например через `&`.',
-    diff: [
-      { vs: 'void', text: '`void` — функция завершилась и вернула управление без полезного результата. `never` — управление не вернётся.' },
-      { vs: 'unknown', text: '`unknown` — верхний тип, все значения. `never` — нижний, ни одного значения.' }
-    ],
-    code: [
-      {
-        title: 'Проверка, что обработаны все варианты',
-        lang: 'ts',
-        src: `type Status = 'paid' | 'pending' | 'refunded'
-
-function label(s: Status): string {
-  switch (s) {
-    case 'paid': return 'Оплачен'
-    case 'pending': return 'Ожидает'
-    default: {
-      // сюда дошёл 'refunded' — его нельзя положить в never,
-      // и сборка покажет, какой case забыли
-      const _x: never = s
-      return _x
-    }
-  }
-}`
-      },
-      {
-        title: 'never в условных типах и функциях',
-        lang: 'ts',
-        src: `// лишнее превращаем в never, а never в union исчезает
-type OnlyStrings<T> = T extends string ? T : never
-type X = OnlyStrings<'a' | 1 | 'b' | true> // 'a' | 'b'
-
-type B = string | never // string
-type C = string & never // never
-
-function fail(msg: string): never {
+    summary: '`never` — тип без значений. Функция не возвращается, ветка недостижима, вариант выкинут из union.',
+    points: [
+      { title: '`never` — «сюда управление не дойдёт»', text: 'Функция, которая всегда бросает исключение или крутится вечно, возвращает `never`. `void` — другое: функция завершилась, просто без полезного результата.', code: `function fail(msg: string): never {
   throw new Error(msg)
 }
-const fail2 = () => { throw new Error() } // выведен never
-function fail3() { throw new Error() }    // выведен void — объявление функции`
-      }
+function log(msg: string): void {
+  console.log(msg) // завершилась — это void
+}`, lang: 'ts' },
+      { title: 'В union `never` исчезает, в `&` — поглощает', text: 'Пустое множество: объединение с ним ничего не добавляет, пересечение с ним пустое. Поэтому неожиданный `never` обычно значит конфликт в `&`.', code: `type A = string | never           // string
+type B = string & never           // never
+type C = { id: string } & { id: number }
+// C['id'] — never: объект такого типа не создать`, lang: 'ts' },
+      { title: 'Exhaustive check: в `default` кладём значение в `never`', text: 'Discriminated union, `switch` по метке. Если все варианты обработаны, в `default` остаётся `never`, и присваивание проходит. Добавили вариант и забыли `case` — он попадёт в `default`, его нельзя положить в `never`, и сборка укажет, что забыто.', code: `type Msg =
+  | { type: 'chat'; text: string }
+  | { type: 'typing'; userId: number }
+  | { type: 'read'; messageId: number } // добавили новый
+
+function handle(m: Msg) {
+  switch (m.type) {
+    case 'chat': return show(m.text)      // m сужен до chat
+    case 'typing': return mark(m.userId)
+    default: {
+      const _x: never = m // ошибка: 'read' не обработан
+      throw new Error('Unknown message')
+    }
+  }
+}`, lang: 'ts' },
+      { title: 'Проверку удобно вынести в `assertNever`', text: 'Тот же приём одной строкой. Бонус — в рантайме функция бросит понятную ошибку, если с сервера пришёл неизвестный вариант.', code: `function assertNever(x: never): never {
+  throw new Error('Неожиданное значение: ' + JSON.stringify(x))
+}
+
+default: return assertNever(m) // ошибка компиляции, если варианты не все`, lang: 'ts' },
+      { title: 'Ловушка: `default: return null` прячет новые варианты', text: 'Без проверки на `never` новый статус молча уходит в дефолтную ветку, и никто этого не замечает до бага на проде.', code: `switch (s) {
+  case 'paid': return 'Оплачен'
+  default: return null // новый 'refunded' попадёт сюда молча
+}`, lang: 'ts' },
+      { title: 'В условных типах `never` значит «выкинуть вариант»', text: 'Условный тип применяется к каждому варианту union. Лишние варианты превращаем в `never`, а он из union исчезает. Так устроены `Exclude` и `Extract`.', code: `type OnlyStrings<T> = T extends string ? T : never
+type X = OnlyStrings<'a' | 1 | 'b'> // 'a' | never | 'b' → 'a' | 'b'`, lang: 'ts' },
+      { title: 'Ловушка вывода: стрелка, которая только бросает, — `never`, `function` — `void`', text: 'Для объявления `function` TS выводит `void`, поэтому там `never` пишут явно.', code: `const fail2 = () => { throw new Error() } // () => never
+function fail3() { throw new Error() }    // () => void`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Писать `default: return null` вместо проверки на `never` — новый вариант union молча уходит в дефолтную ветку.',
-      'Не заметить, что тип стал `never` из-за конфликта в `&`, — потом значение «вдруг» нельзя ни создать, ни присвоить.',
-      'Путать `never` с `void`: функция, которая просто заканчивается или делает `return;`, — это `void`.'
-    ],
+    takeaway: 'Главное применение — exhaustive check: в `default` у `switch` по union значение должно быть `never`, тогда забытый вариант ловит сборка.',
     questions: [
       {
         q: 'Что такое never и где он полезен на практике?',
@@ -458,6 +372,10 @@ function fail3() { throw new Error() }    // выведен void — объяв�
       {
         q: 'Чем never отличается от void?',
         a: '`void` значит «функция вернула управление, результат не важен» — типичный обработчик клика. `never` значит «управление не вернётся»: функция бросает исключение или работает бесконечно. Поэтому `never` присваивается любому типу, а `void` — нет. Нюанс вывода: для стрелочной функции, которая только бросает, TS выведет `never`, а для объявления через `function` — `void`, поэтому там тип `never` пишут явно.'
+      },
+      {
+        q: 'Как гарантировать, что switch по union обработал все варианты?',
+        a: 'Делаю union с полем-меткой и в `default` присваиваю значение в переменную типа `never` или передаю в `assertNever(x: never)`. Если все `case` на месте, там действительно `never`, и всё компилируется. Добавили вариант и забыли обработать — он доходит до `default`, его нельзя положить в `never`, и сборка показывает ошибку прямо в этом месте. `assertNever` ещё и бросает в рантайме, если с сервера пришло неизвестное значение.'
       }
     ]
   },
@@ -469,56 +387,37 @@ function fail3() { throw new Error() }    // выведен void — объяв�
     group: 'TS во Vue и Nuxt',
     title: 'Типизация API',
     level: 'middle',
-    summary: 'Типы описывают контракт с бэкендом на этапе компиляции, а схема валидации проверяет данные в рантайме.',
-    what: 'DTO (Data Transfer Object) — типы данных, которые передаются по сети: тело запроса и ответ. Клиент с generic вида `get<T>(url): Promise<T>` даёт каждому вызову свой тип. Но это утверждение, а не проверка: в рантайме типов нет, и если бэкенд вернёт другую форму, TS об этом не узнает. Поэтому данные на входе проверяют схемой, например zod, и тип выводят из неё.',
-    analogy: '',
-    where: 'Типы генерируют из OpenAPI-описания бэкенда, поверх — тонкий клиент на `$fetch`, а формы и внешние интеграции проверяют zod-схемами. В Nuxt для роутов из `server/api` `useFetch` и `$fetch` выводят тип ответа из обработчика сами.',
-    why: 'Типы ответов дают автодополнение и ловят ошибки при изменении контракта. Проверка на входе превращает падение где-то в шаблоне в понятную ошибку прямо при разборе ответа.',
-    when: 'Типизировать ответы — всегда. Проверять схемой — внешние или нестабильные API, формы, платёжные данные. Если типы генерируются из OpenAPI и бэкенд свой, проверка каждого ответа бывает избыточной.',
-    diff: [
-      { vs: 'useFetch<User>() и as', text: 'Это подпись типа, данные никто не проверяет. zod-схема проверяет данные в рантайме, а через `z.infer` даёт тот же тип, поэтому тип и проверка не расходятся.' },
-      { vs: 'свои и внешние роуты', text: 'Для своих роутов из `server/api` Nuxt выводит тип ответа сам, generic не нужен. Для внешних URL тип указывают через `useFetch<T>()`.' }
-    ],
-    code: [
-      {
-        title: 'Клиент на $fetch и проверка zod',
-        lang: 'ts',
-        src: `export const api = {
+    summary: 'Типы описывают контракт с бэкендом при компиляции, схема валидации проверяет данные в рантайме.',
+    points: [
+      { title: 'Generic у клиента — подпись типа, а не проверка', text: 'Клиент вида `get<T>(url): Promise<T>` даёт каждому вызову свой тип и автодополнение. Но в рантайме типов нет: если бэкенд вернёт другую форму, TS не узнает, и упадёт где-нибудь в шаблоне.', code: `export const api = {
   get<T>(url: string, query?: Record<string, unknown>) {
     return $fetch<T>(url, { baseURL: '/api', query }) // T — без проверки
   }
 }
-
-import { z } from 'zod'
+const list = await api.get<Product[]>('/products')`, lang: 'ts' },
+      { title: 'Проверка — схемой, тип — из схемы через `z.infer`', text: 'Схема проверяет данные на входе, а тип выводится из неё же. Писать тип руками рядом со схемой не надо — со временем они разойдутся.', code: `import { z } from 'zod'
 const Product = z.object({ id: z.number(), title: z.string(), price: z.number() })
-export type Product = z.infer<typeof Product> // тип берём из схемы
+export type Product = z.infer<typeof Product>
 
 export async function getProduct(id: number): Promise<Product> {
   const raw: unknown = await $fetch('/api/products/' + id)
-  return Product.parse(raw) // форма не та — бросит ошибку здесь
-}`
-      },
-      {
-        title: 'Тип data в useFetch',
-        lang: 'vue',
-        src: `<script setup lang="ts">
-import type { ProductDto } from '~/types/api'
+  return Product.parse(raw) // форма не та — бросит здесь, а не в шаблоне
+}`, lang: 'ts' },
+      { title: 'Для своих роутов `server/api` Nuxt выводит тип сам', text: '`useFetch` и `$fetch` знают, что возвращает обработчик, generic не нужен. Для внешних URL тип указывают через `useFetch<T>()`.', code: `// server/api/products.get.ts
+export default defineEventHandler(() => [{ id: 1, title: 'Чай' }])
 
-const { data } = await useFetch<ProductDto[]>('/external/products')
-// data: Ref<ProductDto[] | null> в Nuxt 3, в Nuxt 4 — undefined вместо null
+// в компоненте
+const { data } = await useFetch('/api/products') // тип выведен из обработчика`, lang: 'ts' },
+      { title: '`data` из `useFetch` бывает пустым: `null` в Nuxt 3, `undefined` в Nuxt 4', text: 'До загрузки и при ошибке данных нет, поэтому `data.value.items` без проверки — ошибка. С `transform` тип `data` — то, что вернул `transform`.', code: `const { data } = await useFetch<ProductDto[]>('/external/products')
+// Nuxt 3: Ref<ProductDto[] | null>, Nuxt 4: Ref<ProductDto[] | undefined>
 
 const { data: count } = await useFetch<ProductDto[]>('/external/products', {
   transform: items => items.length
-}) // тип data берётся из transform: number | null (Nuxt 3)
-</script>`
-      }
+}) // data: number | null (Nuxt 3)`, lang: 'ts' },
+      { title: 'Ответ и тело запроса — разные типы', text: 'При создании нет `id` и служебных полей, при обновлении всё необязательно. Выводим из модели, а не копируем.', code: `type ProductCreate = Omit<Product, 'id' | 'createdAt'>
+type ProductPatch = Partial<ProductCreate>`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Считать, что `useFetch<User>()` или `$fetch<User>()` гарантирует форму данных, — это подпись типа. Пришёл `null` вместо массива — упадёт в шаблоне.',
-      'Обращаться к `data.value.items` без проверки — до загрузки и при ошибке `data` пустой.',
-      'Писать тип руками рядом с zod-схемой — со временем они разойдутся, тип надо выводить через `z.infer`.',
-      'Использовать один тип и для ответа, и для тела запроса — при создании нет `id` и служебных полей.'
-    ],
+    takeaway: 'Ответы типизировать всегда (лучше генерировать из OpenAPI). Схемой проверять внешние и нестабильные API, формы, платёжные данные.',
     questions: [
       {
         q: 'Как вы типизируете работу с API на фронтенде?',
@@ -541,62 +440,41 @@ const { data: count } = await useFetch<ProductDto[]>('/external/products', {
     title: 'Типизация props, emits и v-model',
     level: 'middle',
     summary: '`defineProps<T>()`, `defineEmits<T>()` и `defineModel<T>()` типизируют входные данные, события и двустороннюю привязку компонента.',
-    what: 'В `script setup` пропсы описывают типом: `defineProps<Props>()`, и компилятор Vue генерирует из него runtime-объявление. Значения по умолчанию задают через `withDefaults` или, с Vue 3.5, при деструктуризации — она остаётся реактивной. События описывают в `defineEmits`, v-model — через `defineModel<T>()` (Vue 3.4+). Атрибут `generic` у `script setup` (Vue 3.3+) делает компонент дженериком: тип задаётся тем, что передал родитель.',
-    analogy: '',
-    where: 'В UI-ките кнопка, инпут и модалка типизированы через `defineProps` и `defineModel`. Таблица и селект — дженерик-компоненты: родитель передаёт `items: Order[]`, и в событии `pick` и в слоте приходит `Order`.',
-    why: 'Родитель получает подсказки и ошибку при неверном пропе или несуществующем событии. Внутри компонента типы пропсов и аргументов событий известны без ручных проверок.',
-    when: 'Объявление через тип — по умолчанию в проектах на TS. Объявление объектом (`type: String`) — без TS или когда нужен кастомный `validator`. Дженерик-компонент — для списков, селектов, таблиц.',
-    diff: [
-      { vs: 'withDefaults и деструктуризация', text: '`withDefaults` работает во всех версиях Vue 3 с `script setup`. Деструктуризация с дефолтами реактивна только с Vue 3.5: компилятор заменяет `size` на `props.size`.' },
-      { vs: 'defineModel', text: '`defineModel` (стабилен с Vue 3.4) заменяет пару «проп `modelValue` и событие `update:modelValue`» одной строкой и возвращает ref, синхронизированный с родителем.' }
-    ],
-    code: [
-      {
-        title: 'Props, дефолты и emits',
-        lang: 'vue',
-        src: `<script setup lang="ts">
+    points: [
+      { title: 'Пропсы описывают типом: `defineProps<Props>()`', text: 'Компилятор Vue сам строит из типа runtime-объявление. Рантайм проверит только конструктор (`String`, `Array`), форму объекта — нет. Объявление объектом (`type: String`) оставляют для проектов без TS и кастомного `validator`.', code: `<script setup lang="ts">
 interface Props {
   title: string
   size?: 'sm' | 'md' | 'lg'
   items?: string[]
 }
-
-// Vue 3.5+: дефолты при деструктуризации, реактивность сохраняется
+const props = defineProps<Props>()
+</script>`, lang: 'vue' },
+      { title: 'Дефолты: деструктуризация (Vue 3.5+) или `withDefaults`', text: 'С 3.5 деструктуризация `defineProps` реактивна: компилятор заменяет `size` на `props.size`. До 3.5 — только `withDefaults`, где массив и объект задают функцией-фабрикой, иначе экземпляры делят один объект.', code: `// Vue 3.5+
 const { title, size = 'md', items = () => [] } = defineProps<Props>()
 
-// Vue 3.3+: ключ — имя события, значение — кортеж аргументов
-const emit = defineEmits<{ select: [id: number]; close: [] }>()
-emit('select', 42)
-// emit('select', '42') — ошибка: ожидается number
-
-const query = defineModel<string>({ required: true })    // ModelRef<string>
+// любая версия Vue 3
+const props = withDefaults(defineProps<Props>(), {
+  size: 'md',
+  items: () => [] // фабрика, а не []
+})`, lang: 'ts' },
+      { title: 'Ловушка: деструктурированный проп в `watch` — только геттером', text: '`size` после деструктуризации в коде — это `props.size`, то есть значение. В `watch` его передают функцией, иначе Vue предупредит и следить не будет.', code: `watch(size, cb)        // не сработает
+watch(() => size, cb)  // ок`, lang: 'ts' },
+      { title: 'События: ключ — имя, значение — кортеж аргументов (Vue 3.3+)', text: '`emit` с неверными аргументами не скомпилируется, родитель получит типы в обработчике.', code: `const emit = defineEmits<{ select: [id: number]; close: [] }>()
+emit('select', 42)   // ок
+emit('select', '42') // ошибка: нужен number`, lang: 'ts' },
+      { title: '`defineModel<T>()` (Vue 3.4+) — v-model одной строкой', text: 'Заменяет пару «проп `modelValue` + событие `update:modelValue`» и возвращает ref, синхронизированный с родителем. Без `required` или `default` тип — `T | undefined`.', code: `const query = defineModel<string>({ required: true })    // ModelRef<string>
 const page = defineModel<number>('page', { default: 1 }) // v-model:page
-</script>`
-      },
-      {
-        title: 'Дженерик-компонент',
-        lang: 'vue',
-        src: `<script setup lang="ts" generic="T extends { id: number }">
-// T определит родитель тем, что передаст в items
+const note = defineModel<string>()                       // string | undefined`, lang: 'ts' },
+      { title: 'Дженерик-компонент: атрибут `generic` у `script setup` (Vue 3.3+)', text: '`T` выводится из того, что родитель передал в пропсы, и проходит в события и слоты. Без этого таблица или селект принимали бы `unknown[]`, и в обработчиках пришлось бы писать `as`.', code: `<script setup lang="ts" generic="T extends { id: number }">
 defineProps<{ items: T[]; label: (item: T) => string }>()
 const emit = defineEmits<{ pick: [item: T] }>()
 </script>
 
 <template>
-  <ul>
-    <li v-for="item in items" :key="item.id" @click="emit('pick', item)">
-      {{ label(item) }}
-    </li>
-  </ul>
-</template>`
-      }
+  <li v-for="item in items" :key="item.id" @click="emit('pick', item)">{{ label(item) }}</li>
+</template>`, lang: 'vue' }
     ],
-    pitfalls: [
-      'Деструктурировать пропсы до Vue 3.5 — получатся нереактивные копии. С 3.5 реактивность есть, но в `watch` такой проп передают геттером: `watch(() => size, ...)`.',
-      'Задавать в `withDefaults` дефолт массива или объекта значением, а не функцией-фабрикой, — экземпляры компонента будут делить один объект.',
-      '`defineModel<string>()` без `required` или `default` даёт тип `string | undefined` — дальше везде нужны проверки.',
-      'Ждать рантайм-проверки типов от пропсов, объявленных через тип: Vue проверит только примитивный конструктор (`String`, `Array`), а форму объекта — нет.'
-    ],
+    takeaway: 'В TS-проекте всё объявляется типом: `defineProps<T>`, `defineEmits` с кортежами, `defineModel<T>`. Списки, таблицы и селекты — дженерик-компоненты.',
     questions: [
       {
         q: 'Как типизировать props и задать им значения по умолчанию в script setup?',
@@ -619,64 +497,33 @@ const emit = defineEmits<{ pick: [item: T] }>()
     title: 'Типизация composables',
     level: 'middle',
     summary: 'Composable принимает `MaybeRefOrGetter<T>`, читает аргумент через `toValue()` внутри эффекта и возвращает объект из ref.',
-    what: 'Composable — функция, которая инкапсулирует состояние и логику на Composition API. Чтобы аргумент мог быть значением, ref, computed или геттером, его типизируют как `MaybeRefOrGetter<T>` (Vue 3.3+). Внутри значение читают через `toValue()`: она разворачивает ref и вызывает геттер. Если читать внутри `watchEffect` или `computed`, Vue отслеживает изменения аргумента. Возвращают обычно простой объект из ref, чтобы его можно было деструктурировать.',
-    analogy: '',
-    where: '`useProduct(() => route.params.id)` в карточке товара перезапрашивает данные при переходе между товарами без пересоздания компонента. `useSelection<Order>` в таблице заказов даёт массовые действия с правильным типом выбранных строк.',
-    why: 'Composable реагирует на изменения входных данных: передали геттер от пропса — запрос перезапускается сам. Правильные типы возврата дают подсказки потребителю.',
-    when: '`MaybeRefOrGetter` — когда аргумент может меняться и composable должен на это реагировать. Для постоянного аргумента (настройки, ключ) хватит обычного типа. Явный тип возврата пишут для общих библиотечных composables, в остальном TS выведет сам.',
-    diff: [
-      { vs: 'unref и toValue', text: '`unref` разворачивает только ref, функцию вернёт как есть. `toValue` (Vue 3.3+) ещё и вызывает геттер.' },
-      { vs: 'MaybeRef и MaybeRefOrGetter', text: '`MaybeRef<T>` — значение или ref. `MaybeRefOrGetter<T>` добавляет computed и функцию `() => T`.' }
-    ],
-    code: [
-      {
-        title: 'Гибкий аргумент и toValue',
-        lang: 'ts',
-        src: `import { ref, watchEffect, toValue, type MaybeRefOrGetter } from 'vue'
+    points: [
+      { title: 'Аргумент, который может меняться, — `MaybeRefOrGetter<T>` (Vue 3.3+)', text: 'Так composable принимает и число, и ref, и computed, и геттер. Если принять просто `number` и передать `props.id`, composable получит значение один раз и изменений не заметит.', code: `export function useProduct(id: MaybeRefOrGetter<number>) { /* ... */ }
 
-export function useProduct(id: MaybeRefOrGetter<number>) {
-  const product = ref<Product | null>(null) // без типа был бы Ref<null>
-  const loading = ref(false)
-
+useProduct(5)
+useProduct(idRef)
+useProduct(() => props.id) // перезапросит при смене id`, lang: 'ts' },
+      { title: 'Читают через `toValue()` внутри `watchEffect`, `watch` или `computed`', text: 'Тогда Vue отслеживает аргумент. В асинхронном `watchEffect` зависимость считается, только если прочитана до первого `await`.', code: `export function useProduct(id: MaybeRefOrGetter<number>) {
+  const product = ref<Product | null>(null) // без типа — Ref<null>
   watchEffect(async () => {
-    // зависимость отслеживается, только если прочитана до первого await
-    const currentId = toValue(id)
-    loading.value = true
+    const currentId = toValue(id) // до await — отслеживается
     product.value = await api.get<Product>('/products/' + currentId)
-    loading.value = false
   })
-
-  return { product, loading } // объект из ref — можно деструктурировать
-}
-
-// работает с числом, ref, computed и функцией:
-// useProduct(5); useProduct(idRef); useProduct(() => props.id)`
-      },
-      {
-        title: 'Дженерик-composable',
-        lang: 'ts',
-        src: `export function useSelection<T extends { id: number }>(items: Ref<T[]>) {
+  return { product }
+}`, lang: 'ts' },
+      { title: '`toValue` vs `unref`: `unref` геттер не вызывает', text: '`unref` разворачивает только ref, функцию вернёт как есть. `toValue` ещё и вызывает геттер. Аналогично `MaybeRef<T>` — значение или ref, а `MaybeRefOrGetter<T>` добавляет геттер и computed.', code: `unref(() => 5)   // функция
+toValue(() => 5) // 5`, lang: 'ts' },
+      { title: 'Возвращают простой объект из ref', text: 'Его можно деструктурировать без потери реактивности. Если вернуть `reactive`, деструктуризация отвяжет значения. То, что нельзя менять снаружи, отдают через `readonly()` или `computed`.', code: `return { product, loading }       // ок
+const { product } = useProduct(id) // реактивность на месте`, lang: 'ts' },
+      { title: 'Дженерик-composable сохраняет тип элементов', text: '`T extends { id: number }` — composable работает с любыми объектами, у которых есть `id`, а наружу отдаёт тот же `T`.', code: `export function useSelection<T extends { id: number }>(items: Ref<T[]>) {
   const selectedIds = ref(new Set<number>())
-
   const selected = computed(() =>
     items.value.filter(i => selectedIds.value.has(i.id))
-  ) // ComputedRef<T[]> — тип элементов сохранился
-
-  function toggle(item: T) {
-    const s = selectedIds.value
-    s.has(item.id) ? s.delete(item.id) : s.add(item.id)
-  }
-
-  return { selected, toggle }
-}`
-      }
+  ) // ComputedRef<T[]>
+  return { selected }
+}`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Принимать просто `number` и передавать туда `props.id` — composable получит значение один раз и не заметит изменений.',
-      'Использовать `unref` вместо `toValue` — геттер не вызовется, и в переменной окажется функция.',
-      'Читать аргумент после `await` внутри `watchEffect` — эта зависимость не отслеживается, эффект не перезапустится.',
-      'Писать `ref(null)` без типа — получится `Ref<null>`, и записать туда данные не выйдет. Нужно `ref<User | null>(null)`.'
-    ],
+    takeaway: 'Меняющийся вход — `MaybeRefOrGetter` + `toValue()` в эффекте. Тип возврата обычно выводится сам; явно его пишут в общих библиотечных composables.',
     questions: [
       {
         q: 'Как типизировать аргументы composable, чтобы он работал и со значением, и с ref?',
@@ -694,63 +541,34 @@ export function useProduct(id: MaybeRefOrGetter<number>) {
     group: 'TS во Vue и Nuxt',
     title: 'Типизация Pinia',
     level: 'middle',
-    summary: 'Setup store выводит типы сам, в options store типизируют `state()` и геттеры с `this`, `storeToRefs()` сохраняет реактивность.',
-    what: 'В setup store (`defineStore` с функцией) состояние — `ref`, геттеры — `computed`, действия — функции, и TS выводит типы без аннотаций. В options store тип состояния задают через возвращаемый тип `state(): State`, а геттерам, которые обращаются к `this`, нужен явный тип возврата. `storeToRefs()` превращает state и геттеры стора в ref с сохранением типов.',
-    analogy: '',
-    where: 'В Nuxt-магазине корзина и авторизация живут в setup stores, внутри которых используются composables вроде `useCookie`. Компоненты берут данные через `storeToRefs`, а действия вызывают прямо со стора.',
-    why: 'Стор — общая точка данных для многих компонентов, и ошибка в его типе расходится по приложению. Типы дают подсказки в компонентах и ловят опечатки в полях.',
-    when: 'Setup store — по умолчанию в проектах на TS: меньше обвязки, типы выводятся сами, внутри можно вызывать composables. Options store — если команда к нему привыкла или нужен `$reset` из коробки.',
-    diff: [
-      { vs: 'деструктуризация и storeToRefs', text: 'Стор — reactive-объект, и обычная деструктуризация копирует текущие значения. `storeToRefs` отдаёт ref: state как `Ref<T>`, геттеры как `ComputedRef<T>`. Действия он пропускает — их берут прямо со стора.' },
-      { vs: 'setup и options store', text: 'В options store `$reset` есть из коробки, в setup store его пишут сами. Зато setup store выводит типы без ручных аннотаций.' }
-    ],
-    code: [
-      {
-        title: 'Setup store и storeToRefs',
-        lang: 'ts',
-        src: `export const useCartStore = defineStore('cart', () => {
+    summary: 'Setup store выводит типы сам. В options store типизируют `state()` и геттеры с `this`. `storeToRefs()` сохраняет реактивность при деструктуризации.',
+    points: [
+      { title: 'Setup store: `ref`, `computed`, функции — типы выводятся сами', text: 'Тип указывают только у `ref` с начальным `null`. Внутри можно вызывать composables, например `useCookie` в Nuxt.', code: `export const useCartStore = defineStore('cart', () => {
   const items = ref<CartItem[]>([])
   const total = computed(() =>
     items.value.reduce((sum, i) => sum + i.price * i.qty, 0)
   ) // ComputedRef<number>
-
   function add(item: CartItem) { items.value.push(item) }
-
-  return { items, total, add } // что не вернули — не попадёт в стор
-})
-
-// в компоненте
-const cart = useCartStore()
+  return { items, total, add }
+})`, lang: 'ts' },
+      { title: 'Ловушка: всё состояние setup store надо вернуть', text: 'Не вернули ref — он не попадёт в state, не будет виден в devtools и не передастся с сервера на клиент при SSR. `$reset` в setup store тоже пишут сами.', code: `const draft = ref('') // не вернули — в state его нет
+return { items, total, add }`, lang: 'ts' },
+      { title: 'Деструктуризация стора — только через `storeToRefs`', text: 'Стор — reactive-объект, обычная деструктуризация копирует текущие значения. `storeToRefs` отдаёт state как `Ref<T>`, геттеры как `ComputedRef<T>` и пропускает действия — их берут прямо со стора.', code: `const cart = useCartStore()
 const { items, total } = storeToRefs(cart) // реактивно, типы на месте
 const { add } = cart                        // действия — напрямую
-// const { total } = cart — значение не будет обновляться`
-      },
-      {
-        title: 'Options store',
-        lang: 'ts',
-        src: `interface AuthState { user: User | null; token: string | null }
-
-export const useAuthStore = defineStore('auth', {
+const { total: t } = cart                   // значение, не обновится`, lang: 'ts' },
+      { title: 'Options store: тип state — через `state(): State`, у геттера с `this` — явный тип возврата', text: 'Без типа возврата геттер с `this` создаёт циклическую зависимость: тип стора зависит от самого себя, и TS выводит `any` или ругается.', code: `export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({ user: null, token: null }),
   getters: {
     isLoggedIn: state => state.token !== null,
-    // через this TS не выведет тип сам — указываем : string
-    greeting(): string {
+    greeting(): string { // : string обязателен из-за this
       return this.isLoggedIn ? 'Привет, ' + this.user?.name : 'Войдите'
     }
   },
-  actions: {
-    logout() { this.$reset() }
-  }
-})`
-      }
+  actions: { logout() { this.$reset() } } // $reset есть из коробки
+})`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Деструктурировать стор без `storeToRefs` — значения state и геттеров перестанут обновляться.',
-      'Объявить в setup store `ref(null)` без типа — получится `Ref<null>`, и записать туда пользователя не выйдет.',
-      'Не вернуть ref из setup store — он не попадёт в state, не будет виден в devtools и не передастся с сервера на клиент при SSR.',
-      'Оставить геттер с `this` в options store без типа возврата — тип стора начинает зависеть от самого себя, и TS выводит `any` или ошибку.'
-    ],
+    takeaway: 'По умолчанию setup store: меньше обвязки, типы выводятся сами. В компонентах — `storeToRefs` для данных, действия прямо со стора.',
     questions: [
       {
         q: 'Как типизируется стор в Pinia? Чем отличается setup store от options store?',
@@ -770,55 +588,41 @@ export const useAuthStore = defineStore('auth', {
     group: 'Продвинутые типы',
     title: 'keyof, typeof и indexed access',
     level: 'middle',
-    summary: '`keyof T` даёт union ключей, `typeof x` в позиции типа — тип значения, `T[K]` — тип свойства по ключу.',
-    what: '`keyof T` — оператор, который возвращает union ключей типа `T`. `typeof x` в позиции типа берёт тип у переменной или свойства, а не строку, как в рантайме. Indexed access type `T[K]` — тип свойства по ключу; `K` может быть union, тогда результат — union типов значений, а `T[number]` даёт тип элемента массива или кортежа. Вместе с `as const` (TS 3.4+) из объекта-константы получают union ключей и значений.',
-    analogy: '',
-    where: 'Объект-константа статусов или маршрутов вместо `enum`, из которого выводятся типы. Функции вида `sortBy(items, key: keyof Item)`. Тип элемента массива из чужого типа: `OrdersResponse[\'items\'][number]`.',
-    why: 'Позволяет держать один источник правды: значения описаны в коде, а типы выводятся из них и не расходятся при изменениях.',
-    when: 'Когда тип можно вывести из существующего значения или типа. Если данные приходят только в рантайме, `typeof` даст лишь то, что TS знает на этапе компиляции.',
-    diff: [
-      { vs: 'typeof в JS и в TS', text: 'В выражении `typeof x` возвращает строку вроде `\'object\'`. В позиции типа (`type T = typeof x`) — статический тип значения. Работает только с идентификаторами и свойствами, не с вызовами функций.' },
-      { vs: 'as const и enum', text: 'Объект с `as const` даёт те же возможности, что `enum`, но остаётся обычным JS-объектом и хорошо работает с `keyof typeof`. `enum` генерирует рантайм-код и у числовых `enum` слабая проверка значений.' }
-    ],
-    code: [
-      {
-        title: 'Union ключей и значений из константы',
-        lang: 'ts',
-        src: `const ORDER_STATUS = {
+    summary: '`keyof T` — union имён полей, `typeof x` в типе — тип значения, `T[K]` — тип поля по ключу.',
+    points: [
+      { title: '`keyof T` — union имён полей', text: 'Берёт тип объекта и возвращает его ключи как union строковых литералов.', code: `type User = { id: number; name: string }
+type Keys = keyof User // 'id' | 'name'
+
+let k: Keys = 'name' // ок
+k = 'age'            // ошибка`, lang: 'ts' },
+      { title: '`T[\'поле\']` — тип поля, `T[number]` — тип элемента массива', text: 'Indexed access: как `obj.field`, только для типов. Ключом может быть union — получится union типов значений. Удобно, чтобы достать тип вложенной части чужого типа.', code: `type Name = User['name']           // string
+type Both = User['id' | 'name']    // number | string
+
+interface OrdersResponse { items: { id: number; total: number }[] }
+type Order = OrdersResponse['items'][number] // { id: number; total: number }`, lang: 'ts' },
+      { title: '`typeof x` в позиции типа — тип переменной, а не строка', text: 'В выражении `typeof` — оператор JS, вернёт `\'object\'`. В `type X = typeof x` — оператор TS, даёт статический тип. Вызовы он не принимает: тип результата функции — через `ReturnType`.', code: `const config = { api: '/api', retries: 3 }
+type Config = typeof config // { api: string; retries: number }
+
+type U = typeof getUser()             // ошибка: вызов нельзя
+type U2 = ReturnType<typeof getUser>  // ок`, lang: 'ts' },
+      { title: '`keyof typeof OBJ` — ключи константы, читать справа налево', text: '`typeof OBJ` — тип объекта, `keyof` от него — ключи. Чтобы значения тоже стали литералами, нужен `as const`: без него они расширятся до `string`.', code: `const ORDER_STATUS = {
   new: 'Новый',
-  paid: 'Оплачен',
-  shipped: 'Отправлен'
-} as const // без as const значения были бы просто string
+  paid: 'Оплачен'
+} as const
 
-type StatusKey = keyof typeof ORDER_STATUS                // 'new' | 'paid' | 'shipped'
-type StatusLabel = (typeof ORDER_STATUS)[StatusKey]       // 'Новый' | 'Оплачен' | 'Отправлен'
+type StatusKey = keyof typeof ORDER_STATUS                // 'new' | 'paid'
+type StatusLabel = (typeof ORDER_STATUS)[StatusKey]       // 'Новый' | 'Оплачен'`, lang: 'ts' },
+      { title: 'Для массива-константы union значений даёт `[number]`', text: 'Тот же приём: `typeof` — тип массива, `[number]` — тип любого его элемента.', code: `const SIZES = ['sm', 'md', 'lg'] as const
+type Size = (typeof SIZES)[number] // 'sm' | 'md' | 'lg'`, lang: 'ts' },
+      { title: 'Объект `as const` вместо `enum`', text: 'Остаётся обычным JS-объектом, а типы выводятся из него и не расходятся со значениями. `enum` генерирует рантайм-код, а у числовых `enum` слабая проверка значений: литерал вне списка TS 5 поймает, а любое `number` пропустит.', code: `enum Status { New, Paid }
+const n: number = 42
+const s: Status = n // числовой enum: ошибки нет
 
-const SIZES = ['sm', 'md', 'lg'] as const
-type Size = (typeof SIZES)[number]                        // 'sm' | 'md' | 'lg'`
-      },
-      {
-        title: 'Indexed access и keyof с индексной сигнатурой',
-        lang: 'ts',
-        src: `interface OrdersResponse {
-  items: { id: number; total: number }[]
-  meta: { page: number }
-}
-type Order = OrdersResponse['items'][number] // { id: number; total: number }
-type IdOrPage = Order['id' | 'total']         // number
-
-type Dict = { [key: string]: unknown }
-type K = keyof Dict // string | number — числовые ключи в JS тоже строки
-
-function sortBy<T>(list: T[], key: keyof T) {
-  return [...list].sort((a, b) => (a[key] > b[key] ? 1 : -1))
-}`
-      }
+type StatusKey = keyof typeof ORDER_STATUS // строгий union`, lang: 'ts' },
+      { title: 'Ловушка: `keyof` от индексной сигнатуры `string` — это `string | number`', text: 'В JS числовые ключи всё равно приводятся к строкам, поэтому `obj[1]` допустим, и TS добавляет `number`.', code: `type Dict = { [key: string]: unknown }
+type K = keyof Dict // string | number`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Забыть `as const` — значения объекта расширятся до `string`, и union литералов не получится.',
-      'Ждать, что `keyof` от типа с индексной сигнатурой `string` даст `string`, — он даёт `string | number`.',
-      'Писать `typeof getUser()` — в позиции типа `typeof` не принимает вызовы, нужно `ReturnType<typeof getUser>`.'
-    ],
+    takeaway: 'Значения — источник правды: объект или массив `as const`, а типы из него через `keyof typeof` и `[number]`.',
     questions: [
       {
         q: 'Как из объекта-константы получить union его ключей и значений?',
@@ -840,51 +644,35 @@ function sortBy<T>(list: T[], key: keyof T) {
     group: 'Продвинутые типы',
     title: 'Mapped types',
     level: 'middle+',
-    summary: 'Mapped type строит объектный тип, перебирая ключи: `{ [K in keyof T]: ... }`, с управлением модификаторами и переименованием ключей.',
-    what: 'Mapped type — тип, который перебирает union ключей и для каждого задаёт тип значения: `{ [K in keyof T]: T[K] }`. Модификаторы `readonly` и `?` можно добавить или снять через `-readonly` и `-?` (`+` подразумевается по умолчанию). С TS 4.1 ключи можно переименовать через `as`, в том числе в template literal type, а вернув `never` — выкинуть ключ. На mapped types построены `Partial`, `Required`, `Readonly`, `Pick` и `Record`.',
-    analogy: '',
-    where: 'Типы форм, где у каждого поля модели есть ошибка или флаг «изменено»: `{ [K in keyof Form]?: string }`. Типы геттеров и событий, сгенерированные из модели: `onChange` + имя поля. Обёртки для API, где все поля становятся nullable.',
-    why: 'Позволяет описать правило преобразования один раз, а не повторять поля вручную. При изменении исходной модели производный тип обновляется сам.',
-    when: 'Когда новый тип получается из существующего по единому правилу для всех ключей. Если правило нужно для двух-трёх полей, проще описать их явно или собрать из `Pick` и `&`.',
-    diff: [
-      { vs: 'гомоморфный mapped type', text: 'Если перебираются ключи `keyof T`, TS сохраняет исходные модификаторы `?` и `readonly`. Поэтому `Pick` оставляет необязательные поля необязательными, а `Record<K, V>` с произвольными ключами — нет.' },
-      { vs: 'Record', text: '`Record<K, V>` — это `{ [P in K]: V }`: одинаковый тип для всех ключей. Mapped type с `keyof T` может вычислять тип значения из каждого исходного поля.' }
-    ],
-    code: [
-      {
-        title: 'Как устроены встроенные утилиты',
-        lang: 'ts',
-        src: `type MyPartial<T>  = { [K in keyof T]?: T[K] }
+    summary: 'Mapped type строит объектный тип, перебирая ключи: `{ [K in keyof T]: ... }`. Можно менять модификаторы, переименовывать и выкидывать ключи.',
+    points: [
+      { title: '`{ [K in keyof T]: T[K] }` — перебор ключей, как `map` для типа', text: 'Для каждого ключа `K` из union задаётся тип значения. Так одно правило описывают один раз, а не повторяют для каждого поля. При изменении модели производный тип обновится сам.', code: `interface Form { email: string; age?: number }
+
+type FormErrors = { [K in keyof Form]?: string }
+// { email?: string; age?: string }`, lang: 'ts' },
+      { title: 'Встроенные утилиты — это mapped types', text: '`?` и `readonly` добавляют, `-?` и `-readonly` снимают.', code: `type MyPartial<T>  = { [K in keyof T]?: T[K] }
 type MyReadonly<T> = { readonly [K in keyof T]: T[K] }
-type MyRequired<T> = { [K in keyof T]-?: T[K] }          // снимаем ?
-type Mutable<T>    = { -readonly [K in keyof T]: T[K] }  // снимаем readonly
-type MyRecord<K extends PropertyKey, V> = { [P in K]: V }
-
-interface Form { email: string; age?: number }
-type FormErrors = { [K in keyof Form]?: string } // { email?: string; age?: string }`
-      },
-      {
-        title: 'Переименование и фильтрация ключей (TS 4.1+)',
-        lang: 'ts',
-        src: `interface User { name: string; age: number; save(): void }
-
-type Getters<T> = {
+type MyRequired<T> = { [K in keyof T]-?: T[K] }
+type Mutable<T>    = { -readonly [K in keyof T]: T[K] }
+type MyRecord<K extends PropertyKey, V> = { [P in K]: V }`, lang: 'ts' },
+      { title: 'Перебор `keyof T` сохраняет `?` и `readonly`, перебор произвольного union — нет', text: 'Это гомоморфный mapped type. Поэтому `Pick` оставляет необязательные поля необязательными, а у `Record` все поля обязательные: связи с исходным типом нет.', code: `type P = Pick<Form, 'age'>         // { age?: number }
+type R = Record<'age', number>     // { age: number }`, lang: 'ts' },
+      { title: 'Переименование ключей через `as` (TS 4.1+)', text: 'Новый ключ часто строят template literal type. `string & K` нужен, потому что в `keyof T` бывают `number` и `symbol`, а `Capitalize` принимает только строки.', code: `type Getters<T> = {
   [K in keyof T as \`get\${Capitalize<string & K>}\`]: () => T[K]
 }
-type G = Getters<{ name: string }> // { getName: () => string }
+type G = Getters<{ name: string }> // { getName: () => string }`, lang: 'ts' },
+      { title: '`as never` выкидывает ключ — так фильтруют поля по типу', text: 'Если в `as` получился `never`, ключа в результате нет.', code: `interface User { name: string; age: number; save(): void }
 
-// as never выкидывает ключ: оставляем только поля-данные
 type DataOnly<T> = {
   [K in keyof T as T[K] extends Function ? never : K]: T[K]
 }
-type D = DataOnly<User> // { name: string; age: number }`
-      }
+type D = DataOnly<User> // { name: string; age: number }`, lang: 'ts' },
+      { title: 'Ловушка: `DeepPartial` через `extends object` цепляет массивы, `Date` и функции', text: 'Они тоже `object`, и их внутренности станут необязательными. Такие типы обрабатывают отдельными ветками. И помним: `readonly` — только компилятор и только на один уровень.', code: `type DeepPartial<T> = {
+  [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K]
+}
+// Date и массивы тоже пройдут через DeepPartial`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Писать `DeepPartial` через `T[K] extends object` и забыть, что массивы, `Date` и функции тоже `object`, — их внутренности станут необязательными.',
-      'Использовать `string & K` без понимания: `keyof T` может содержать `number` и `symbol`, а `Capitalize` принимает только строки, поэтому их отфильтровывают пересечением.',
-      'Ждать, что `Readonly<T>` или `readonly` в mapped type запретит изменения в рантайме, — это только проверка компилятора и только на один уровень вглубь.'
-    ],
+    takeaway: 'Mapped type — когда новый тип получается из старого по одному правилу для всех ключей. Для двух-трёх полей проще `Pick` и `&`.',
     questions: [
       {
         q: 'Что такое mapped types? Напишите Partial и Readonly.',
@@ -906,53 +694,35 @@ type D = DataOnly<User> // { name: string; age: number }`
     group: 'Продвинутые типы',
     title: 'Conditional types и infer',
     level: 'middle+',
-    summary: 'Условный тип `T extends U ? X : Y` выбирает тип по совместимости; на голом параметре он распределяется по union, `infer` выводит часть типа.',
-    what: 'Conditional type — тип вида `T extends U ? X : Y`: если `T` совместим с `U`, результат `X`, иначе `Y`. Если проверяемый тип — «голый» параметр (`T`, а не `T[]` или `[T]`) и в него подставлен union, условие применяется к каждому варианту отдельно, а результаты объединяются — это дистрибутивность. Ключевое слово `infer` внутри `extends` объявляет переменную типа, которую TS выводит при сопоставлении. На этом построены `Exclude`, `Extract`, `ReturnType`, `Parameters`, `Awaited`.',
-    analogy: 'Тернарный оператор на уровне типов. Дистрибутивность похожа на `.map()` по вариантам union с последующим объединением результатов.',
-    where: 'Чаще всего — через встроенные утилиты: `ReturnType`, `Awaited`, `Exclude`. Свои условные типы пишут в библиотечном коде: тип ответа, зависящий от параметра запроса, тип элемента из массива или промиса, дистрибутивный `Omit` для union.',
-    why: 'Позволяет выражать зависимости между типами: «если на входе массив — верни тип элемента». Без них типы приходилось бы дублировать или ослаблять до `any`.',
-    when: 'Когда тип результата зависит от формы входного типа. В прикладном коде обычно хватает готовых утилит; сложные условные типы трудно читать и они замедляют проверку, поэтому их держат в одном месте.',
-    diff: [
-      { vs: 'T extends U и [T] extends [U]', text: 'Голый `T` распределяется по union, обёрнутый в кортеж — нет: union проверяется целиком. `[T] extends [never]` — стандартный способ проверить, что `T` — именно `never`.' },
-      { vs: 'extends в ограничении и в условии', text: 'В `<T extends X>` это ограничение параметра. В `T extends U ? X : Y` — проверка совместимости, которая выбирает ветку.' }
-    ],
-    code: [
-      {
-        title: 'infer: ReturnType своими руками',
-        lang: 'ts',
-        src: `type MyReturnType<T> = T extends (...args: any[]) => infer R ? R : never
+    summary: '`T extends U ? X : Y` — тернарник для типов. На голом параметре он распределяется по union, а `infer` вытаскивает часть типа.',
+    points: [
+      { title: '`T extends U ? X : Y` — если `T` совместим с `U`, то `X`, иначе `Y`', text: '`extends` здесь — проверка совместимости, которая выбирает ветку. В `<T extends X>` то же слово значит ограничение параметра.', code: `type IsString<T> = T extends string ? 'да' : 'нет'
+type A = IsString<'hi'> // 'да'
+type B = IsString<42>   // 'нет'`, lang: 'ts' },
+      { title: '`infer R` — «выведи эту часть типа и назови `R`»', text: 'Объявляет переменную типа внутри `extends`, TS заполняет её при сопоставлении. Так устроены `ReturnType`, `Parameters`, `Awaited`.', code: `type MyReturnType<T> = T extends (...args: any[]) => infer R ? R : never
 type MyAwaited<T> = T extends Promise<infer V> ? MyAwaited<V> : T
 type ElementOf<T> = T extends readonly (infer E)[] ? E : never
 
-async function loadUser() { return { id: 1, name: 'Ann' } }
-type U = MyAwaited<MyReturnType<typeof loadUser>> // { id: number; name: string }
-
-// TS 4.7+: ограничение прямо в infer
-type FirstString<T> = T extends [infer S extends string, ...unknown[]] ? S : never`
-      },
-      {
-        title: 'Дистрибутивность и как её отключить',
-        lang: 'ts',
-        src: `type ToArray<T> = T extends unknown ? T[] : never
-type A = ToArray<string | number>   // string[] | number[] — по варианту
-
-type ToArrayAll<T> = [T] extends [unknown] ? T[] : never
-type B = ToArrayAll<string | number> // (string | number)[] — целиком
+type X = ElementOf<string[]> // string`, lang: 'ts' },
+      { title: 'На голом `T` union распределяется по вариантам', text: 'Если проверяется голый параметр (`T`, а не `T[]` или `[T]`), условие применяется к каждому варианту, результаты объединяются. Похоже на `.map()` по union. На этом стоит `Exclude`.', code: `type ToArray<T> = T extends unknown ? T[] : never
+type A = ToArray<string | number> // string[] | number[]
 
 type MyExclude<T, U> = T extends U ? never : T
-type C = MyExclude<'a' | 'b' | 'c', 'a'> // 'b' | 'c'
+type C = MyExclude<'a' | 'b' | 'c', 'a'> // 'b' | 'c'`, lang: 'ts' },
+      { title: 'Отключить распределение — обернуть в кортеж `[T] extends [U]`', text: 'Тогда union проверяется целиком.', code: `type ToArrayAll<T> = [T] extends [unknown] ? T[] : never
+type B = ToArrayAll<string | number> // (string | number)[]`, lang: 'ts' },
+      { title: 'Ловушка: `T extends never` не ловит `never`', text: '`never` — пустой union, дистрибутивный тип на нём сразу возвращает `never`. Нужна обёртка в кортеж.', code: `type IsNeverBad<T> = T extends never ? true : false
+type X = IsNeverBad<never> // never
 
-// never — пустой union, дистрибутивный тип вернёт never
-type IsNeverBad<T> = T extends never ? true : false // IsNeverBad<never> = never
-type IsNever<T> = [T] extends [never] ? true : false // IsNever<never> = true`
-      }
+type IsNever<T> = [T] extends [never] ? true : false
+type Y = IsNever<never>    // true`, lang: 'ts' },
+      { title: 'Ловушка: функция с условным типом возврата требует `as` внутри', text: 'Пока `T` — параметр, TS откладывает вычисление (deferred) и не знает ветку, даже после `typeof`: сужение значения не сужает параметр типа. Для внешнего API функции лучше перегрузки.', code: `function parse<T extends string | number>(v: T): T extends string ? number : string {
+  return (typeof v === 'string' ? Number(v) : String(v)) as any // без as — ошибка
+}`, lang: 'ts' },
+      { title: '`infer` с ограничением (TS 4.7+) и перегрузки', text: '`infer S extends string` выводит только строку. У перегруженной функции `infer` (и `ReturnType`) берёт последнюю перегрузку.', code: `type FirstString<T> = T extends [infer S extends string, ...unknown[]] ? S : never
+type F = FirstString<['a', 1]> // 'a'`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Не учесть дистрибутивность: условный тип на голом `T` для union даёт union результатов, а не один результат.',
-      'Проверять `T extends never` для детекта `never` — дистрибутивный тип на `never` возвращает `never`, нужен `[T] extends [never]`.',
-      'Возвращать условный тип из generic-функции: пока `T` неизвестен, TS откладывает вычисление и не может проверить ветки в теле, поэтому там приходится писать `as` или перегрузки.',
-      'Брать `ReturnType` у перегруженной функции и ждать нужную сигнатуру — `infer` берёт последнюю перегрузку.'
-    ],
+    takeaway: 'В прикладном коде обычно хватает готовых `ReturnType`, `Awaited`, `Exclude`. Свои условные типы трудно читать и они тормозят проверку — держите их в одном месте.',
     questions: [
       {
         q: 'Что такое conditional types и что делает infer? Напишите ReturnType.',
@@ -974,55 +744,34 @@ type IsNever<T> = [T] extends [never] ? true : false // IsNever<never> = true`
     group: 'Продвинутые типы',
     title: 'Оператор satisfies',
     level: 'middle',
-    summary: '`satisfies` (TS 4.9+) проверяет, что выражение соответствует типу, но оставляет его собственный, более точный выведенный тип.',
-    what: '`expr satisfies Type` — оператор TS 4.9+, который проверяет выражение на совместимость с `Type`, включая проверку лишних свойств (она срабатывает для свежего объектного литерала, написанного прямо в выражении; объект из переменной лишние свойства не ловит), но не меняет его тип: переменная получает тип, выведенный из значения. Аннотация `const x: Type = ...` тоже проверяет, но тип переменной становится `Type`, и конкретика значения теряется. `as Type` не проверяет соответствие, а утверждает его. Часто сочетают с `as const`: `{ ... } as const satisfies Type`.',
-    analogy: '',
-    where: 'Карта маршрутов, конфиг меню, словарь «статус → цвет бейджа», тема дизайн-системы: нужно проверить форму и при этом сохранить конкретные ключи и литеральные значения для автодополнения и `keyof typeof`.',
-    why: 'Решает конфликт между проверкой и точностью: аннотация проверяет, но расширяет тип, а без аннотации нет проверки. `satisfies` даёт и то и другое.',
-    when: 'Для объектов-констант, у которых важны и соответствие контракту, и точные ключи или значения. Если переменная будет перезаписываться другим значением того же контракта, нужна обычная аннотация.',
-    diff: [
-      { vs: 'аннотация типа', text: '`const r: Record<string, string> = {...}` — тип `r` становится `Record<string, string>`, и `r.unknownKey` не ошибка. С `satisfies` тип остаётся точным, и обращение к несуществующему ключу ловится.' },
-      { vs: 'as', text: '`as` не проверяет соответствие (только достаточное пересечение типов), поэтому пропущенное поле не заметит. `satisfies` выдаст ошибку.' }
-    ],
-    code: [
-      {
-        title: 'Карта маршрутов',
-        lang: 'ts',
-        src: `type Route = { path: string; auth?: boolean }
+    summary: '`satisfies` (TS 4.9+) проверяет, что значение подходит под тип, но оставляет переменной собственный, более точный тип.',
+    points: [
+      { title: 'Аннотация проверяет, но расширяет тип; `satisfies` проверяет и сохраняет точный', text: 'С `const r: Record<string, Route>` любой ключ допустим, и `keyof typeof r` — просто `string`. С `satisfies` форма проверена, а ключи и поля остаются конкретными.', code: `type Route = { path: string; auth?: boolean }
 
 const routes = {
   home: { path: '/' },
-  orders: { path: '/orders', auth: true },
-  // promo: { pth: '/promo' } — ошибка: лишнее свойство pth
+  orders: { path: '/orders', auth: true }
 } satisfies Record<string, Route>
 
-type RouteName = keyof typeof routes // 'home' | 'orders' — ключи сохранились
-routes.orders.auth                   // boolean, без | undefined
-
-// с аннотацией тип расширился бы:
-// const r: Record<string, Route> = {...}; keyof typeof r — string`
-      },
-      {
-        title: 'as const satisfies и сравнение с as',
-        lang: 'ts',
-        src: `type Status = 'new' | 'paid' | 'shipped'
+type RouteName = keyof typeof routes // 'home' | 'orders'
+routes.orders.auth                   // есть, без | undefined
+routes.promo                         // ошибка: такого маршрута нет`, lang: 'ts' },
+      { title: 'Лишние свойства ловит у объектного литерала', text: 'Проверка лишних полей срабатывает для объекта, написанного прямо в выражении. Объект из переменной лишние свойства не ловит.', code: `const bad = {
+  promo: { pth: '/promo' } // ошибка: лишнее свойство pth
+} satisfies Record<string, Route>`, lang: 'ts' },
+      { title: '`as const satisfies` — литералы плюс проверка полноты', text: '`as const` делает значения литеральными, `satisfies` проверяет, что все ключи на месте.', code: `type Status = 'new' | 'paid' | 'shipped'
 
 const BADGE = {
-  new: 'gray',
-  paid: 'green',
-  shipped: 'blue'
+  new: 'gray', paid: 'green', shipped: 'blue'
 } as const satisfies Record<Status, string> // забыли статус — ошибка
 
-type BadgeColor = (typeof BADGE)[Status] // 'gray' | 'green' | 'blue'
-
-const bad = { new: 'gray' } as Record<Status, string> // компилируется, хотя полей нет`
-      }
+type BadgeColor = (typeof BADGE)[Status] // 'gray' | 'green' | 'blue'`, lang: 'ts' },
+      { title: '`satisfies` vs `as`: `as` подавляет ошибки, `satisfies` показывает', text: '`as` проверяет только, что типы вообще пересекаются, поэтому пропущенные поля не заметит.', code: `const a = { new: 'gray' } as Record<Status, string>        // компилируется
+const b = { new: 'gray' } satisfies Record<Status, string> // ошибка: нет paid, shipped`, lang: 'ts' },
+      { title: 'Ловушка: переменную, которую перезаписывают, `satisfies` не подходит', text: 'Тип выводится из начального значения и может оказаться уже нужного. Тут нужна обычная аннотация.', code: `let theme = { color: 'red' } satisfies Theme
+theme = otherTheme // может не подойти: тип — { color: string }, а не Theme`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Использовать `satisfies` для переменной, которую потом перезаписывают: тип выведен из начального значения и может оказаться уже нужного.',
-      'Путать с `as`: `as` подавляет ошибки, `satisfies` их показывает.',
-      'Ожидать работы в старом TS или в инструментах с устаревшим парсером — оператор появился в TS 4.9.'
-    ],
+    takeaway: '`satisfies` — для объектов-констант (маршруты, меню, словари, тема), где важны и контракт, и точные ключи.',
     questions: [
       {
         q: 'Что делает satisfies и чем он отличается от аннотации типа?',
@@ -1040,23 +789,10 @@ const bad = { new: 'gray' } as Record<Status, string> // компилирует�
     group: 'Продвинутые типы',
     title: 'Перегрузки функций',
     level: 'middle',
-    summary: 'Перегрузки — несколько сигнатур одной функции и одна общая реализация; вызов сопоставляется с сигнатурами сверху вниз.',
-    what: 'Перегрузки функций (function overloads) — несколько объявлений сигнатуры подряд, за которыми следует одна реализация. Снаружи видны только сигнатуры перегрузок, реализация недоступна для вызова, а её сигнатура должна быть совместима со всеми перегрузками. TS проверяет перегрузки сверху вниз и берёт первую подходящую, поэтому более конкретные пишут выше. Тип с несколькими сигнатурами вызова (`{ (a: string): X; (a: number): Y }`) — тоже перегрузка, так её описывают для стрелочных функций и методов.',
-    analogy: '',
-    where: 'Функции, где тип результата зависит от аргумента: `getUser(id)` возвращает `User`, а `getUser(ids[])` — `User[]`. Вызовы с разным числом аргументов. Во Vue — синтаксис сигнатур вызова в `defineEmits`, и тип `emit` получается перегруженным.',
-    why: 'Даёт точный тип результата для каждого варианта вызова, когда связь между входом и выходом не выражается одним generic.',
-    when: 'Когда варианты вызова заметно различаются по набору аргументов или типу результата. Если результат не зависит от варианта входа — хватит union-параметра. Если результат прямо повторяет вход — generic.',
-    diff: [
-      { vs: 'union-параметр', text: 'Union проще и позволяет передать значение типа `string | number`, которое прошло бы мимо отдельных перегрузок для `string` и для `number`. Handbook рекомендует union, когда это возможно.' },
-      { vs: 'generic', text: 'Generic подходит, когда тип результата выражается через тип входа (`T` → `T[]`). Перегрузки — когда соответствие произвольное или зависит от числа аргументов.' }
-    ],
-    code: [
-      {
-        title: 'Сигнатуры перегрузок и реализация',
-        lang: 'ts',
-        src: `function getUsers(id: number): Promise<User>
+    summary: 'Несколько сигнатур одной функции и одна общая реализация. Вызов сопоставляется с сигнатурами сверху вниз.',
+    points: [
+      { title: 'Сигнатуры подряд, потом одна реализация', text: 'Снаружи видны только сигнатуры перегрузок, реализацию напрямую вызвать нельзя. Её сигнатура должна покрывать все перегрузки, а аргумент внутри сужают сами.', code: `function getUsers(id: number): Promise<User>
 function getUsers(ids: number[]): Promise<User[]>
-// реализация: снаружи не видна, должна покрывать обе сигнатуры
 function getUsers(arg: number | number[]): Promise<User | User[]> {
   return Array.isArray(arg)
     ? $fetch<User[]>('/api/users', { query: { ids: arg.join(',') } })
@@ -1064,34 +800,25 @@ function getUsers(arg: number | number[]): Promise<User | User[]> {
 }
 
 const one = await getUsers(1)       // User
-const many = await getUsers([1, 2]) // User[]
+const many = await getUsers([1, 2]) // User[]`, lang: 'ts' },
+      { title: 'Порядок важен: конкретные сигнатуры — выше общих', text: 'TS берёт первую подходящую. Общая сверху перехватит вызов, и точный тип результата не достанется.', code: `function f(x: unknown): unknown
+function f(x: string): string // недостижима
+function f(x: unknown) { return x }
 
-declare const x: number | number[]
-// getUsers(x) — ошибка: ни одна перегрузка не принимает union`
-      },
-      {
-        title: 'Перегрузки в defineEmits',
-        lang: 'vue',
-        src: `<script setup lang="ts">
-// синтаксис сигнатур вызова: emit — перегруженная функция
-const emit = defineEmits<{
+f('a') // unknown, а не string`, lang: 'ts' },
+      { title: 'Ловушка: значение типа union не проходит ни в одну перегрузку', text: 'Каждая перегрузка принимает свой вариант, а union — ни одна. Если результат от варианта не зависит, проще union-параметр — так и советует документация TS.', code: `declare const x: number | number[]
+getUsers(x) // ошибка: нет перегрузки для number | number[]`, lang: 'ts' },
+      { title: 'Перегрузки vs generic', text: 'Если тип результата выражается через тип входа (`T` → `T[]`), нужен generic. Перегрузки — когда соответствие произвольное или различается число аргументов.', code: `function wrap<T>(x: T): T[] { return [x] } // generic хватает`, lang: 'ts' },
+      { title: 'Ловушка: `ReturnType` и `Parameters` видят только последнюю перегрузку', text: 'Если нужен тип конкретного варианта, его описывают отдельно.', code: `type R = ReturnType<typeof getUsers> // Promise<User[]> — последняя`, lang: 'ts' },
+      { title: 'Во Vue: `defineEmits` с сигнатурами вызова — это перегрузки', text: 'Тип с несколькими сигнатурами вызова — тоже перегрузка, так её описывают для стрелок и методов. С Vue 3.3 короче через кортежи, результат по типам тот же.', code: `const emit = defineEmits<{
   (e: 'change', id: number): void
   (e: 'update', value: string): void
 }>()
+emit('change', '1') // ошибка: для change нужен number
 
-emit('change', 1)
-// emit('change', '1') — ошибка: для 'change' нужен number
-
-// то же короче (Vue 3.3+): change: [id: number]; update: [value: string]
-</script>`
-      }
+// короче: defineEmits<{ change: [id: number]; update: [value: string] }>()`, lang: 'ts' }
     ],
-    pitfalls: [
-      'Писать общую перегрузку выше конкретных — TS выберет первую подходящую, и конкретный тип результата не достанется.',
-      'Ожидать, что сигнатуру реализации можно вызвать снаружи, — вызывающий код видит только перегрузки.',
-      'Делать перегрузки там, где хватает union: вызов со значением типа `A | B` перестаёт компилироваться.',
-      'Брать `ReturnType` или `Parameters` у перегруженной функции — они видят только последнюю перегрузку.'
-    ],
+    takeaway: 'Сначала union, потом generic, перегрузки — последними: когда связь вход-выход произвольная или разное число аргументов.',
     questions: [
       {
         q: 'Как работают перегрузки функций в TypeScript?',
