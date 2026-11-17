@@ -8,8 +8,8 @@
                                                  (<dir> — out_dir ArtifactData list коллекций
                                                  sites и removed: sites/*.json, removed/*.json)
   python3 -I leads.py validate <file.json>       проверка JSON агента: поля, ниши, fit, дубли
-  python3 -I leads.py catalog <с> <по> [seen.md] страницы <с>..<по> раздела «Продукты питания»
-                                                 aboutpartner.ru: пищевые компании с сайтом,
+  python3 -I leads.py catalog <с> <по> [seen.md] страницы <с>..<по> списка производителей
+                                                 aboutpartner.ru: компании с сайтом,
                                                  TSV домен (punycode)/регион/город/название/карточка,
                                                  без доменов из seen.md
 
@@ -26,7 +26,6 @@ import urllib.parse
 import urllib.request
 
 UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36'
-NICHES = {'Продукты и опт', 'Фермерские продукты'}
 
 # Маркеры платформ: имя → regex по HTML. Megagroup — и латиницей, и кириллицей.
 PLATFORMS = {
@@ -244,8 +243,8 @@ def validate(path):
     seen_d, bad = {}, 0
     for i, l in enumerate(leads):
         errs = [f for f in need if not l.get(f)]
-        if l.get('niche') and l['niche'] not in NICHES:
-            errs.append('ниша «%s»' % l['niche'])
+        if l.get('niche') and len(l['niche']) > 30:
+            errs.append('ниша «%s» — нужна короткая группа' % l['niche'])
         if l.get('fit') not in (3, 4, 5):
             errs.append('fit %r' % l.get('fit'))
         if l.get('alive_date') and not re.match(r'\d{4}-\d{2}(-\d{2})?$', str(l['alive_date'])):
@@ -265,11 +264,7 @@ def validate(path):
 
 
 AP = 'https://www.aboutpartner.ru'
-AP_LIST = AP + '/producers/catalog-produkty-pitaniia?page=%d'
-# В разделе вперемешку двери и химия: пищевых по названию ~10%.
-FOOD = re.compile(r'рыб|мяс|молоч|молок|колбас|фермер|ферма|сыр|пасек|мёд|мед[ао ]|кфх|птиц|'
-                  r'яйц|фрукт|овощ|продукт|хозяйств|агро|деликатес|копчен|пельмен|хлеб|крупа|'
-                  r'икр|морепродукт|халял|бойн|говяд|свин|баран', re.I)
+AP_LIST = AP + '/producers?page=%d'
 # Не сайт компании: соцсети, карты, мессенджеры, сам каталог.
 AP_SKIP = re.compile(r'aboutpartner|vk\.com|vkontakte|t\.me|telegram|yandex|google|ok\.ru|'
                      r'whatsapp|wa\.me|instagram|youtube|rutube|dzen|max\.ru|resize-web|'
@@ -308,8 +303,7 @@ def catalog(first, last, seen_path=None):
         found = {}
         for html in pages:
             for pid, name in re.findall(r'/producer/(pc-producer-\d+)">([^<]{3,120})<', html):
-                if FOOD.search(name):
-                    found[pid] = re.sub(r'&quot;|&amp;', '"', name).strip()
+                found[pid] = re.sub(r'&quot;|&amp;', '"', name).strip()
         cards = dict(zip(found, ex.map(card, found)))
     total, out = 0, {}
     for pid, c in cards.items():
@@ -317,12 +311,12 @@ def catalog(first, last, seen_path=None):
             continue
         total += 1
         d = norm(c[0])
-        if d in skip or d in out:
+        if not re.fullmatch(r'[a-z0-9.-]+\.[a-z0-9-]+', d) or d in skip or d in out:
             continue
         out[d] = '\t'.join([d, c[1], c[2], found[pid], '%s/producer/%s' % (AP, pid)])
     for line in out.values():
         print(line)
-    print('# страницы %s–%s: пищевых по названию %d, с сайтом %d, новых доменов %d'
+    print('# страницы %s–%s: компаний %d, с сайтом %d, новых доменов %d'
           % (first, last, len(found), total, len(out)), file=sys.stderr)
 
 
