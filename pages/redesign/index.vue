@@ -318,8 +318,13 @@ const allProjects = [
   },
 ]
 
+// Концепты, которые уже перенесены на сайт клиента и работают там: выделены рамкой и закреплены сверху.
+const implemented = ['olimpfish']
+
 const slug = (to: string) => to.split('/')[2]
-const projects = featured.map((s) => allProjects.find((p) => slug(p.to) === s)!)
+const projects = featured
+  .map((s) => ({ ...allProjects.find((p) => slug(p.to) === s)!, live: implemented.includes(s) }))
+  .sort((a, b) => Number(b.live) - Number(a.live))
 
 const ui = useHomeUi()
 onMounted(() => ui.syncTheme())
@@ -348,7 +353,11 @@ const pad = (n: number) => String(n).padStart(2, '0')
       </header>
 
       <ul class="catalog__grid">
-        <li v-for="(p, i) in projects" :key="p.to" class="concept">
+        <li v-for="(p, i) in projects" :key="p.to" class="concept" :class="{ 'concept--live': p.live }">
+          <span v-if="p.live" class="concept__badge mono">
+            <i class="concept__pulse" aria-hidden="true" />
+            Работает на сайте клиента
+          </span>
           <RedesignCatalogLink :to="p.to" :plain="p.plain" class="concept__preview" tabindex="-1" aria-hidden="true">
             <img v-if="p.image" :src="p.image" alt="" width="1200" height="630" loading="lazy">
             <span v-else class="concept__placeholder">{{ p.title.replace(/[«»]/g, '') }}</span>
@@ -373,7 +382,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
                 Посмотреть
               </RedesignCatalogLink>
               <a :href="p.source" target="_blank" rel="noopener" class="h-btn">
-                Оригинал
+                {{ p.live ? 'Сайт клиента' : 'Оригинал' }}
                 <svg class="concept__arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" /></svg>
               </a>
             </div>
@@ -549,6 +558,149 @@ const pad = (n: number) => String(n).padStart(2, '0')
   }
 }
 
+// Внедрённый концепт: переливающаяся рамка, мягкое свечение и плашка «работает на сайте клиента».
+@property --concept-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.concept--live {
+  position: relative;
+  grid-column: 1 / -1;
+  flex-direction: row;
+  border-color: transparent;
+  box-shadow: 0 0 0 1px var(--h-accent-glow), 0 18px 48px -18px var(--h-accent);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    padding: 2px;
+    border-radius: inherit;
+    background: conic-gradient(
+      from var(--concept-angle),
+      var(--h-accent),
+      #b06cff,
+      #ff6fae,
+      #ffb547,
+      #3fd8b0,
+      var(--h-accent)
+    );
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    animation: concept-spin 5s linear infinite;
+    pointer-events: none;
+  }
+
+  &:hover {
+    box-shadow: 0 0 0 1px var(--h-accent-glow), 0 24px 64px -16px var(--h-accent);
+  }
+
+  .concept__preview {
+    flex: 0 0 56%;
+    aspect-ratio: auto;
+    min-height: 100%;
+    border-right: 1px solid var(--h-line);
+    border-bottom: 0;
+
+    // Превью выше своих 1200×630 — держим левый верх, где заголовок первого экрана.
+    img {
+      object-position: left top;
+    }
+  }
+
+  .concept__body {
+    justify-content: center;
+    padding: 32px 36px;
+  }
+
+  .concept__title {
+    font-size: 26px;
+  }
+}
+
+.concept__badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(10, 12, 16, 0.78);
+  color: #fff;
+  font-size: 12px;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+
+.concept__pulse {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3fd88a;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: #3fd88a;
+    animation: concept-ping 1.8s ease-out infinite;
+  }
+}
+
+@keyframes concept-spin {
+  to {
+    --concept-angle: 360deg;
+  }
+}
+
+@keyframes concept-ping {
+  from {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .concept--live::before,
+  .concept__pulse::after {
+    animation: none;
+  }
+}
+
+@media (max-width: 960px) {
+  .concept--live {
+    flex-direction: column;
+
+    .concept__preview {
+      flex: none;
+      aspect-ratio: 1200 / 630;
+      min-height: 0;
+      border-right: 0;
+      border-bottom: 1px solid var(--h-line);
+    }
+
+    .concept__body {
+      padding: 24px;
+    }
+
+    .concept__title {
+      font-size: 22px;
+    }
+  }
+}
+
 @media (max-width: 760px) {
   .catalog {
     padding-top: 20px;
@@ -563,8 +715,14 @@ const pad = (n: number) => String(n).padStart(2, '0')
     }
   }
 
-  .concept__body {
+  .concept__body,
+  .concept--live .concept__body {
     padding: 18px 18px 20px;
+  }
+
+  .concept__badge {
+    top: 12px;
+    left: 12px;
   }
 }
 
