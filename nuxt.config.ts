@@ -1,4 +1,12 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { readdirSync } from "node:fs";
+
+// Каталог /redesign/ показывает только избранные концепты, а краулер prerender идёт по ссылкам.
+// Чтобы остальные концепты (ссылки на них уходят в письмах) тоже генерировались, их главные — явными маршрутами.
+const redesignRoutes = readdirSync("pages/redesign")
+  .filter((f) => f.endsWith(".vue") && f !== "index.vue")
+  .map((f) => `/redesign/${f.replace(/\.vue$/, "")}/`);
+
 export default defineNuxtConfig({
   devtools: { enabled: false },
   css: ["~/assets/css/main.scss"],
@@ -35,7 +43,10 @@ export default defineNuxtConfig({
   },
   nitro: {
     // Статичные концепты лежат в public/redesign/<name>/, у Nuxt для них нет маршрутов.
-    prerender: { ignore: ['/redesign/sttorg70', '/redesign/prodagro', '/redesign/sibprod'] },
+    prerender: {
+      routes: redesignRoutes,
+      ignore: ['/redesign/sttorg70', '/redesign/prodagro', '/redesign/sibprod'],
+    },
   },
   vite: {
     css: {

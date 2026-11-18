@@ -7,7 +7,24 @@ useSeoMeta({
   robots: 'noindex, nofollow',
 })
 
-const projects = [
+// В каталоге — только избранные концепты, в этом порядке. Остальные живут по прямым ссылкам (из писем)
+// и остаются в allProjects, чтобы любой можно было вернуть сюда одной строкой.
+const featured = [
+  'olimpfish',
+  'sovelan',
+  'moreland',
+  'smolryba',
+  'oyster',
+  'zdrava22',
+  'zolotieluga',
+  'rkdon',
+  '22bee',
+  'fermertomska',
+  'sibirtreid',
+  'sibprod',
+]
+
+const allProjects = [
   {
     to: '/redesign/sovelan/',
     image: '/redesign/sovelan/og.jpg',
@@ -300,6 +317,9 @@ const projects = [
     plain: true,
   },
 ]
+
+const slug = (to: string) => to.split('/')[2]
+const projects = featured.map((s) => allProjects.find((p) => slug(p.to) === s)!)
 
 const ui = useHomeUi()
 onMounted(() => ui.syncTheme())
