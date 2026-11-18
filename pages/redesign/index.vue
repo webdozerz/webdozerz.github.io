@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import '~/assets/scss/home.scss'
+import { cases } from '~/data/cases'
 
 useHomeHead()
 useSeoMeta({
@@ -318,13 +319,22 @@ const allProjects = [
   },
 ]
 
-// Концепты, которые уже перенесены на сайт клиента и работают там: выделены рамкой и закреплены сверху.
-const implemented = ['olimpfish']
-
+// Внедрённые — концепты, у которых есть кейс (data/cases.ts): новый дизайн уже работает на сайте клиента.
+// Они идут отдельным блоком над концептами, в порядке кейсов.
 const slug = (to: string) => to.split('/')[2]
+const bySlug = (s: string) => allProjects.find((p) => slug(p.to) === s)
+const caseSlugs = cases.map((c) => c.slug)
+
+// Текст и стек — из кейса: клиенту важнее, что концепт стал работающим сайтом, чем перечень функций.
+const live = cases
+  .filter((c) => bySlug(c.slug))
+  .map((c) => ({ ...bySlug(c.slug)!, text: c.lead, tags: c.tags, caseTo: `/cases/${c.slug}/` }))
 const projects = featured
-  .map((s) => ({ ...allProjects.find((p) => slug(p.to) === s)!, live: implemented.includes(s) }))
-  .sort((a, b) => Number(b.live) - Number(a.live))
+  .filter((s) => !caseSlugs.includes(s))
+  .map((s) => ({ ...bySlug(s)!, caseTo: '' }))
+
+// Внедрённых две колонки; нечётный последний — во всю ширину горизонтально, чтобы ряд не зиял.
+const isWide = (i: number) => i === live.length - 1 && live.length % 2 === 1
 
 const ui = useHomeUi()
 onMounted(() => ui.syncTheme())
@@ -342,7 +352,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
       </NuxtLink>
 
       <header class="catalog__head">
-        <span class="catalog__kicker mono">redesign / {{ pad(projects.length) }} концептов</span>
+        <span class="catalog__kicker mono">redesign / {{ pad(live.length + projects.length) }} концептов</span>
         <h1 class="catalog__title">
           Концепты редизайна
         </h1>
@@ -352,12 +362,74 @@ const pad = (n: number) => String(n).padStart(2, '0')
         </p>
       </header>
 
-      <ul class="catalog__grid">
-        <li v-for="(p, i) in projects" :key="p.to" class="concept" :class="{ 'concept--live': p.live }">
-          <span v-if="p.live" class="concept__badge mono">
-            <i class="concept__pulse" aria-hidden="true" />
-            Работает на сайте клиента
-          </span>
+      <section v-if="live.length" class="catalog__section">
+        <div class="catalog__section-head">
+          <h2 class="catalog__section-title">
+            Внедрено у клиентов
+          </h2>
+          <p class="catalog__section-note">
+            Концепт понравился владельцу — и новый дизайн перенесён на их рабочий сайт. Как это было — в кейсе.
+          </p>
+        </div>
+
+        <ul class="catalog__grid">
+          <li
+            v-for="(p, i) in live"
+            :key="p.to"
+            class="concept concept--live"
+            :class="{ 'concept--wide': isWide(i) }"
+          >
+            <span class="concept__badge mono">
+              <i class="concept__pulse" aria-hidden="true" />
+              Работает на сайте клиента
+            </span>
+            <NuxtLink :to="p.caseTo" class="concept__preview" tabindex="-1" aria-hidden="true">
+              <img :src="p.image" alt="" width="1200" height="630" loading="lazy">
+            </NuxtLink>
+
+            <div class="concept__body">
+              <div class="concept__meta mono">
+                <span>кейс</span>
+                <span>{{ host(p.source) }}</span>
+              </div>
+              <h3 class="concept__title">
+                {{ p.title }}
+              </h3>
+              <p class="concept__text">
+                {{ p.text }}
+              </p>
+              <p class="concept__stack mono">
+                {{ p.tags.join(' · ') }}
+              </p>
+              <div class="concept__actions">
+                <NuxtLink :to="p.caseTo" class="h-btn h-btn--primary">
+                  Читать кейс
+                </NuxtLink>
+                <RedesignCatalogLink :to="p.to" :plain="p.plain" class="h-btn">
+                  Концепт
+                </RedesignCatalogLink>
+                <a :href="p.source" target="_blank" rel="noopener" class="h-btn">
+                  Сайт клиента
+                  <svg class="concept__arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" /></svg>
+                </a>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="catalog__section">
+        <div v-if="live.length" class="catalog__section-head">
+          <h2 class="catalog__section-title">
+            Концепты
+          </h2>
+          <p class="catalog__section-note">
+            Как мог бы выглядеть сайт — на их товарах, ценах и функциях.
+          </p>
+        </div>
+
+        <ul class="catalog__grid">
+        <li v-for="(p, i) in projects" :key="p.to" class="concept">
           <RedesignCatalogLink :to="p.to" :plain="p.plain" class="concept__preview" tabindex="-1" aria-hidden="true">
             <img v-if="p.image" :src="p.image" alt="" width="1200" height="630" loading="lazy">
             <span v-else class="concept__placeholder">{{ p.title.replace(/[«»]/g, '') }}</span>
@@ -368,9 +440,9 @@ const pad = (n: number) => String(n).padStart(2, '0')
               <span>{{ pad(i + 1) }}</span>
               <span>{{ host(p.source) }}</span>
             </div>
-            <h2 class="concept__title">
+            <h3 class="concept__title">
               {{ p.title }}
-            </h2>
+            </h3>
             <p class="concept__text">
               {{ p.text }}
             </p>
@@ -382,13 +454,14 @@ const pad = (n: number) => String(n).padStart(2, '0')
                 Посмотреть
               </RedesignCatalogLink>
               <a :href="p.source" target="_blank" rel="noopener" class="h-btn">
-                {{ p.live ? 'Сайт клиента' : 'Оригинал' }}
+                Оригинал
                 <svg class="concept__arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" /></svg>
               </a>
             </div>
           </div>
         </li>
       </ul>
+      </section>
     </div>
   </div>
 </template>
@@ -431,6 +504,34 @@ const pad = (n: number) => String(n).padStart(2, '0')
     color: var(--h-muted);
     font-size: 16px;
     line-height: 1.6;
+  }
+
+  &__section + &__section {
+    margin-top: 64px;
+  }
+
+  &__section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 24px;
+    margin-bottom: 20px;
+  }
+
+  &__section-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  &__section-note {
+    max-width: 520px;
+    margin: 0;
+    color: var(--h-muted);
+    font-size: 14px;
+    line-height: 1.5;
   }
 
   &__grid {
@@ -567,8 +668,6 @@ const pad = (n: number) => String(n).padStart(2, '0')
 
 .concept--live {
   position: relative;
-  grid-column: 1 / -1;
-  flex-direction: row;
   border-color: transparent;
   box-shadow: 0 0 0 1px var(--h-accent-glow), 0 18px 48px -18px var(--h-accent);
 
@@ -597,17 +696,23 @@ const pad = (n: number) => String(n).padStart(2, '0')
     box-shadow: 0 0 0 1px var(--h-accent-glow), 0 24px 64px -16px var(--h-accent);
   }
 
+  .concept__preview img {
+    // Превью внедрённого может быть выше своих 1200×630 — держим левый верх, где заголовок первого экрана.
+    object-position: left top;
+  }
+}
+
+// Одиночный (или нечётный последний) внедрённый — во всю ширину: превью слева, текст справа.
+.concept--wide {
+  grid-column: 1 / -1;
+  flex-direction: row;
+
   .concept__preview {
     flex: 0 0 56%;
     aspect-ratio: auto;
     min-height: 100%;
     border-right: 1px solid var(--h-line);
     border-bottom: 0;
-
-    // Превью выше своих 1200×630 — держим левый верх, где заголовок первого экрана.
-    img {
-      object-position: left top;
-    }
   }
 
   .concept__body {
@@ -680,7 +785,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
 }
 
 @media (max-width: 960px) {
-  .concept--live {
+  .concept--wide {
     flex-direction: column;
 
     .concept__preview {
@@ -709,6 +814,10 @@ const pad = (n: number) => String(n).padStart(2, '0')
       margin: 36px 0 32px;
     }
 
+    &__section + &__section {
+      margin-top: 48px;
+    }
+
     &__grid {
       grid-template-columns: 1fr;
       gap: 16px;
@@ -716,7 +825,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
   }
 
   .concept__body,
-  .concept--live .concept__body {
+  .concept--wide .concept__body {
     padding: 18px 18px 20px;
   }
 
@@ -734,6 +843,12 @@ const pad = (n: number) => String(n).padStart(2, '0')
   .concept__actions .h-btn {
     flex: 1;
     justify-content: center;
+    white-space: nowrap;
+  }
+
+  // У внедрённого три кнопки: «Читать кейс» отдельной строкой, остальные две под ней.
+  .concept--live .concept__actions .h-btn--primary {
+    flex-basis: 100%;
   }
 }
 </style>
