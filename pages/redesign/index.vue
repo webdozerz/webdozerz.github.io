@@ -12,6 +12,7 @@ useSeoMeta({
 // и остаются в allProjects, чтобы любой можно было вернуть сюда одной строкой.
 const featured = [
   'olimpfish',
+  'domoteka',
   'sovelan',
   'moreland',
   'smolryba',
